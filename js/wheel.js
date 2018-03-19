@@ -21,7 +21,8 @@ let createWheel = (id)=>{
         font-size="50" font-family="Lato"
         transform="rotate(90 50,50)"
         lengthAdjust="spacingAndGlyphs" x="50" y="68">${el.dataset.value}</text>
-    </svg>`;
+    </svg>
+    <div class="wheel-title">${el.dataset.title || ''}</div>`;
 };
 
 
