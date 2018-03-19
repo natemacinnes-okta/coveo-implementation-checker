@@ -24,7 +24,7 @@
 				"https://*/*"
 			],
 			"js": [
-				"/js/content-script.js"
+				"/js/content.js"
 			],
 			"css": [
 				"/css/inject.css"

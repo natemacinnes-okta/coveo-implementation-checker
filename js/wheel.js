@@ -1,11 +1,11 @@
-let createWheel = (data)=>{
-  let r = 45, C = 2*Math.PI*r;
-  let v = ( data.value / (data.max || 100) );
+let createWheel = (data) => {
+  let r = 45, C = 2 * Math.PI * r;
+  let v = (data.value / (data.max || 100));
   let cssClass = 'bad';
   if (v >= 0.75) {
     cssClass = 'good';
   }
-  else if ( v >= 0.5 ) {
+  else if (v >= 0.5) {
     cssClass = 'warn';
   }
   v = C * v;

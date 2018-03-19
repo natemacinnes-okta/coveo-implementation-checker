@@ -48,6 +48,7 @@ h3 i {
   margin-top: -40px;
   margin-left: -10px;
 }
+
 .coveo-styleguide .collapsible .collapsible-header .result div.wheel svg .back-ring {
   stroke: #fff;
   fill: none;
@@ -61,9 +62,11 @@ h3 i {
   font-variant: small-caps;
   text-align: center;
 }
+
 .line-valid-true td.line-result {
   color: #009830;
 }
+
 .line-valid-false td.line-result {
   color: #ce3f00;
 }
