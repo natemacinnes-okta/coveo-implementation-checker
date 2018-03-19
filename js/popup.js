@@ -75,3 +75,18 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
     });
   });
 }
+else {
+  setTimeout(function () {
+    processReport([{
+      title: "TestOnly",
+      value: 31, max: 60,
+      lines: [
+        { label: "# of search executed (should be 1)", value: 0, expected: 1 },
+        { label: "Search Events sent using our api?", value: false, expected: true },
+        { label: "Analytics sent?", value: false, expected: true },
+        { label: "Using search as you type (degrades performances)", value: false, expected: false },
+        { label: "Using ML Powered Query Completions", value: false, expected: true },
+      ]
+    }]);
+  });
+}
