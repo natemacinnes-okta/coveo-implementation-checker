@@ -1,0 +1,8 @@
+html, body {
+  height: 500px;
+  width: 600px;
+}
+
+h3 { margin: 10px; }
+h3 i { font-style: italic; }
+

@@ -1,0 +1,40 @@
+{
+	"manifest_version": 2,
+	"name": "Coveo Implementation Checker",
+	"short_name": "coveo-checker",
+	"version": "0.1",
+	"description": "A Chrome extension to get a score card on your Coveo implementation.",
+
+	"icons": {
+		"16": "images/16.png",
+		"48": "images/48.png",
+		"128": "images/128.png"
+	},
+
+	"browser_action": {
+    "default_icon": "/images/icon.png",
+    "default_popup": "/popup.html"
+	},
+
+	"content_scripts": [
+		{
+			"run_at": "document_end",
+			"matches": [
+				"http://*/*",
+				"https://*/*"
+			],
+			"js": [
+				"/js/content-script.js"
+			],
+			"css": [
+				"/css/inject.css"
+			],
+			"all_frames": false
+		}
+	],
+
+	"permissions": [
+		"http://*/*",
+		"https://*/*"
+	]
+}

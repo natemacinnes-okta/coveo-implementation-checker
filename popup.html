@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+  <link rel="stylesheet" href="dependencies/CoveoStyleGuide-2.10.0.css">
+  <link rel="stylesheet" href="css/popup.css">
+  <link rel="stylesheet" href="css/wheel.css">
+
+  <script src="dependencies/jquery-3.3.1.min.js"></script>
+  <script src="dependencies/underscore-1.8.3.min.js"></script>
+  <script src="dependencies/CoveoStyleGuide-2.10.0.js"></script>
+
+  <script src="js/wheel.js"></script>
+
+</head>
+<body class="coveo-styleguide">
+
+  <h3>Using <i>data-value</i> and <i>data-max</i>. <br>Using <span style="color:#009830;">green >= 75%</span>, <span style="color:#ecad00;">orange >= 50%</span> and <span style="color:#ce3f00;">red below 50%</span>.</h3>
+  <div>
+    <div id="g1" class="wheel" data-value="20" data-max="60"></div>
+    <div id="g2" class="wheel" data-value="30" data-max="60"></div>
+    <div id="g3" class="wheel" data-value="45" data-max="60"></div>
+  </div>
+  <br>
+  <h3>With no <i>data-max</i>, 100 is implied.</h3>
+  <div>
+    <div id="g4" class="wheel" data-value="25"></div>
+    <div id="g5" class="wheel" data-value="55"></div>
+    <div id="g6" class="wheel" data-value="95"></div>
+  </div>
+
+  <br><br><br>
+
+  <ul class="collapsible" data-collapsible="expandable">
+      <li>
+          <button type="button" class="collapsible-header active btn with-icon">
+              Text example
+          </button>
+          <div class="collapsible-body">
+              <p>Lorem ipsum dolor sit amet.</p>
+          </div>
+      </li>
+  </ul>
+</body>
+</html>
