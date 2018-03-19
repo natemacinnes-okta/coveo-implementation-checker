@@ -2,14 +2,21 @@ div.wheel {
   display: inline-block;
   text-align: center;
   margin: 5px 10px;
+  cursor: default;
 }
 div.wheel svg {
+  cursor: default;
   width: 80px;
   height: 80px;
   transform: rotate(-90deg);
 }
 div.wheel .wheel-title {
   margin-top: 5px;
+}
+
+div.wheel svg .back-ring {
+  stroke: #E4EAED;
+  fill: none;
 }
 
 div.wheel svg text { font-weight: bold; }

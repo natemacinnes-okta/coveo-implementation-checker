@@ -1,8 +1,69 @@
-html, body {
+html,
+body {
   height: 500px;
   width: 600px;
 }
 
-h3 { margin: 10px; }
-h3 i { font-style: italic; }
+h3 {
+  margin: 10px;
+}
 
+h3 i {
+  font-style: italic;
+}
+
+#scores {
+  text-align: center;
+}
+
+/* overrides of Vapor styles */
+
+.coveo-styleguide .collapsible .collapsible-header {
+  background-position: left 20px center;
+  display: flex;
+  line-height: inherit;
+}
+
+.coveo-styleguide .collapsible .collapsible-header .msg {
+  flex: 1;
+}
+
+.coveo-styleguide .collapsible .collapsible-header .details {
+  color: #ce3f00;
+  font-size: 8px;
+}
+
+.coveo-styleguide .collapsible .collapsible-header .result {
+  color: #ce3f00;
+  margin: auto;
+}
+
+.coveo-styleguide .collapsible .collapsible-header .result .wheel {
+  position: relative;
+}
+
+.coveo-styleguide .collapsible .collapsible-header .result .wheel svg {
+  width: 40px;
+  position: absolute;
+  margin-top: -40px;
+  margin-left: -10px;
+}
+.coveo-styleguide .collapsible .collapsible-header .result div.wheel svg .back-ring {
+  stroke: #fff;
+  fill: none;
+}
+
+.coveo-styleguide .collapsible .collapsible-header .result .wheel-title {
+  display: none;
+}
+
+.coveo-styleguide table:not(.datepicker-table) td.line-result {
+  font-variant: small-caps;
+  text-align: center;
+}
+.line-valid-true td.line-result {
+  color: #009830;
+}
+.line-valid-false td.line-result {
+  color: #ce3f00;
+}
