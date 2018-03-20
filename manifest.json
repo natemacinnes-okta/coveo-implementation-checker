@@ -10,7 +10,7 @@
 		"48": "images/48.png",
 		"128": "images/128.png"
 	},
-
+	"background": { "scripts": ["js/background.js"] },
 	"browser_action": {
     "default_icon": "/images/icon.png",
     "default_popup": "/popup.html"
@@ -20,8 +20,7 @@
 		{
 			"run_at": "document_end",
 			"matches": [
-				"http://*/*",
-				"https://*/*"
+				"<all_urls>"
 			],
 			"js": [
 				"/js/content.js"
@@ -32,9 +31,6 @@
 			"all_frames": false
 		}
 	],
-
-	"permissions": [
-		"http://*/*",
-		"https://*/*"
-	]
+    "permissions": ["background", "activeTab", "webRequest", "webRequestBlocking","notifications", "*://*/"]
+	
 }
