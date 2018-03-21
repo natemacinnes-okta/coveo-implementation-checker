@@ -3,25 +3,24 @@
 /*global chrome*/
 
 
-function addConsoleTracker()
-{
-  var html = '';
- // html += "<script>";
-  html += "   (function(){ ";
-  html += " if(window.console && console.log){";
-  html += " var old = console.log;";
-  html += " console.log = function(){";
-  html += "    var message = Array.prototype.slice.apply(arguments).join(' '); ";
-  html += "      if (message.indexOf('A search was triggered, but no analytics')!=-1) {";
-  html += "          $('body').append('<div id=myanalyticsfailure></div>'); ";
-  html += "      Array.prototype.unshift.call(arguments, 'MAYDAY: '); ";
-  html += "      }";
-  html += "     old.apply(this, arguments)";
-  html += "    } ";
-  html += "  }  ";
-  html += " })();";
- // html += "</script>";
-  return html;
+function addConsoleTracker() {
+	var html = '';
+	// html += "<script>";
+	html += "   (function(){ ";
+	html += " if(window.console && console.log){";
+	html += " var old = console.log;";
+	html += " console.log = function(){";
+	html += "    var message = Array.prototype.slice.apply(arguments).join(' '); ";
+	html += "      if (message.indexOf('A search was triggered, but no analytics')!=-1) {";
+	html += "          $('body').append('<div id=myanalyticsfailure></div>'); ";
+	html += "      Array.prototype.unshift.call(arguments, 'MAYDAY: '); ";
+	html += "      }";
+	html += "     old.apply(this, arguments)";
+	html += "    } ";
+	html += "  }  ";
+	html += " })();";
+	// html += "</script>";
+	return html;
 }
 
 //Add the above div always to track analytics problems
@@ -38,8 +37,8 @@ let SendMessage = (parameters) => {
 	});
 };
 
-let getScreen = () =>{
-    SendMessage({type: 'getScreen'});
+let getScreen = () => {
+	SendMessage({ type: 'getScreen' });
 }
 
 var reportJson;
@@ -101,7 +100,7 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 				analyticsToken = request.analyticsToken;
 				searchToken = request.searchToken;
 				image = request.image;
-//				$('#mywebsiteimage').attr('src', msg.image);
+				//				$('#mywebsiteimage').attr('src', msg.image);
 
 			}
 		}
@@ -111,69 +110,69 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 
 function onlyUnique(value, index, self) {
 	return self.indexOf(value) === index;
-  }
+}
 
-  var indicator;
-  var difficulty;
-  var detailed_report;
-  var usingRecommendations;
-  var uiVersion;
-  var usingPartialMatch;
-  var usingLQ;
-  var usingSearchAsYouType;
-  var fromSystem;
-  var usingFacets;
-  var usingTabs;
-  var nrOfResultTemplates;
-  var usingState;
-  var usingCustomEvents;
-  var customEvents;
-  var usingTokens;
-  var usingCulture;
-  var cultures;
-  var usingAdditionalSearch;
-  var usingQRE;
-  var usingAdditionalAnalytics;
-  var pagesize;
-  var responsive;
-  var pipelines;
-  var hardcodedAccessTokens;
-  var onpremise;
-  var nrofraw;
-  var generated;
+var indicator;
+var difficulty;
+var detailed_report;
+var usingRecommendations;
+var uiVersion;
+var usingPartialMatch;
+var usingLQ;
+var usingSearchAsYouType;
+var fromSystem;
+var usingFacets;
+var usingTabs;
+var nrOfResultTemplates;
+var usingState;
+var usingCustomEvents;
+var customEvents;
+var usingTokens;
+var usingCulture;
+var cultures;
+var usingAdditionalSearch;
+var usingQRE;
+var usingAdditionalAnalytics;
+var pagesize;
+var responsive;
+var pipelines;
+var hardcodedAccessTokens;
+var onpremise;
+var nrofraw;
+var generated;
 
-  function cleanMatch(match) {
+function cleanMatch(match) {
 	return match.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace('\n', '<BR>¶ ') + "<BR>";
-  }
+}
 
-  function addMatches(matches) {
+function addMatches(matches) {
 	var report = '';
 	$.each(matches, function (element) {
-	  if (matches[element] != undefined) {
-		report += cleanMatch(matches[element]);
-	  }
+		if (matches[element] != undefined) {
+			report += cleanMatch(matches[element]);
+		}
 	});
 	report += "</span>";
 	return report;
-  }
+}
 
-  function parseScript(name, content, all, external) {
+function parseScript(name, content, all, external) {
 	var report = '';
 
 	console.log('Parsing: ' + name + '... ');
 	$('#myreportdetails').html('Parsing: ' + name + '... one moment...');
 	//Lazy
 	if (name.toLowerCase().indexOf('lazy') != -1) {
-	  usingLazy = true;
+		usingLazy = true;
 	}
 	//Version?
 	var reg = /[\"']?lib[\"']? ?: ?[\"']\d[^m](.*?)[\"'],/g;///"?lib"? ?: ?['"](.*)['"].*\n?.*"?product"?: ?['"](.*)['"],/g;
 	matches = String(content).match(reg);
 	if (matches) {
-	  uiVersion = '' + matches[0].replace('lib', '').replace(/:/g, '').replace(/\'/g, '').replace(',', '').replace(/"/g, '');
-	  reg = /[.\S\s ]{19}[\"']?lib[\"']? ?: ?[\"']\d[^m](.*?)[\"'],[.\S\s ]{40}/g;
-	  matches = String(content).match(reg);
-	  report += '<b>UI Version found:</b><BR><span class="mycode">' + matches[0].replace('\n', ' ').replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</span><BR>";
+		uiVersion = '' + matches[0].replace('lib', '').replace(/:/g, '').replace(/\'/g, '').replace(',', '').replace(/"/g, '');
+		reg = /[.\S\s ]{19}[\"']?lib[\"']? ?: ?[\"']\d[^m](.*?)[\"'],[.\S\s ]{40}/g;
+		matches = String(content).match(reg);
+		report += '<b>UI Version found:</b><BR><span class="mycode">' + matches[0].replace('\n', ' ').replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</span><BR>";
 	}
 	//Seems the below token is in the sample endpoint, we do not want to match that
 	//We need to remove the sampleTokens from the content
@@ -181,170 +180,170 @@ function onlyUnique(value, index, self) {
 	reg = /(accessToken[:=] ?[\"'](?!xx564559b1-0045-48e1-953c-3addd1ee4457)(.*?)[\"'])/g;
 	matches = String(content).match(reg);
 	if (matches) {
-	  hardcodedAccessTokens = true;
-	  report += '<b>Hardcoded accessTokens:</b><br><span class="mycode">';
-	  reg = /[.\S\s ]{10}(accessToken[:=] ?[\"'](?!xx564559b1-0045-48e1-953c-3addd1ee4457)(.*?)[\"'])[.\S\s ]{70}/g;
-	  matches = String(content).match(reg);
-	  report += addMatches(matches);
+		hardcodedAccessTokens = true;
+		report += '<b>Hardcoded accessTokens:</b><br><span class="mycode">';
+		reg = /[.\S\s ]{10}(accessToken[:=] ?[\"'](?!xx564559b1-0045-48e1-953c-3addd1ee4457)(.*?)[\"'])[.\S\s ]{70}/g;
+		matches = String(content).match(reg);
+		report += addMatches(matches);
 	}
 	if (all) {
 
-	  reg = /(\$qre)|(\$correlateUsingIdf)|(\$some)\./g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		usingQRE = true;
-		difficulty = difficulty + 1;
-		report += '<b>Use of QRE:</b><BR><span class="mycode" >';
-		reg = /[.\S\s ]{10}(\$qre)[.\S\s ]{40}|[.\S\s ]{10}(\$correlateUsingIdf)[.\S\s ]{40}|[.\S\s ]{10}(\$some)[.\S\s ]{40}/g;
+		reg = /(\$qre)|(\$correlateUsingIdf)|(\$some)\./g;
 		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
+		if (matches) {
+			usingQRE = true;
+			difficulty = difficulty + 1;
+			report += '<b>Use of QRE:</b><BR><span class="mycode" >';
+			reg = /[.\S\s ]{10}(\$qre)[.\S\s ]{40}|[.\S\s ]{10}(\$correlateUsingIdf)[.\S\s ]{40}|[.\S\s ]{10}(\$some)[.\S\s ]{40}/g;
+			matches = String(content).match(reg);
+			report += addMatches(matches);
+		}
 
-	  reg = /raw\./g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		nrofraw = nrofraw + matches.length;
-		difficulty = difficulty + 1;
-		report += '<b>Use of raw. found:</b><BR><span class="mycode" >';
-		reg = /[.\S\s ]{10}raw\.[.\S\s ]{40}/g;
+		reg = /raw\./g;
 		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
+		if (matches) {
+			nrofraw = nrofraw + matches.length;
+			difficulty = difficulty + 1;
+			report += '<b>Use of raw. found:</b><BR><span class="mycode" >';
+			reg = /[.\S\s ]{10}raw\.[.\S\s ]{40}/g;
+			matches = String(content).match(reg);
+			report += addMatches(matches);
+		}
 
-	  reg = /configureOnPremiseEndpoint/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		onpremise = true;
-		difficulty = difficulty + 1;
-		report += '<b>On premise found:</b><BR><span class="mycode" >';
-		reg = /[.\S\s ]{10}configureOnPremiseEndpoint[.\S\s ]{40}/g;
+		reg = /configureOnPremiseEndpoint/g;
 		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
+		if (matches) {
+			onpremise = true;
+			difficulty = difficulty + 1;
+			report += '<b>On premise found:</b><BR><span class="mycode" >';
+			reg = /[.\S\s ]{10}configureOnPremiseEndpoint[.\S\s ]{40}/g;
+			matches = String(content).match(reg);
+			report += addMatches(matches);
+		}
 
-	  reg = /coveo\(.?state.?,/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		usingState = true;
-		difficulty = difficulty + 1;
-		report += '<b>State found:</b><BR><span class="mycode" >';
-		reg = /[.\S\s ]{10}coveo\(.?state.?,[.\S\s ]{40}/g;
+		reg = /coveo\(.?state.?,/g;
 		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
+		if (matches) {
+			usingState = true;
+			difficulty = difficulty + 1;
+			report += '<b>State found:</b><BR><span class="mycode" >';
+			reg = /[.\S\s ]{10}coveo\(.?state.?,[.\S\s ]{40}/g;
+			matches = String(content).match(reg);
+			report += addMatches(matches);
+		}
 
-	  reg = /(data-pipeline=?[\"'](.*?)[\"'])|(options.pipeline ?=(.*);)/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Pipelines:</b><br><span class="mycode" >';
-		$.each(matches, function (element) {
-		  if (matches[element] != undefined) {
-			pipelines = pipelines + " " + cleanMatch(matches[element]);
-		  }
-		});
-		reg = /[.\S\s ]{10}(data-pipeline=?[\"'](.*?)[\"'])[.\S\s ]{50}|[.\S\s ]{10}(options.pipeline ?=(.*);)[.\S\s ]{50}/g;
+		reg = /(data-pipeline=?[\"'](.*?)[\"'])|(options.pipeline ?=(.*);)/g;
 		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
+		if (matches) {
+			report += '<b>Pipelines:</b><br><span class="mycode" >';
+			$.each(matches, function (element) {
+				if (matches[element] != undefined) {
+					pipelines = pipelines + " " + cleanMatch(matches[element]);
+				}
+			});
+			reg = /[.\S\s ]{10}(data-pipeline=?[\"'](.*?)[\"'])[.\S\s ]{50}|[.\S\s ]{10}(options.pipeline ?=(.*);)[.\S\s ]{50}/g;
+			matches = String(content).match(reg);
+			report += addMatches(matches);
+		}
 
-	  //usingEvents: "(changeAnalyticsCustomData)|(buildingQuery)|(preprocessResults)|(deferredQuerySuccess)|(doneBuildingQuery)|(duringFetchMoreQuery)|(duringQuery)|(newQuery)|(preprocessMoreResults)",
-	  reg = /(changeAnalyticsCustomData)|(initSearchbox)|(buildingQuery)|(preprocessResults)|(deferredQuerySuccess)|(doneBuildingQuery)|(duringFetchMoreQuery)|(duringQuery)|(newQuery)|(preprocessMoreResults)/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		usingCustomEvents = true;
-		report += '<b>Custom Events:</b><br><span class="mycode" >';
-		$.each(matches, function (element) {
-		  if (matches[element] != undefined) {
-			if (!customEvents.includes(matches[element])) {
-			  difficulty = difficulty + 1;
-			  customEvents.push(matches[element]);
-			}
-		  }
-		});
-		reg = /[.\S\s ]{5}(changeAnalyticsCustomData)[.\S\s ]{40}|[.\S\s ]{5}(initSearchbox)[.\S\s ]{40}|[.\S\s ]{5}(buildingQuery)[.\S\s ]{40}|[.\S\s ]{5}(preprocessResults)[.\S\s ]{40}|[.\S\s ]{5}(deferredQuerySuccess)[.\S\s ]{40}|[.\S\s ]{5}(doneBuildingQuery)[.\S\s ]{40}|[.\S\s ]{5}(duringFetchMoreQuery)[.\S\s ]{40}|[.\S\s ]{5}(duringQuery)[.\S\s ]{40}|[.\S\s ]{5}(newQuery)[.\S\s ]{40}|[.\S\s ]{5}(preprocessMoreResults)[.\S\s ]{40}/g;
+		//usingEvents: "(changeAnalyticsCustomData)|(buildingQuery)|(preprocessResults)|(deferredQuerySuccess)|(doneBuildingQuery)|(duringFetchMoreQuery)|(duringQuery)|(newQuery)|(preprocessMoreResults)",
+		reg = /(changeAnalyticsCustomData)|(initSearchbox)|(buildingQuery)|(preprocessResults)|(deferredQuerySuccess)|(doneBuildingQuery)|(duringFetchMoreQuery)|(duringQuery)|(newQuery)|(preprocessMoreResults)/g;
 		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
+		if (matches) {
+			usingCustomEvents = true;
+			report += '<b>Custom Events:</b><br><span class="mycode" >';
+			$.each(matches, function (element) {
+				if (matches[element] != undefined) {
+					if (!customEvents.includes(matches[element])) {
+						difficulty = difficulty + 1;
+						customEvents.push(matches[element]);
+					}
+				}
+			});
+			reg = /[.\S\s ]{5}(changeAnalyticsCustomData)[.\S\s ]{40}|[.\S\s ]{5}(initSearchbox)[.\S\s ]{40}|[.\S\s ]{5}(buildingQuery)[.\S\s ]{40}|[.\S\s ]{5}(preprocessResults)[.\S\s ]{40}|[.\S\s ]{5}(deferredQuerySuccess)[.\S\s ]{40}|[.\S\s ]{5}(doneBuildingQuery)[.\S\s ]{40}|[.\S\s ]{5}(duringFetchMoreQuery)[.\S\s ]{40}|[.\S\s ]{5}(duringQuery)[.\S\s ]{40}|[.\S\s ]{5}(newQuery)[.\S\s ]{40}|[.\S\s ]{5}(preprocessMoreResults)[.\S\s ]{40}/g;
+			matches = String(content).match(reg);
+			report += addMatches(matches);
+		}
 
-	  //usingTokens: "(options.token)|(options.accessToken)",
-	  reg = /(options.token)|(options.accessToken)/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Tokens:</b><br><span class="mycode" >';
-		reg = /[.\S\s ]{40}(options.token)[.\S\s ][.\S\s ]{40}|[.\S\s ]{40}(options.accessToken)[.\S\s ][.\S\s ]{40}/g;
+		//usingTokens: "(options.token)|(options.accessToken)",
+		reg = /(options.token)|(options.accessToken)/g;
 		matches = String(content).match(reg);
-		report += addMatches(matches);
-		usingTokens = true;
-	  }
-	  //usingVersion: "\/searchui\/(.*)\/js;js/CoveoJsSearch",
-	  //usingCultures: "\/js\/cultures\/(\w+)",
-	  reg = /\/js\/cultures\/(\w+)/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		usingCulture = true;
-		report += '<b>Cultures:</b><br><span class="mycode" >';
-		difficulty = (matches.length) + difficulty;
-		$.each(matches, function (element) {
-		  if (matches[element] != undefined) {
-			if (!cultures.includes(matches[element])) {
-			  cultures.push(matches[element]);
-			  report += matches[element] + ' ';
-			}
-		  }
-		});
-		reg = /[.\S\s ]{10}\/js\/cultures\/(\w+)[.\S\s ][.\S\s ]{40}/g;
+		if (matches) {
+			report += '<b>Tokens:</b><br><span class="mycode" >';
+			reg = /[.\S\s ]{40}(options.token)[.\S\s ][.\S\s ]{40}|[.\S\s ]{40}(options.accessToken)[.\S\s ][.\S\s ]{40}/g;
+			matches = String(content).match(reg);
+			report += addMatches(matches);
+			usingTokens = true;
+		}
+		//usingVersion: "\/searchui\/(.*)\/js;js/CoveoJsSearch",
+		//usingCultures: "\/js\/cultures\/(\w+)",
+		reg = /\/js\/cultures\/(\w+)/g;
 		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
-	  //usingAdditionalSearch: ".search.*.done",
-	  reg = /getEndpoint\(\).search\([\w\.\(\)]*\).done\( ?function/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Additional Search:</b><br><span class="mycode" >';
-		reg = /[.\S\s ]{10}getEndpoint\(\).search\([\w\.\(\)]*\).done\( ?function[.\S\s ]{40}/g;
+		if (matches) {
+			usingCulture = true;
+			report += '<b>Cultures:</b><br><span class="mycode" >';
+			difficulty = (matches.length) + difficulty;
+			$.each(matches, function (element) {
+				if (matches[element] != undefined) {
+					if (!cultures.includes(matches[element])) {
+						cultures.push(matches[element]);
+						report += matches[element] + ' ';
+					}
+				}
+			});
+			reg = /[.\S\s ]{10}\/js\/cultures\/(\w+)[.\S\s ][.\S\s ]{40}/g;
+			matches = String(content).match(reg);
+			report += addMatches(matches);
+		}
+		//usingAdditionalSearch: ".search.*.done",
+		reg = /getEndpoint\(\).search\([\w\.\(\)]*\).done\( ?function/g;
 		matches = String(content).match(reg);
-		report += addMatches(matches);
-		usingAdditionalSearch = usingAdditionalSearch + matches.length;
-		difficulty = (matches.length) + difficulty;
-	  }
-	  //usingAnalytics: "(analytics.js\/coveoua.js)|CoveoAnalytics"
-	  reg = /(analytics.js\/coveoua.js)|CoveoAnalytics/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Additional Analytics:</b><br><span class="mycode" >';
-		reg = /[.\S\s ]{10}(analytics.js\/coveoua.js)[.\S\s ]{40}|[.\S\s ]{10}CoveoAnalytics[.\S\s ]{40}/g;
+		if (matches) {
+			report += '<b>Additional Search:</b><br><span class="mycode" >';
+			reg = /[.\S\s ]{10}getEndpoint\(\).search\([\w\.\(\)]*\).done\( ?function[.\S\s ]{40}/g;
+			matches = String(content).match(reg);
+			report += addMatches(matches);
+			usingAdditionalSearch = usingAdditionalSearch + matches.length;
+			difficulty = (matches.length) + difficulty;
+		}
+		//usingAnalytics: "(analytics.js\/coveoua.js)|CoveoAnalytics"
+		reg = /(analytics.js\/coveoua.js)|CoveoAnalytics/g;
 		matches = String(content).match(reg);
-		usingAdditionalAnalytics = usingAdditionalAnalytics + matches.length;
-		report += addMatches(matches);
-	  }
-	  //usingRecommendations: "CoveoRecommendation"
-	  reg = /CoveoRecommendation/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Recommendations found:</b><br><span class="mycode" >';
-		usingRecommendations = true;
-		reg = /[.\S\s ]{10}CoveoRecommendation[.\S\s ]{50}/g;
+		if (matches) {
+			report += '<b>Additional Analytics:</b><br><span class="mycode" >';
+			reg = /[.\S\s ]{10}(analytics.js\/coveoua.js)[.\S\s ]{40}|[.\S\s ]{10}CoveoAnalytics[.\S\s ]{40}/g;
+			matches = String(content).match(reg);
+			usingAdditionalAnalytics = usingAdditionalAnalytics + matches.length;
+			report += addMatches(matches);
+		}
+		//usingRecommendations: "CoveoRecommendation"
+		reg = /CoveoRecommendation/g;
 		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
-	  reg = /CoveoFacet/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Facets found</b><br><span class="mycode" >';
-		usingFacets = true;
-		reg = /[.\S\s ]{10}CoveoFacet[.\S\s ]{60}/g;
+		if (matches) {
+			report += '<b>Recommendations found:</b><br><span class="mycode" >';
+			usingRecommendations = true;
+			reg = /[.\S\s ]{10}CoveoRecommendation[.\S\s ]{50}/g;
+			matches = String(content).match(reg);
+			report += addMatches(matches);
+		}
+		reg = /CoveoFacet/g;
 		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
-	  reg = /CoveoTab/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Tabs found:</b><br><span class="mycode" >';
-		usingTabs = true;
-		reg = /[.\S\s ]{10}CoveoTab[.\S\s ]{40}/g;
+		if (matches) {
+			report += '<b>Facets found</b><br><span class="mycode" >';
+			usingFacets = true;
+			reg = /[.\S\s ]{10}CoveoFacet[.\S\s ]{60}/g;
+			matches = String(content).match(reg);
+			report += addMatches(matches);
+		}
+		reg = /CoveoTab/g;
 		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
+		if (matches) {
+			report += '<b>Tabs found:</b><br><span class="mycode" >';
+			usingTabs = true;
+			reg = /[.\S\s ]{10}CoveoTab[.\S\s ]{40}/g;
+			matches = String(content).match(reg);
+			report += addMatches(matches);
+		}
 	  /*reg = /result-template/g;
 	  matches = String(content).match(reg);
 	  if (matches)
@@ -352,61 +351,61 @@ function onlyUnique(value, index, self) {
 		nrOfResultTemplates = nrOfResultTemplates+matches.length;
 		report += "<BR>";
 	  }*/
-	  reg = /(window.Sfdc)|(sfdcId)|(CoveoV2Search)/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		fromSystem = 'Salesforce';
-		report += '<b>Salesforce UI found.</b><br>';
-		reg = /data-aura/g;
+		reg = /(window.Sfdc)|(sfdcId)|(CoveoV2Search)/g;
 		matches = String(content).match(reg);
 		if (matches) {
-		  fromSystem = 'Salesforce - Lightning';
-		  report += '<b>Salesforce UI - Lightning found.</b><br>';
+			fromSystem = 'Salesforce';
+			report += '<b>Salesforce UI found.</b><br>';
+			reg = /data-aura/g;
+			matches = String(content).match(reg);
+			if (matches) {
+				fromSystem = 'Salesforce - Lightning';
+				report += '<b>Salesforce UI - Lightning found.</b><br>';
+			}
+			reg = /CoveoBoxHeader/g;
+			matches = String(content).match(reg);
+			if (matches) {
+				report += '<b>Salesforce UI - Service Cloud found.</b><br>';
+				fromSystem = 'Salesforce - ServiceCloud';
+			}
 		}
-		reg = /CoveoBoxHeader/g;
+		reg = /(CoveoForSitecore)/g;
 		matches = String(content).match(reg);
 		if (matches) {
-		  report += '<b>Salesforce UI - Service Cloud found.</b><br>';
-		  fromSystem = 'Salesforce - ServiceCloud';
+			report += '<b>Sitecore UI found.</b><br>';
+			fromSystem = 'Sitecore';
 		}
-	  }
-	  reg = /(CoveoForSitecore)/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Sitecore UI found.</b><br>';
-		fromSystem = 'Sitecore';
-	  }
-	  reg = /@media.*\(max/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Responsive design found.</b><br>';
-		responsive = true;
-	  }
-	  reg = /data-enable-search-as-you-type=.?true/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Search As You Type found:</b><br><span class="mycode" >';
-		usingSearchAsYouType = true;
-		reg = /[.\S\s ]{10}data-enable-search-as-you-type=.?true[.\S\s ]{40}/g;
+		reg = /@media.*\(max/g;
 		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
+		if (matches) {
+			report += '<b>Responsive design found.</b><br>';
+			responsive = true;
+		}
+		reg = /data-enable-search-as-you-type=.?true/g;
+		matches = String(content).match(reg);
+		if (matches) {
+			report += '<b>Search As You Type found:</b><br><span class="mycode" >';
+			usingSearchAsYouType = true;
+			reg = /[.\S\s ]{10}data-enable-search-as-you-type=.?true[.\S\s ]{40}/g;
+			matches = String(content).match(reg);
+			report += addMatches(matches);
+		}
 
 	}
 	if (report != '') {
-	  if (external) {
-		report = "<br><b><strong>Found in file: <a target='_blank' href='" + name + "'>" + name.substr(name.length - 45) + "</a></strong></b><BR>" + report;
-	  }
-	  else {
-		report = "<br><b><strong>Found In file: " + name + "</strong></b><BR>" + report;
-	  }
+		if (external) {
+			report = "<br><b><strong>Found in file: <a target='_blank' href='" + name + "'>" + name.substr(name.length - 45) + "</a></strong></b><BR>" + report;
+		}
+		else {
+			report = "<br><b><strong>Found In file: " + name + "</strong></b><BR>" + report;
+		}
 
 	}
 	return report;
-  }
+}
 
 
-  function getReport() {
+function getReport() {
 	indicator = 0;
 	difficulty = 0;
 	usingLazy = false;
@@ -439,14 +438,14 @@ function onlyUnique(value, index, self) {
 	var allCoveoComponentsUsed = $("*[class^='Coveo'],*[class*=' Coveo']", html);
 	var allClasses = [];
 	$.each(allCoveoComponentsUsed, function (obj) {
-	  var classes = allCoveoComponentsUsed[obj].className.split(' ');
-	  $.each(classes, function (cls) {
-		if (classes[cls].includes('Coveo')) {
-		  if (!allClasses.includes(classes[cls])) {
-			allClasses.push(classes[cls]);
-		  }
-		}
-	  });
+		var classes = allCoveoComponentsUsed[obj].className.split(' ');
+		$.each(classes, function (cls) {
+			if (classes[cls].includes('Coveo')) {
+				if (!allClasses.includes(classes[cls])) {
+					allClasses.push(classes[cls]);
+				}
+			}
+		});
 	});
 	//Get from the page the number of result templates
 	var resulttemplates = $('.result-template', html);
@@ -464,48 +463,48 @@ function onlyUnique(value, index, self) {
 	//For each script we want:
 	var scripts = $('script');
 	$.each(scripts, function (script) {
-	  if (scripts[script].innerHTML == "") {
-		//External, load it
-		all = true;
-		if (scripts[script].src.includes('/js/CoveoJsSearch') || scripts[script].src.includes('/coveoua.js') || scripts[script].src.includes('/CoveoForSitecore') || scripts[script].src.includes('/core.js')) {
-		  all = false;
-		}
-		var src = '';
-		//if (all)
-		{
-		  $.ajax({
-			url: scripts[script].src,
-			async: false,
-			success: function (data) {
-			  src = data;
-			  if (src != undefined) {
-				pagesize = pagesize + src.length;
-			  }
+		if (scripts[script].innerHTML == "") {
+			//External, load it
+			all = true;
+			if (scripts[script].src.includes('/js/CoveoJsSearch') || scripts[script].src.includes('/coveoua.js') || scripts[script].src.includes('/CoveoForSitecore') || scripts[script].src.includes('/core.js')) {
+				all = false;
 			}
-		  });
-		}
-		//Do not parse internal files
-		var cont = true;
-		//Do not parse internal files
-		if (src == undefined) {
+			var src = '';
+			//if (all)
+			{
+				$.ajax({
+					url: scripts[script].src,
+					async: false,
+					success: function (data) {
+						src = data;
+						if (src != undefined) {
+							pagesize = pagesize + src.length;
+						}
+					}
+				});
+			}
+			//Do not parse internal files
+			var cont = true;
+			//Do not parse internal files
+			if (src == undefined) {
 
+			}
+			else {
+				if (src.includes('if( window.Coveo === undefined) {')) {
+					//cont=false;
+					all = false;
+				}
+				if (src.startsWith('webpackJsonpCoveo')) {
+					cont = false;
+				}
+				if (cont) {
+					detailed_report += parseScript(scripts[script].src, src, all, true);
+				}
+			}
 		}
 		else {
-		  if (src.includes('if( window.Coveo === undefined) {')) {
-			//cont=false;
-			all = false;
-		  }
-		  if (src.startsWith('webpackJsonpCoveo')) {
-			cont = false;
-		  }
-		  if (cont) {
-			detailed_report += parseScript(scripts[script].src, src, all, true);
-		  }
+			detailed_report += parseScript('Original file, Inner script.', scripts[script].innerHTML, true, false);
 		}
-	  }
-	  else {
-		detailed_report += parseScript('Original file, Inner script.', scripts[script].innerHTML, true, false);
-	  }
 	});
 	//var mes=$.getScript($('script')[2].src);
 	report += "Components used: " + allClasses.filter(onlyUnique).join('<BR>');
@@ -523,15 +522,15 @@ function onlyUnique(value, index, self) {
 	report += "<tr><td>Integrated in UI:</td><td>" + fromSystem + "</td></tr>";
 	indic = '#ef1a45';
 	if (hardcodedAccessTokens) {
-	  report += "<tr><td>Hard coded Access Tokens<br>(Should NOT be done!!):</td><td style='background-color:" + indic + "'>" + hardcodedAccessTokens + "</td></tr>";
+		report += "<tr><td>Hard coded Access Tokens<br>(Should NOT be done!!):</td><td style='background-color:" + indic + "'>" + hardcodedAccessTokens + "</td></tr>";
 	}
 	indic = '#ef1a45';
 	if (alertsError != "") {
-	  report += "<tr><td>Search alerts error<br>(Bad access to search alert subscriptions)<br>Or remove component class='CoveoSearchAlerts':</td><td style='background-color:" + indic + "'>" + alertsError + "</td></tr>";
+		report += "<tr><td>Search alerts error<br>(Bad access to search alert subscriptions)<br>Or remove component class='CoveoSearchAlerts':</td><td style='background-color:" + indic + "'>" + alertsError + "</td></tr>";
 	}
 	indic = '#ef1a45';
 	if (analyticsFailures != 0) {
-	  report += "<tr><td>Searches executed without sending analytics<br>(Manual triggered search did not sent analytics):</td><td style='background-color:" + indic + "'>" + "true" + "</td></tr>";
+		report += "<tr><td>Searches executed without sending analytics<br>(Manual triggered search did not sent analytics):</td><td style='background-color:" + indic + "'>" + "true" + "</td></tr>";
 	}
 
 
@@ -641,12 +640,12 @@ function onlyUnique(value, index, self) {
 	report += "<tr><td colspan=2 style='text-align:left'>Searches executed with token info:</td></tr>";
 	indic = 'lightgreen';
 	try {
-	  if (searchToken.indexOf('Bearer') != -1) indic = '#ef1a45';
-	  report += "<tr><td colspan=2 style='word-wrap:break-word;font-family:courier;text-align:left;background-color:" + indic + "'><pre style='width:820px;overflow:hidden'>" + searchToken + "</pre></td></tr>";
-	  report += "<tr><td colspan=2 style='text-align:left'>Analytics executed with token info:</td></tr>";
-	  indic = 'lightgreen';
-	  if (analyticsToken.indexOf('Bearer') != -1) indic = '#ef1a45';
-	  report += "<tr><td style='word-wrap:break-word;font-family:courier;text-align:left;background-color:" + indic + "' colspan=2><pre  style='width:820px;overflow:hidden'>" + analyticsToken + "</pre></td></tr>";
+		if (searchToken.indexOf('Bearer') != -1) indic = '#ef1a45';
+		report += "<tr><td colspan=2 style='word-wrap:break-word;font-family:courier;text-align:left;background-color:" + indic + "'><pre style='width:820px;overflow:hidden'>" + searchToken + "</pre></td></tr>";
+		report += "<tr><td colspan=2 style='text-align:left'>Analytics executed with token info:</td></tr>";
+		indic = 'lightgreen';
+		if (analyticsToken.indexOf('Bearer') != -1) indic = '#ef1a45';
+		report += "<tr><td style='word-wrap:break-word;font-family:courier;text-align:left;background-color:" + indic + "' colspan=2><pre  style='width:820px;overflow:hidden'>" + analyticsToken + "</pre></td></tr>";
 	}
 	catch (e) {
 
@@ -656,4 +655,4 @@ function onlyUnique(value, index, self) {
 	report += "<tr><td colspan=2 style='text-align:left'>" + detailed_report + "</td></tr>";
 
 	$('#myreportdetails').html(report);
-  }
+}
