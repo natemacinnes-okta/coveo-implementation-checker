@@ -24,7 +24,6 @@ function addConsoleTracker()
   return html;
 }
 
-
 //Add the above div always to track analytics problems
 var script = document.createElement('script');
 script.textContent = addConsoleTracker();
@@ -113,7 +112,7 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 				searchToken = request.searchToken;
 				image = request.image;
 //				$('#mywebsiteimage').attr('src', msg.image);
-			
+
 			}
 		}
 	);
@@ -123,7 +122,7 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 function onlyUnique(value, index, self) {
 	return self.indexOf(value) === index;
   }
-  
+
   var indicator;
   var difficulty;
   var detailed_report;
@@ -152,11 +151,11 @@ function onlyUnique(value, index, self) {
   var onpremise;
   var nrofraw;
   var generated;
-  
+
   function cleanMatch(match) {
 	return match.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace('\n', '<BR>¶ ') + "<BR>";
   }
-  
+
   function addMatches(matches) {
 	var report = '';
 	$.each(matches, function (element) {
@@ -167,10 +166,10 @@ function onlyUnique(value, index, self) {
 	report += "</span>";
 	return report;
   }
-  
+
   function parseScript(name, content, all, external) {
 	var report = '';
-  
+
 	console.log('Parsing: ' + name + '... ');
 	$('#myreportdetails').html('Parsing: ' + name + '... one moment...');
 	//Lazy
@@ -199,7 +198,7 @@ function onlyUnique(value, index, self) {
 	  report += addMatches(matches);
 	}
 	if (all) {
-  
+
 	  reg = /(\$qre)|(\$correlateUsingIdf)|(\$some)\./g;
 	  matches = String(content).match(reg);
 	  if (matches) {
@@ -210,7 +209,7 @@ function onlyUnique(value, index, self) {
 		matches = String(content).match(reg);
 		report += addMatches(matches);
 	  }
-  
+
 	  reg = /raw\./g;
 	  matches = String(content).match(reg);
 	  if (matches) {
@@ -221,7 +220,7 @@ function onlyUnique(value, index, self) {
 		matches = String(content).match(reg);
 		report += addMatches(matches);
 	  }
-  
+
 	  reg = /configureOnPremiseEndpoint/g;
 	  matches = String(content).match(reg);
 	  if (matches) {
@@ -232,7 +231,7 @@ function onlyUnique(value, index, self) {
 		matches = String(content).match(reg);
 		report += addMatches(matches);
 	  }
-  
+
 	  reg = /coveo\(.?state.?,/g;
 	  matches = String(content).match(reg);
 	  if (matches) {
@@ -243,7 +242,7 @@ function onlyUnique(value, index, self) {
 		matches = String(content).match(reg);
 		report += addMatches(matches);
 	  }
-  
+
 	  reg = /(data-pipeline=?[\"'](.*?)[\"'])|(options.pipeline ?=(.*);)/g;
 	  matches = String(content).match(reg);
 	  if (matches) {
@@ -257,7 +256,7 @@ function onlyUnique(value, index, self) {
 		matches = String(content).match(reg);
 		report += addMatches(matches);
 	  }
-  
+
 	  //usingEvents: "(changeAnalyticsCustomData)|(buildingQuery)|(preprocessResults)|(deferredQuerySuccess)|(doneBuildingQuery)|(duringFetchMoreQuery)|(duringQuery)|(newQuery)|(preprocessMoreResults)",
 	  reg = /(changeAnalyticsCustomData)|(initSearchbox)|(buildingQuery)|(preprocessResults)|(deferredQuerySuccess)|(doneBuildingQuery)|(duringFetchMoreQuery)|(duringQuery)|(newQuery)|(preprocessMoreResults)/g;
 	  matches = String(content).match(reg);
@@ -276,7 +275,7 @@ function onlyUnique(value, index, self) {
 		matches = String(content).match(reg);
 		report += addMatches(matches);
 	  }
-  
+
 	  //usingTokens: "(options.token)|(options.accessToken)",
 	  reg = /(options.token)|(options.accessToken)/g;
 	  matches = String(content).match(reg);
@@ -402,7 +401,7 @@ function onlyUnique(value, index, self) {
 		matches = String(content).match(reg);
 		report += addMatches(matches);
 	  }
-  
+
 	}
 	if (report != '') {
 	  if (external) {
@@ -411,12 +410,12 @@ function onlyUnique(value, index, self) {
 	  else {
 		report = "<br><b><strong>Found In file: " + name + "</strong></b><BR>" + report;
 	  }
-  
+
 	}
 	return report;
   }
-  
-  
+
+
   function getReport() {
 	indicator = 0;
 	difficulty = 0;
@@ -463,7 +462,7 @@ function onlyUnique(value, index, self) {
 	var resulttemplates = $('.result-template', html);
 	nrOfResultTemplates = resulttemplates.length;
 	var underscoretemplates = $('.result-template[type="text/underscore"]').length + $('.result-template[type="text/x-underscore-template"]').length;
-  
+
 	var nroffacets = $('.coveo-facet-header', html).length;
 	var nrofsorts = $('.coveo-sort-icon-descending', html).length;
 	//Also parse the page to get some contents
@@ -499,7 +498,7 @@ function onlyUnique(value, index, self) {
 		var cont = true;
 		//Do not parse internal files
 		if (src == undefined) {
-  
+
 		}
 		else {
 		  if (src.includes('if( window.Coveo === undefined) {')) {
@@ -523,7 +522,7 @@ function onlyUnique(value, index, self) {
 	//console.log(report);
 	//alert('Your Coveo implementation score: '+indicator+'/10, reasons: '+indicator_report.substring(1)+'\n\nDifficulty of implemenation: '+difficulty+', reasons: '+difficulty_report.substring(1)+'\nSee developer console for more details.');
 	//$('#myreport').html('Your Coveo implementation score: '+indicator+'/10, reasons: '+indicator_report.substring(1)+'<BR><BR>Difficulty of implemenation: '+difficulty+', reasons: '+difficulty_report.substring(1)+"<BR>"+report);
-  
+
 	var report = '';
 	//
 	report += "<table cellpadding=2 class='myreporttable'>";
@@ -544,8 +543,8 @@ function onlyUnique(value, index, self) {
 	if (analyticsFailures != 0) {
 	  report += "<tr><td>Searches executed without sending analytics<br>(Manual triggered search did not sent analytics):</td><td style='background-color:" + indic + "'>" + "true" + "</td></tr>";
 	}
-  
-  
+
+
 	//Behavior
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Behavior information:</b></tr>";
 	indic = 'lightgreen';
@@ -568,7 +567,7 @@ function onlyUnique(value, index, self) {
 	if (topQueriesSent == true && suggestSent == true) indic = '#ef1a45';
 	if (topQueriesSent == false && suggestSent == true) indic = 'lightgreen';
 	report += "<tr><td>Using Analytics Query Completions<br>(should be true)<br>if ML Powered Query Completions enabled, then it should be false:</td><td style='background-color:" + indic + "'>" + topQueriesSent + "</td></tr>";
-  
+
 	//implementation
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Implementation information:</b></tr>";
 	report += "<tr><td>Pagesize in kB:</td><td>" + Math.round(pagesize / 1024) + " kB</td></tr>";
@@ -608,13 +607,13 @@ function onlyUnique(value, index, self) {
 	indic = 'lightgreen';
 	if (onpremise == true) indic = '#ef1a45';
 	report += "<tr><td>On-premise index<br>(better to use cloud):</td><td style='background-color:" + indic + "'>" + onpremise + "</td></tr>";
-  
+
 	//UI
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>UI information:</b></tr>";
 	indic = 'lightgreen';
 	if (!usingLazy) indic = '#ef1a45';
 	report += "<tr><td>Lazy Loading<br>(Should be true, better performance):</td><td style='background-color:" + indic + "'>" + usingLazy + "</td></tr>";
-  
+
 	report += "<tr><td>Using Facets:</td><td>" + usingFacets + "</td></tr>";
 	report += "<tr><td>Using Tabbed interfaces:</td><td>" + usingTabs + "</td></tr>";
 	var indic;
@@ -646,7 +645,7 @@ function onlyUnique(value, index, self) {
 	if (usingCulture == true) indic = '#ef1a45';
 	report += "<tr><td>Additional cultures<br>(more complicated):</td><td style='background-color:" + indic + "'>" + cultures + "<BR>" + cultures.join('<BR>') + "</td></tr>";
 	report += "<tr><td>Components used in the UI:</td><td>" + allClasses.join('<BR>') + "</td></tr>";
-  
+
 	//Tokens
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Token information:</b></tr>";
 	report += "<tr><td colspan=2 style='text-align:left'>Searches executed with token info:</td></tr>";
@@ -660,11 +659,11 @@ function onlyUnique(value, index, self) {
 	  report += "<tr><td style='word-wrap:break-word;font-family:courier;text-align:left;background-color:" + indic + "' colspan=2><pre  style='width:820px;overflow:hidden'>" + analyticsToken + "</pre></td></tr>";
 	}
 	catch (e) {
-  
+
 	}
 	//Details
 	report += "<trstyle='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Detailed information:</b></tr>";
 	report += "<tr><td colspan=2 style='text-align:left'>" + detailed_report + "</td></tr>";
-  
+
 	$('#myreportdetails').html(report);
   }

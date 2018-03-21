@@ -78,55 +78,44 @@ let processReport = (data) => {
 };
 
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   myenabledsearch = false;
-  $('#getReport').click(function () {
-    //getReport();
-    getNumbers();
-  });
-  $('#setSearchTracker').click(function () {
-    toggleTracker();
-  });
-  $('#reset').click(function () {
-    reset();
-  });
+  $('#getReport').click(getNumbers);
+  $('#setSearchTracker').click(toggleTracker);
+  $('#reset').click(reset);
 });
 
 
-function getReport(){
+function getReport() {
   //first get a screenshot, the next event will be gathering the numbers, then the analyzePage
   chrome.runtime.sendMessage({ type: 'getScreen' });
 }
 
-function toggleTracker(){
+function toggleTracker() {
   //first get a screenshot, the next event will be gathering the numbers, then the analyzePage
   myenabledsearch = !myenabledsearch;
-  if (myenabledsearch){
-      $('setSearchTracker').text('Search is being tracked');
-  }
-  else{
-      $('setSearchTracker').text('Enable Searchtracker');
-  }
+  $('#setSearchTracker').text( myenabledsearch ? 'Search is being tracked' : 'Enable Searchtracker');
   chrome.runtime.sendMessage({ type: 'enablesearch', enabled: myenabledsearch });
 }
 
-function reset(){
+function reset() {
   //reset all parameters
   chrome.runtime.sendMessage({ type: 'reset' });
 }
 
-function getNumbers(){
+function getNumbers() {
   chrome.runtime.sendMessage({ type: 'getNumbers' });
 }
 
 if (chrome && chrome.runtime && chrome.runtime.onMessage) {
   chrome.runtime.onMessage.addListener(
     function (reportData/*, sender, sendResponse*/) {
-      if (reportData.type === 'gotScreen'){
-        $('#myscreenimage').attr('src',reportData.src);
+
+      if (reportData.type === 'gotScreen') {
+        $('#myscreenimage').attr('src', reportData.src);
         getNumbers();
       }
-      if (reportData.type === 'gotNumbers'){
+      if (reportData.type === 'gotNumbers') {
         analyticsSent = reportData.analyticsSent;
         nrofsearches = reportData.nrofsearches;
         searchSent = reportData.searchSent;
