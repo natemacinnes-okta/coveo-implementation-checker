@@ -1,3 +1,5 @@
+'use strict';
+/* globals chrome */
 var filterSearch = { urls: ["*://*/rest/search/*", "*://*/?errorsAsSuccess=1", "https://*/rest/search/v2/*", "https://*/coveo/rest/v2/*", "https://cloudplatform.coveo.com/rest/search/*", "*://platform.cloud.coveo.com/rest/search/v2/*", "https://search.cloud.coveo.com/rest/search/v2/*", "*://*/*/coveo/platform/rest/*", "*://*/coveo/rest/*"] };
 var filterAnalytics = { urls: ["*://usageanalytics.coveo.com/rest/*", "*://*/*/coveo/analytics/rest/*", "*://*/*/coveoanalytics/rest/*"] };
 var filterOthers = { urls: ["*://*/rest/search/alerts*"] };
@@ -40,17 +42,17 @@ function setEnabledSearch(enabled) {
 
 
 let SendMessage = (parameters) => {
-	setTimeout(() => {
-		try {
-			chrome.runtime.sendMessage(parameters);
-		}
-		catch (e) { }
-	});
+  setTimeout(() => {
+    try {
+      chrome.runtime.sendMessage(parameters);
+    }
+    catch (e) { }
+  });
 };
 
 
 chrome.runtime.onMessage.addListener(function (msg/*, sender, sendResponse*/) {
-  if (msg.type === 'getScreen'){
+  if (msg.type === 'getScreen') {
     //Get screenshot
     chrome.tabs.captureVisibleTab(null, {
       "format": "png"
@@ -61,16 +63,16 @@ chrome.runtime.onMessage.addListener(function (msg/*, sender, sendResponse*/) {
       }
     });
   }
-  if (msg.type == 'enable') {
+  if (msg.type === 'enable') {
     setEnabled(msg.enable);
   }
-  if (msg.type == 'reset') {
+  else if (msg.type === 'reset') {
     reset();
   }
-  if (msg.type == 'enablesearch') {
+  else if (msg.type === 'enablesearch') {
     setEnabledSearch(msg.enable);
   }
-  if (msg.type == 'getNumbers') {
+  else if (msg.type === 'getNumbers') {
     SendMessage({
       type: "gotNumbers",
       topQueriesSent: topQueriesSent,
@@ -314,3 +316,17 @@ chrome.webRequest.onSendHeaders.addListener(
   },
   filterAnalytics,
   ["requestHeaders"]);
+
+chrome.runtime.onMessage.addListener(
+  function (reportData, sender/*, sendResponse*/) {
+    // Toggle popup button, disabling it when we don't find a Coveo Search Interface in the page.
+    if (reportData.disabled !== undefined) {
+      let enable = (reportData.disabled !== true);
+      chrome.browserAction[enable ? 'enable' : 'disable'](sender.tab.id);
+
+      if (enable) {
+        chrome.tabs.executeScript(sender.tab.id, { file: "/js/content.js" });
+      }
+    }
+  }
+);
