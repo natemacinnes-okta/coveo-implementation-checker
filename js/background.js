@@ -228,7 +228,7 @@ var responseSearch = function (details) {
     }
   }
   return { cancel: false };
-}
+};
 
 var responseAnalytics = function (details) {
   if (myenabled) {
@@ -257,7 +257,7 @@ var responseAnalytics = function (details) {
     }
   }
   return { cancel: false };
-}
+};
 
 var responseOthers = function (details) {
   if (myenabled) {
@@ -267,7 +267,7 @@ var responseOthers = function (details) {
     }
   }
   return { cancel: false };
-}
+};
 
 chrome.webRequest.onBeforeRequest.addListener(responseSearch, filterSearch, ['blocking', 'requestBody']);
 chrome.webRequest.onBeforeRequest.addListener(responseAnalytics, filterAnalytics, ['blocking', 'requestBody']);

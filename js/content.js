@@ -39,7 +39,7 @@ let SendMessage = (parameters) => {
 
 let getScreen = () => {
 	SendMessage({ type: 'getScreen' });
-}
+};
 
 var reportJson;
 
@@ -148,7 +148,7 @@ function cleanMatch(match) {
 function addMatches(matches) {
 	var report = '';
 	$.each(matches, function (element) {
-		if (matches[element] != undefined) {
+		if (matches[element] !== undefined) {
 			report += cleanMatch(matches[element]);
 		}
 	});
@@ -162,7 +162,7 @@ function parseScript(name, content, all, external) {
 	console.log('Parsing: ' + name + '... ');
 	$('#myreportdetails').html('Parsing: ' + name + '... one moment...');
 	//Lazy
-	if (name.toLowerCase().indexOf('lazy') != -1) {
+	if (name.toLowerCase().indexOf('lazy') !== -1) {
 		usingLazy = true;
 	}
 	//Version?
@@ -237,7 +237,7 @@ function parseScript(name, content, all, external) {
 		if (matches) {
 			report += '<b>Pipelines:</b><br><span class="mycode" >';
 			$.each(matches, function (element) {
-				if (matches[element] != undefined) {
+				if (matches[element] !== undefined) {
 					pipelines = pipelines + " " + cleanMatch(matches[element]);
 				}
 			});
@@ -253,7 +253,7 @@ function parseScript(name, content, all, external) {
 			usingCustomEvents = true;
 			report += '<b>Custom Events:</b><br><span class="mycode" >';
 			$.each(matches, function (element) {
-				if (matches[element] != undefined) {
+				if (matches[element] !== undefined) {
 					if (!customEvents.includes(matches[element])) {
 						difficulty = difficulty + 1;
 						customEvents.push(matches[element]);
@@ -284,7 +284,7 @@ function parseScript(name, content, all, external) {
 			report += '<b>Cultures:</b><br><span class="mycode" >';
 			difficulty = (matches.length) + difficulty;
 			$.each(matches, function (element) {
-				if (matches[element] != undefined) {
+				if (matches[element] !== undefined) {
 					if (!cultures.includes(matches[element])) {
 						cultures.push(matches[element]);
 						report += matches[element] + ' ';
@@ -392,7 +392,7 @@ function parseScript(name, content, all, external) {
 		}
 
 	}
-	if (report != '') {
+	if (report !== '') {
 		if (external) {
 			report = "<br><b><strong>Found in file: <a target='_blank' href='" + name + "'>" + name.substr(name.length - 45) + "</a></strong></b><BR>" + report;
 		}
@@ -463,7 +463,7 @@ function getReport() {
 	//For each script we want:
 	var scripts = $('script');
 	$.each(scripts, function (script) {
-		if (scripts[script].innerHTML == "") {
+		if (scripts[script].innerHTML === "") {
 			//External, load it
 			all = true;
 			if (scripts[script].src.includes('/js/CoveoJsSearch') || scripts[script].src.includes('/coveoua.js') || scripts[script].src.includes('/CoveoForSitecore') || scripts[script].src.includes('/core.js')) {
@@ -477,7 +477,7 @@ function getReport() {
 					async: false,
 					success: function (data) {
 						src = data;
-						if (src != undefined) {
+						if (src !== undefined) {
 							pagesize = pagesize + src.length;
 						}
 					}
@@ -486,7 +486,7 @@ function getReport() {
 			//Do not parse internal files
 			var cont = true;
 			//Do not parse internal files
-			if (src == undefined) {
+			if (src === undefined) {
 
 			}
 			else {
@@ -517,7 +517,7 @@ function getReport() {
 	report += "<table cellpadding=2 class='myreporttable'>";
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>General information:</b></tr>";
 	indic = 'lightgreen';
-	if (uiVersion.indexOf(currentUI) == -1) indic = '#ef1a45';
+	if (uiVersion.indexOf(currentUI) === -1) { indic = '#ef1a45'; }
 	report += "<tr><td>JS UI version:<br>Should be: " + currentUI + "</td><td style='background-color:" + indic + "'>" + uiVersion + "</td></tr>";
 	report += "<tr><td>Integrated in UI:</td><td>" + fromSystem + "</td></tr>";
 	indic = '#ef1a45';
@@ -525,11 +525,11 @@ function getReport() {
 		report += "<tr><td>Hard coded Access Tokens<br>(Should NOT be done!!):</td><td style='background-color:" + indic + "'>" + hardcodedAccessTokens + "</td></tr>";
 	}
 	indic = '#ef1a45';
-	if (alertsError != "") {
+	if (alertsError !== "") {
 		report += "<tr><td>Search alerts error<br>(Bad access to search alert subscriptions)<br>Or remove component class='CoveoSearchAlerts':</td><td style='background-color:" + indic + "'>" + alertsError + "</td></tr>";
 	}
 	indic = '#ef1a45';
-	if (analyticsFailures != 0) {
+	if (analyticsFailures !== 0) {
 		report += "<tr><td>Searches executed without sending analytics<br>(Manual triggered search did not sent analytics):</td><td style='background-color:" + indic + "'>" + "true" + "</td></tr>";
 	}
 
@@ -537,101 +537,101 @@ function getReport() {
 	//Behavior
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Behavior information:</b></tr>";
 	indic = 'lightgreen';
-	if (nrofsearches > 1) indic = '#ef1a45';
+	if (nrofsearches > 1) { indic = '#ef1a45'; }
 	report += "<tr><td>Nr of searches executed<br>(should be 1):</td><td style='background-color:" + indic + "'>" + nrofsearches + "</td></tr>";
 	indic = 'lightgreen';
-	if (searchSent == false) indic = '#ef1a45';
+	if (!searchSent) { indic = '#ef1a45'; }
 	report += "<tr><td>Search Events Sent<br>using our api (should be true):</td><td style='background-color:" + indic + "'>" + searchSent + "</td></tr>";
 	indic = 'lightgreen';
-	if (analyticsSent == false) indic = '#ef1a45';
+	if (!analyticsSent) { indic = '#ef1a45'; }
 	report += "<tr><td>Analytics Sent<br>(should be true):</td><td style='background-color:" + indic + "'>" + analyticsSent + "</td></tr>";
 	indic = 'lightgreen';
-	if (usingSearchAsYouType == true) indic = '#ef1a45';
+	if (usingSearchAsYouType) { indic = '#ef1a45'; }
 	report += "<tr><td>Using search as you type<br>Eats performance!!! (should be false):</td><td style='background-color:" + indic + "'>" + usingSearchAsYouType + "</td></tr>";
 	indic = 'lightgreen';
-	if (suggestSent == false) indic = '#ef1a45';
+	if (!suggestSent) { indic = '#ef1a45'; }
 	report += "<tr><td>Using ML Powered Query Completions<br>(should be true):</td><td style='background-color:" + indic + "'>" + suggestSent + "</td></tr>";
 	indic = 'lightgreen';
-	if (topQueriesSent == false) indic = '#ef1a45';
-	if (topQueriesSent == true && suggestSent == true) indic = '#ef1a45';
-	if (topQueriesSent == false && suggestSent == true) indic = 'lightgreen';
+	if (!topQueriesSent) { indic = '#ef1a45'; }
+	if (topQueriesSent && suggestSent) { indic = '#ef1a45'; }
+	if (!topQueriesSent && suggestSent) { indic = 'lightgreen'; }
 	report += "<tr><td>Using Analytics Query Completions<br>(should be true)<br>if ML Powered Query Completions enabled, then it should be false:</td><td style='background-color:" + indic + "'>" + topQueriesSent + "</td></tr>";
 
 	//implementation
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Implementation information:</b></tr>";
 	report += "<tr><td>Pagesize in kB:</td><td>" + Math.round(pagesize / 1024) + " kB</td></tr>";
 	indic = 'lightgreen';
-	if (usingState == true) indic = '#ef1a45';
+	if (usingState) { indic = '#ef1a45'; }
 	report += "<tr><td>Using state in code<br>(more complicated):</td><td style='background-color:" + indic + "'>" + usingState + "</td></tr>";
 	indic = 'lightgreen';
-	if (partialMatchUsed == true) indic = '#ef1a45';
+	if (partialMatchUsed) { indic = '#ef1a45'; }
 	report += "<tr><td>Using partial match<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + partialMatchUsed + "</td></tr>";
 	indic = 'lightgreen';
-	if (lqUsed == true) indic = '#ef1a45';
+	if (lqUsed) { indic = '#ef1a45'; }
 	report += "<tr><td>Using Long Queries (ML)<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + lqUsed + "</td></tr>";
 	indic = 'lightgreen';
-	if (usingQRE == true) indic = '#ef1a45';
+	if (usingQRE) { indic = '#ef1a45'; }
 	report += "<tr><td>Using QRE<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + usingQRE + "</td></tr>";
 	indic = 'lightgreen';
-	if (filterFieldUsed == true) indic = '#ef1a45';
+	if (filterFieldUsed) { indic = '#ef1a45'; }
 	report += "<tr><td>Using Filter Field (Folding)<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + filterFieldUsed + "</td></tr>";
 	indic = 'lightgreen';
-	if (contextUsed == true) indic = '#ef1a45';
+	if (contextUsed) { indic = '#ef1a45'; }
 	report += "<tr><td>Using Context<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + contextUsed + "</td></tr>";
 	indic = 'lightgreen';
-	if (pipelines == '' || pipelines.indexOf('default') != -1) indic = '#ef1a45';
+	if (pipelines === '' || pipelines.indexOf('default') !== -1) { indic = '#ef1a45'; }
 	report += "<tr><td>Using default pipelines<br>(ML should use dedicated pipelines):</td><td style='background-color:" + indic + "'>" + pipelines + "</td></tr>";
 	indic = 'lightgreen';
-	if (usingTokens == true || hardcodedAccessTokens) indic = '#ef1a45';
+	if (usingTokens || hardcodedAccessTokens) { indic = '#ef1a45'; }
 	report += "<tr><td>Setting tokens by code<br>(API keys in code?):</td><td style='background-color:" + indic + "'>" + (usingTokens || hardcodedAccessTokens) + "</td></tr>";
 	indic = 'lightgreen';
-	if (usingCustomEvents == true) indic = '#ef1a45';
+	if (usingCustomEvents) { indic = '#ef1a45'; }
 	report += "<tr><td>Additional custom events<br>(more complicated):</td><td style='background-color:" + indic + "'>" + usingCustomEvents + "<BR>" + customEvents.join('<BR>') + "</td></tr>";
 	indic = 'lightgreen';
-	if (usingAdditionalSearch > 0) indic = '#ef1a45';
+	if (usingAdditionalSearch > 0) { indic = '#ef1a45'; }
 	report += "<tr><td>Additional search events are coded<br>(more complicated):</td><td style='background-color:" + indic + "'>" + usingAdditionalSearch + "</td></tr>";
 	indic = 'lightgreen';
-	if (usingAdditionalAnalytics > 1) indic = '#ef1a45';
+	if (usingAdditionalAnalytics > 1) { indic = '#ef1a45'; }
 	report += "<tr><td>Additional analytic events are coded<br>(more complicated):</td><td style='background-color:" + indic + "'>" + usingAdditionalAnalytics + "</td></tr>";
 	indic = 'lightgreen';
-	if (onpremise == true) indic = '#ef1a45';
+	if (onpremise) { indic = '#ef1a45'; }
 	report += "<tr><td>On-premise index<br>(better to use cloud):</td><td style='background-color:" + indic + "'>" + onpremise + "</td></tr>";
 
 	//UI
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>UI information:</b></tr>";
 	indic = 'lightgreen';
-	if (!usingLazy) indic = '#ef1a45';
+	if (!usingLazy) { indic = '#ef1a45'; }
 	report += "<tr><td>Lazy Loading<br>(Should be true, better performance):</td><td style='background-color:" + indic + "'>" + usingLazy + "</td></tr>";
 
 	report += "<tr><td>Using Facets:</td><td>" + usingFacets + "</td></tr>";
 	report += "<tr><td>Using Tabbed interfaces:</td><td>" + usingTabs + "</td></tr>";
 	var indic;
 	indic = 'lightgreen';
-	if (usingFacets == false) indic = '#ef1a45';
+	if (!usingFacets) { indic = '#ef1a45'; }
 	report += "<tr><td>Using Facets<br>(should be true):</td><td style='background-color:" + indic + "'>" + usingFacets + "</td></tr>";
 	indic = 'lightgreen';
-	if (nroffacets > 5) indic = '#ef1a45';
+	if (nroffacets > 5) { indic = '#ef1a45'; }
 	report += "<tr><td>Nr of active Facets<br>(should less then 5):</td><td style='background-color:" + indic + "'>" + nroffacets + "</td></tr>";
 	indic = 'lightgreen';
-	if (nrofsorts > 3) indic = '#ef1a45';
+	if (nrofsorts > 3) { indic = '#ef1a45'; }
 	report += "<tr><td>Nr of active Sorts<br>(should less then 3):</td><td style='background-color:" + indic + "'>" + nrofsorts + "</td></tr>";
 	indic = 'lightgreen';
-	if (usingTabs == false) indic = '#ef1a45';
+	if (!usingTabs) { indic = '#ef1a45'; }
 	report += "<tr><td>Using Tabs<br>(should be true):</td><td style='background-color:" + indic + "'>" + usingTabs + "</td></tr>";
 	indic = 'lightgreen';
-	if (usingRecommendations == false) indic = '#ef1a45';
+	if (!usingRecommendations) { indic = '#ef1a45'; }
 	report += "<tr><td>Using ML Recommendations<br>(should be true):</td><td style='background-color:" + indic + "'>" + usingRecommendations + "</td></tr>";
 	indic = 'lightgreen';
-	if (nrOfResultTemplates > 5) indic = '#ef1a45';
+	if (nrOfResultTemplates > 5) { indic = '#ef1a45'; }
 	report += "<tr><td>Nr of result templates<br>(should less then 5):</td><td style='background-color:" + indic + "'>" + nrOfResultTemplates + "</td></tr>";
 	indic = 'lightgreen';
-	if (underscoretemplates > 0) indic = '#ef1a45';
+	if (underscoretemplates > 0) { indic = '#ef1a45'; }
 	report += "<tr><td>Nr of underscore result templates<br>(should less then 1):</td><td style='background-color:" + indic + "'>" + underscoretemplates + "</td></tr>";
 	indic = 'lightgreen';
-	if (nrofraw > 5) indic = '#ef1a45';
+	if (nrofraw > 5) { indic = '#ef1a45'; }
 	report += "<tr><td>Nr of raw. use<br>(should less then 5):</td><td style='background-color:" + indic + "'>" + nrofraw + "</td></tr>";
 	indic = 'lightgreen';
-	if (usingCulture == true) indic = '#ef1a45';
+	if (usingCulture) { indic = '#ef1a45'; }
 	report += "<tr><td>Additional cultures<br>(more complicated):</td><td style='background-color:" + indic + "'>" + cultures + "<BR>" + cultures.join('<BR>') + "</td></tr>";
 	report += "<tr><td>Components used in the UI:</td><td>" + allClasses.join('<BR>') + "</td></tr>";
 
@@ -640,11 +640,11 @@ function getReport() {
 	report += "<tr><td colspan=2 style='text-align:left'>Searches executed with token info:</td></tr>";
 	indic = 'lightgreen';
 	try {
-		if (searchToken.indexOf('Bearer') != -1) indic = '#ef1a45';
+		if (searchToken.indexOf('Bearer') !== -1) { indic = '#ef1a45'; }
 		report += "<tr><td colspan=2 style='word-wrap:break-word;font-family:courier;text-align:left;background-color:" + indic + "'><pre style='width:820px;overflow:hidden'>" + searchToken + "</pre></td></tr>";
 		report += "<tr><td colspan=2 style='text-align:left'>Analytics executed with token info:</td></tr>";
 		indic = 'lightgreen';
-		if (analyticsToken.indexOf('Bearer') != -1) indic = '#ef1a45';
+		if (analyticsToken.indexOf('Bearer') !== -1) { indic = '#ef1a45'; }
 		report += "<tr><td style='word-wrap:break-word;font-family:courier;text-align:left;background-color:" + indic + "' colspan=2><pre  style='width:820px;overflow:hidden'>" + analyticsToken + "</pre></td></tr>";
 	}
 	catch (e) {
