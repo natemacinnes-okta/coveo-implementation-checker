@@ -29,16 +29,6 @@ var script = document.createElement('script');
 script.textContent = addConsoleTracker();
 (document.head || document.documentElement).appendChild(script);
 
-let SendMessageToPopup = (payload) => {
-	setTimeout(() => {
-		try {
-			chrome.runtime.sendMessage(payload);
-		}
-		catch (e) { }
-	});
-};
-
-
 let SendMessage = (parameters) => {
 	setTimeout(() => {
 		try {
@@ -61,7 +51,7 @@ let analyzePage = () => {
 	/**
 	 * Sample - Should be replaced by a message handler responding to messages from content.js
 	 */
-	SendMessageToPopup([{
+	SendMessage([{
 		title: "General",
 		value: 21, max: 60,
 		lines: [
