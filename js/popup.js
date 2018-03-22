@@ -87,16 +87,16 @@ function getReport() {
   $('#myscreenimage').css('background-image', 'none').hide();
   document.getElementById('details').innerHTML = '';
 
-  chrome.runtime.sendMessage({ type: 'getScreen' });
+  sendMessage('getScreen');
 }
 
 let getState = () => {
-  chrome.runtime.sendMessage({ type: 'getState' }, null, processState);
+  sendMessage('getState', processState);
 };
 
 function toggleTracker(e) {
   let myenabledsearch = $('#setSearchTracker input').prop('checked') ? true : false;
-  chrome.runtime.sendMessage({ type: 'enablesearch', enable: myenabledsearch });
+  sendMessage({ type: 'enablesearch', enable: myenabledsearch });
 }
 
 function reset() {
@@ -106,11 +106,20 @@ function reset() {
   $('#setSearchTracker input').prop('checked', false);
   document.getElementById('details').innerHTML = '';
 
-  chrome.runtime.sendMessage({ type: 'reset' }, null, getState);
+  sendMessage('reset', getState);
 }
 
-function getNumbers() {
-  chrome.runtime.sendMessage({ type: 'getNumbers' });
+function sendMessage(typeOrMessage, callback) {
+  if (typeof typeOrMessage === 'string') {
+    typeOrMessage = {type: typeOrMessage};
+  }
+
+  if (callback) {
+    chrome.runtime.sendMessage(typeOrMessage, null, callback);
+  }
+  else {
+    chrome.runtime.sendMessage(typeOrMessage);
+  }
 }
 
 function setScreenShot(dataurl) {
@@ -123,7 +132,7 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 
       if (reportData.type === 'gotScreen') {
         setScreenShot(reportData.src);
-        getNumbers();
+        sendMessage('getNumbers');
       }
       else if (reportData.type === 'gotNumbers') {
         processReport(reportData);
