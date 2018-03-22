@@ -1,44 +1,36 @@
 'use strict';
-// jshint -W110, -W003
+// jshint -W003
 /*global chrome*/
 
+let THIS_PAGE_COVEO_REPORT = {};
+const EXPECTED = {
+	currentUI: '2.3679'
+};
 
-function addConsoleTracker()
-{
-  var html = '';
- // html += "<script>";
-  html += "   (function(){ ";
-  html += " if(window.console && console.log){";
-  html += " var old = console.log;";
-  html += " console.log = function(){";
-  html += "    var message = Array.prototype.slice.apply(arguments).join(' '); ";
-  html += "      if (message.indexOf('A search was triggered, but no analytics')!=-1) {";
-  html += "          $('body').append('<div id=myanalyticsfailure></div>'); ";
-  html += "      Array.prototype.unshift.call(arguments, 'MAYDAY: '); ";
-  html += "      }";
-  html += "     old.apply(this, arguments)";
-  html += "    } ";
-  html += "  }  ";
-  html += " })();";
- // html += "</script>";
-  return html;
+function addConsoleTracker() {
+	var html = '';
+	// html += "<script>";
+	html += "   (function(){ ";
+	html += " if(window.console && console.log){";
+	html += " var old = console.log;";
+	html += " console.log = function(){";
+	html += "    var message = Array.prototype.slice.apply(arguments).join(' '); ";
+	html += "      if (message.indexOf('A search was triggered, but no analytics')!=-1) {";
+	html += "          $('body').append('<div id=myanalyticsfailure></div>'); ";
+	html += "      Array.prototype.unshift.call(arguments, 'MAYDAY: '); ";
+	html += "      }";
+	html += "     old.apply(this, arguments)";
+	html += "    } ";
+	html += "  }  ";
+	html += " })();";
+	// html += "</script>";
+	return html;
 }
-
 
 //Add the above div always to track analytics problems
 var script = document.createElement('script');
 script.textContent = addConsoleTracker();
 (document.head || document.documentElement).appendChild(script);
-
-let SendMessageToPopup = (payload) => {
-	setTimeout(() => {
-		try {
-			chrome.runtime.sendMessage(payload);
-		}
-		catch (e) { }
-	});
-};
-
 
 let SendMessage = (parameters) => {
 	setTimeout(() => {
@@ -49,9 +41,9 @@ let SendMessage = (parameters) => {
 	});
 };
 
-let getScreen = () =>{
-    SendMessage({type: 'getScreen'});
-}
+let getScreen = () => {
+	SendMessage({ type: 'getScreen' });
+};
 
 var reportJson;
 
@@ -62,7 +54,7 @@ let analyzePage = () => {
 	/**
 	 * Sample - Should be replaced by a message handler responding to messages from content.js
 	 */
-	SendMessageToPopup([{
+	SendMessage([{
 		title: "General",
 		value: 21, max: 60,
 		lines: [
@@ -96,575 +88,628 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 			if (request.analyzePage === true) {
 				analyzePage();
 			}
-			if (request.type === 'getNumbers2') {
-				//analyzePage();
-				analyticsSent = request.analyticsSent;
-				nrofsearches = request.nrofsearches;
-				searchSent = request.searchSent;
-				suggestSent = request.suggestSent;
-				topQueriesSent = request.topQueriesSent;
-				dqUsed = request.dqUsed;
-				lqUsed = request.lqUsed;
-				filterFieldUsed = request.filterFieldUsed;
-				partialMatchUsed = request.partialMatchUsed;
-				contextUsed = request.contextUsed;
-				alertsError = request.alertsError;
-				analyticsToken = request.analyticsToken;
-				searchToken = request.searchToken;
-				image = request.image;
-//				$('#mywebsiteimage').attr('src', msg.image);
-			
+			if (request.type ===  'getReport') {
+				getReport();
+			}
+			else if (request.type === 'getNumbers') {
+				let reportJson = getReport();
+				SendMessage({
+					type: "gotNumbers",
+					json: reportJson
+				});
+
+
+				// //analyzePage();
+				// analyticsSent = request.analyticsSent;
+				// nrofsearches = request.nrofsearches;
+				// searchSent = request.searchSent;
+				// suggestSent = request.suggestSent;
+				// topQueriesSent = request.topQueriesSent;
+				// dqUsed = request.dqUsed;
+				// lqUsed = request.lqUsed;
+				// filterFieldUsed = request.filterFieldUsed;
+				// partialMatchUsed = request.partialMatchUsed;
+				// contextUsed = request.contextUsed;
+				// alertsError = request.alertsError;
+				// analyticsToken = request.analyticsToken;
+				// searchToken = request.searchToken;
+				// image = request.image;
+				// //				$('#mywebsiteimage').attr('src', msg.image);
+
 			}
 		}
 	);
 }
 
+// var indicator;
+// var difficulty;
+// var detailed_report;
+// var usingRecommendations;
+// var uiVersion;
+// var usingPartialMatch;
+// var usingLQ;
+// var usingSearchAsYouType;
+// var fromSystem;
+// var usingFacets;
+// var usingTabs;
+// var nrOfResultTemplates;
+// var usingState;
+// var usingCustomEvents;
+// var customEvents;
+// var usingTokens;
+// var usingCulture;
+// var cultures;
+// var usingAdditionalSearch;
+// var usingQRE;
+// var usingAdditionalAnalytics;
+// var pagesize;
+// var responsive;
+// var pipelines;
+// var hardcodedAccessTokens;
+// var onpremise;
+// var nrofraw;
+// var generated;
 
-function onlyUnique(value, index, self) {
-	return self.indexOf(value) === index;
-  }
-  
-  var indicator;
-  var difficulty;
-  var detailed_report;
-  var usingRecommendations;
-  var uiVersion;
-  var usingPartialMatch;
-  var usingLQ;
-  var usingSearchAsYouType;
-  var fromSystem;
-  var usingFacets;
-  var usingTabs;
-  var nrOfResultTemplates;
-  var usingState;
-  var usingCustomEvents;
-  var customEvents;
-  var usingTokens;
-  var usingCulture;
-  var cultures;
-  var usingAdditionalSearch;
-  var usingQRE;
-  var usingAdditionalAnalytics;
-  var pagesize;
-  var responsive;
-  var pipelines;
-  var hardcodedAccessTokens;
-  var onpremise;
-  var nrofraw;
-  var generated;
-  
-  function cleanMatch(match) {
+function cleanMatch(match) {
 	return match.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace('\n', '<BR>¶ ') + "<BR>";
-  }
-  
-  function addMatches(matches) {
+}
+
+function addMatches(matches) {
 	var report = '';
-	$.each(matches, function (element) {
-	  if (matches[element] != undefined) {
-		report += cleanMatch(matches[element]);
-	  }
+	matches.forEach(function (m) {
+		report += cleanMatch(m);
 	});
 	report += "</span>";
 	return report;
-  }
-  
-  function parseScript(name, content, all, external) {
-	var report = '';
-  
+}
+
+function parseScript(name, content, all, external, __report__) {
+	let report = '';
+	// let __report__ = {
+	// 	customEvents: [],
+	// 	difficulty: 0,
+	// 	nrofraw: 0,
+	// };
+
 	console.log('Parsing: ' + name + '... ');
-	$('#myreportdetails').html('Parsing: ' + name + '... one moment...');
+	content = String(content);
+
+	// $('#myreportdetails').html('Parsing: ' + name + '... one moment...');
 	//Lazy
-	if (name.toLowerCase().indexOf('lazy') != -1) {
-	  usingLazy = true;
+	if (name.toLowerCase().indexOf('lazy') !== -1) {
+		__report__.usingLazy = true;
 	}
 	//Version?
 	var reg = /[\"']?lib[\"']? ?: ?[\"']\d[^m](.*?)[\"'],/g;///"?lib"? ?: ?['"](.*)['"].*\n?.*"?product"?: ?['"](.*)['"],/g;
-	matches = String(content).match(reg);
+	let matches = content.match(reg);
 	if (matches) {
-	  uiVersion = '' + matches[0].replace('lib', '').replace(/:/g, '').replace(/\'/g, '').replace(',', '').replace(/"/g, '');
-	  reg = /[.\S\s ]{19}[\"']?lib[\"']? ?: ?[\"']\d[^m](.*?)[\"'],[.\S\s ]{40}/g;
-	  matches = String(content).match(reg);
-	  report += '<b>UI Version found:</b><BR><span class="mycode">' + matches[0].replace('\n', ' ').replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</span><BR>";
+		__report__.uiVersion = '' + matches[0].replace('lib', '').replace(/:/g, '').replace(/\'/g, '').replace(',', '').replace(/"/g, '');
+		reg = /[.\S\s ]{19}[\"']?lib[\"']? ?: ?[\"']\d[^m](.*?)[\"'],[.\S\s ]{40}/g;
+		matches = content.match(reg);
+		report += '<b>UI Version found:</b><BR><span class="mycode">' + matches[0].replace('\n', ' ').replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</span><BR>";
 	}
 	//Seems the below token is in the sample endpoint, we do not want to match that
 	//We need to remove the sampleTokens from the content
-	content = String(content).replace(/configureSampleEndpoint[\S\s]*\.configureCloudEndpoint ?=/g, '');
+	content = content.replace(/configureSampleEndpoint[\S\s]*\.configureCloudEndpoint ?=/g, '');
 	reg = /(accessToken[:=] ?[\"'](?!xx564559b1-0045-48e1-953c-3addd1ee4457)(.*?)[\"'])/g;
-	matches = String(content).match(reg);
+	matches = content.match(reg);
 	if (matches) {
-	  hardcodedAccessTokens = true;
-	  report += '<b>Hardcoded accessTokens:</b><br><span class="mycode">';
-	  reg = /[.\S\s ]{10}(accessToken[:=] ?[\"'](?!xx564559b1-0045-48e1-953c-3addd1ee4457)(.*?)[\"'])[.\S\s ]{70}/g;
-	  matches = String(content).match(reg);
-	  report += addMatches(matches);
+		__report__.hardcodedAccessTokens = true;
+		report += '<b>Hardcoded accessTokens:</b><br><span class="mycode">';
+		reg = /[.\S\s ]{10}(accessToken[:=] ?[\"'](?!xx564559b1-0045-48e1-953c-3addd1ee4457)(.*?)[\"'])[.\S\s ]{70}/g;
+		matches = content.match(reg);
+		report += addMatches(matches);
 	}
 	if (all) {
-  
-	  reg = /(\$qre)|(\$correlateUsingIdf)|(\$some)\./g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		usingQRE = true;
-		difficulty = difficulty + 1;
-		report += '<b>Use of QRE:</b><BR><span class="mycode" >';
-		reg = /[.\S\s ]{10}(\$qre)[.\S\s ]{40}|[.\S\s ]{10}(\$correlateUsingIdf)[.\S\s ]{40}|[.\S\s ]{10}(\$some)[.\S\s ]{40}/g;
-		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
-  
-	  reg = /raw\./g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		nrofraw = nrofraw + matches.length;
-		difficulty = difficulty + 1;
-		report += '<b>Use of raw. found:</b><BR><span class="mycode" >';
-		reg = /[.\S\s ]{10}raw\.[.\S\s ]{40}/g;
-		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
-  
-	  reg = /configureOnPremiseEndpoint/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		onpremise = true;
-		difficulty = difficulty + 1;
-		report += '<b>On premise found:</b><BR><span class="mycode" >';
-		reg = /[.\S\s ]{10}configureOnPremiseEndpoint[.\S\s ]{40}/g;
-		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
-  
-	  reg = /coveo\(.?state.?,/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		usingState = true;
-		difficulty = difficulty + 1;
-		report += '<b>State found:</b><BR><span class="mycode" >';
-		reg = /[.\S\s ]{10}coveo\(.?state.?,[.\S\s ]{40}/g;
-		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
-  
-	  reg = /(data-pipeline=?[\"'](.*?)[\"'])|(options.pipeline ?=(.*);)/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Pipelines:</b><br><span class="mycode" >';
-		$.each(matches, function (element) {
-		  if (matches[element] != undefined) {
-			pipelines = pipelines + " " + cleanMatch(matches[element]);
-		  }
-		});
-		reg = /[.\S\s ]{10}(data-pipeline=?[\"'](.*?)[\"'])[.\S\s ]{50}|[.\S\s ]{10}(options.pipeline ?=(.*);)[.\S\s ]{50}/g;
-		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
-  
-	  //usingEvents: "(changeAnalyticsCustomData)|(buildingQuery)|(preprocessResults)|(deferredQuerySuccess)|(doneBuildingQuery)|(duringFetchMoreQuery)|(duringQuery)|(newQuery)|(preprocessMoreResults)",
-	  reg = /(changeAnalyticsCustomData)|(initSearchbox)|(buildingQuery)|(preprocessResults)|(deferredQuerySuccess)|(doneBuildingQuery)|(duringFetchMoreQuery)|(duringQuery)|(newQuery)|(preprocessMoreResults)/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		usingCustomEvents = true;
-		report += '<b>Custom Events:</b><br><span class="mycode" >';
-		$.each(matches, function (element) {
-		  if (matches[element] != undefined) {
-			if (!customEvents.includes(matches[element])) {
-			  difficulty = difficulty + 1;
-			  customEvents.push(matches[element]);
-			}
-		  }
-		});
-		reg = /[.\S\s ]{5}(changeAnalyticsCustomData)[.\S\s ]{40}|[.\S\s ]{5}(initSearchbox)[.\S\s ]{40}|[.\S\s ]{5}(buildingQuery)[.\S\s ]{40}|[.\S\s ]{5}(preprocessResults)[.\S\s ]{40}|[.\S\s ]{5}(deferredQuerySuccess)[.\S\s ]{40}|[.\S\s ]{5}(doneBuildingQuery)[.\S\s ]{40}|[.\S\s ]{5}(duringFetchMoreQuery)[.\S\s ]{40}|[.\S\s ]{5}(duringQuery)[.\S\s ]{40}|[.\S\s ]{5}(newQuery)[.\S\s ]{40}|[.\S\s ]{5}(preprocessMoreResults)[.\S\s ]{40}/g;
-		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
-  
-	  //usingTokens: "(options.token)|(options.accessToken)",
-	  reg = /(options.token)|(options.accessToken)/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Tokens:</b><br><span class="mycode" >';
-		reg = /[.\S\s ]{40}(options.token)[.\S\s ][.\S\s ]{40}|[.\S\s ]{40}(options.accessToken)[.\S\s ][.\S\s ]{40}/g;
-		matches = String(content).match(reg);
-		report += addMatches(matches);
-		usingTokens = true;
-	  }
-	  //usingVersion: "\/searchui\/(.*)\/js;js/CoveoJsSearch",
-	  //usingCultures: "\/js\/cultures\/(\w+)",
-	  reg = /\/js\/cultures\/(\w+)/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		usingCulture = true;
-		report += '<b>Cultures:</b><br><span class="mycode" >';
-		difficulty = (matches.length) + difficulty;
-		$.each(matches, function (element) {
-		  if (matches[element] != undefined) {
-			if (!cultures.includes(matches[element])) {
-			  cultures.push(matches[element]);
-			  report += matches[element] + ' ';
-			}
-		  }
-		});
-		reg = /[.\S\s ]{10}\/js\/cultures\/(\w+)[.\S\s ][.\S\s ]{40}/g;
-		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
-	  //usingAdditionalSearch: ".search.*.done",
-	  reg = /getEndpoint\(\).search\([\w\.\(\)]*\).done\( ?function/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Additional Search:</b><br><span class="mycode" >';
-		reg = /[.\S\s ]{10}getEndpoint\(\).search\([\w\.\(\)]*\).done\( ?function[.\S\s ]{40}/g;
-		matches = String(content).match(reg);
-		report += addMatches(matches);
-		usingAdditionalSearch = usingAdditionalSearch + matches.length;
-		difficulty = (matches.length) + difficulty;
-	  }
-	  //usingAnalytics: "(analytics.js\/coveoua.js)|CoveoAnalytics"
-	  reg = /(analytics.js\/coveoua.js)|CoveoAnalytics/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Additional Analytics:</b><br><span class="mycode" >';
-		reg = /[.\S\s ]{10}(analytics.js\/coveoua.js)[.\S\s ]{40}|[.\S\s ]{10}CoveoAnalytics[.\S\s ]{40}/g;
-		matches = String(content).match(reg);
-		usingAdditionalAnalytics = usingAdditionalAnalytics + matches.length;
-		report += addMatches(matches);
-	  }
-	  //usingRecommendations: "CoveoRecommendation"
-	  reg = /CoveoRecommendation/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Recommendations found:</b><br><span class="mycode" >';
-		usingRecommendations = true;
-		reg = /[.\S\s ]{10}CoveoRecommendation[.\S\s ]{50}/g;
-		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
-	  reg = /CoveoFacet/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Facets found</b><br><span class="mycode" >';
-		usingFacets = true;
-		reg = /[.\S\s ]{10}CoveoFacet[.\S\s ]{60}/g;
-		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
-	  reg = /CoveoTab/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Tabs found:</b><br><span class="mycode" >';
-		usingTabs = true;
-		reg = /[.\S\s ]{10}CoveoTab[.\S\s ]{40}/g;
-		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
+
+		reg = /(\$qre)|(\$correlateUsingIdf)|(\$some)\./g;
+		matches = content.match(reg);
+		if (matches) {
+			__report__.usingQRE = true;
+			__report__.difficulty++;
+			report += '<b>Use of QRE:</b><BR><span class="mycode" >';
+			reg = /[.\S\s ]{10}(\$qre)[.\S\s ]{40}|[.\S\s ]{10}(\$correlateUsingIdf)[.\S\s ]{40}|[.\S\s ]{10}(\$some)[.\S\s ]{40}/g;
+			matches = content.match(reg);
+			report += addMatches(matches);
+		}
+
+		reg = /raw\./g;
+		matches = content.match(reg);
+		if (matches) {
+			__report__.nrofraw += matches.length;
+			__report__.difficulty++;
+
+			report += '<b>Use of raw. found:</b><BR><span class="mycode" >';
+			reg = /[.\S\s ]{10}raw\.[.\S\s ]{40}/g;
+			matches = content.match(reg);
+			report += addMatches(matches);
+		}
+
+		reg = /configureOnPremiseEndpoint/g;
+		matches = content.match(reg);
+		if (matches) {
+			__report__.onpremise = true;
+			__report__.difficulty++;
+			report += '<b>On premise found:</b><BR><span class="mycode" >';
+			reg = /[.\S\s ]{10}configureOnPremiseEndpoint[.\S\s ]{40}/g;
+			matches = content.match(reg);
+			report += addMatches(matches);
+		}
+
+		reg = /coveo\(.?state.?,/g;
+		matches = content.match(reg);
+		if (matches) {
+			__report__.usingState = true;
+			__report__.difficulty++;
+			report += '<b>State found:</b><BR><span class="mycode" >';
+			reg = /[.\S\s ]{10}coveo\(.?state.?,[.\S\s ]{40}/g;
+			matches = content.match(reg);
+			report += addMatches(matches);
+		}
+
+		reg = /(data-pipeline=?[\"'](.*?)[\"'])|(options.pipeline ?=(.*);)/g;
+		matches = content.match(reg);
+		if (matches) {
+			report += '<b>Pipelines:</b><br><span class="mycode" >';
+			matches.forEach(function (m) {
+				if (m !== undefined) {
+					__report__.pipelines = (__report__.pipelines || '') + " " + cleanMatch(m);
+				}
+			});
+			reg = /[.\S\s ]{10}(data-pipeline=?[\"'](.*?)[\"'])[.\S\s ]{50}|[.\S\s ]{10}(options.pipeline ?=(.*);)[.\S\s ]{50}/g;
+			matches = content.match(reg);
+			report += addMatches(matches);
+		}
+
+		//usingEvents: "(changeAnalyticsCustomData)|(buildingQuery)|(preprocessResults)|(deferredQuerySuccess)|(doneBuildingQuery)|(duringFetchMoreQuery)|(duringQuery)|(newQuery)|(preprocessMoreResults)",
+		reg = /(changeAnalyticsCustomData)|(initSearchbox)|(buildingQuery)|(preprocessResults)|(deferredQuerySuccess)|(doneBuildingQuery)|(duringFetchMoreQuery)|(duringQuery)|(newQuery)|(preprocessMoreResults)/g;
+		matches = content.match(reg);
+		if (matches) {
+			__report__.usingCustomEvents = true;
+			report += '<b>Custom Events:</b><br><span class="mycode" >';
+			matches.forEach(function (m) {
+				if (m !== undefined) {
+					if (!__report__.customEvents.includes(m)) {
+						__report__.difficulty++;
+						__report__.customEvents.push(m);
+					}
+				}
+			});
+			reg = /[.\S\s ]{5}(changeAnalyticsCustomData)[.\S\s ]{40}|[.\S\s ]{5}(initSearchbox)[.\S\s ]{40}|[.\S\s ]{5}(buildingQuery)[.\S\s ]{40}|[.\S\s ]{5}(preprocessResults)[.\S\s ]{40}|[.\S\s ]{5}(deferredQuerySuccess)[.\S\s ]{40}|[.\S\s ]{5}(doneBuildingQuery)[.\S\s ]{40}|[.\S\s ]{5}(duringFetchMoreQuery)[.\S\s ]{40}|[.\S\s ]{5}(duringQuery)[.\S\s ]{40}|[.\S\s ]{5}(newQuery)[.\S\s ]{40}|[.\S\s ]{5}(preprocessMoreResults)[.\S\s ]{40}/g;
+			matches = content.match(reg);
+			report += addMatches(matches);
+		}
+
+		//usingTokens: "(options.token)|(options.accessToken)",
+		reg = /(options.token)|(options.accessToken)/g;
+		matches = content.match(reg);
+		if (matches) {
+			report += '<b>Tokens:</b><br><span class="mycode" >';
+			reg = /[.\S\s ]{40}(options.token)[.\S\s ][.\S\s ]{40}|[.\S\s ]{40}(options.accessToken)[.\S\s ][.\S\s ]{40}/g;
+			matches = content.match(reg);
+			report += addMatches(matches);
+			__report__.usingTokens = true;
+		}
+		//usingVersion: "\/searchui\/(.*)\/js;js/CoveoJsSearch",
+		//usingCultures: "\/js\/cultures\/(\w+)",
+		reg = /\/js\/cultures\/(\w+)/g;
+		matches = content.match(reg);
+		if (matches) {
+			__report__.usingCulture = true;
+			report += '<b>Cultures:</b><br><span class="mycode" >';
+			__report__.difficulty += matches.length;
+			matches.forEach(function (m) {
+				if (m !== undefined) {
+					if (!__report__.cultures.includes(m)) {
+						__report__.cultures.push(m);
+						report += m + ' ';
+					}
+				}
+			});
+			reg = /[.\S\s ]{10}\/js\/cultures\/(\w+)[.\S\s ][.\S\s ]{40}/g;
+			matches = content.match(reg);
+			report += addMatches(matches);
+		}
+		//usingAdditionalSearch: ".search.*.done",
+		reg = /getEndpoint\(\).search\([\w\.\(\)]*\).done\( ?function/g;
+		matches = content.match(reg);
+		if (matches) {
+			report += '<b>Additional Search:</b><br><span class="mycode" >';
+			reg = /[.\S\s ]{10}getEndpoint\(\).search\([\w\.\(\)]*\).done\( ?function[.\S\s ]{40}/g;
+			matches = content.match(reg);
+			report += addMatches(matches);
+			__report__.usingAdditionalSearch += matches.length;
+			__report__.difficulty += matches.length;
+		}
+		//usingAnalytics: "(analytics.js\/coveoua.js)|CoveoAnalytics"
+		reg = /(analytics.js\/coveoua.js)|CoveoAnalytics/g;
+		matches = content.match(reg);
+		if (matches) {
+			report += '<b>Additional Analytics:</b><br><span class="mycode" >';
+			reg = /[.\S\s ]{10}(analytics.js\/coveoua.js)[.\S\s ]{40}|[.\S\s ]{10}CoveoAnalytics[.\S\s ]{40}/g;
+			matches = content.match(reg);
+			__report__.usingAdditionalAnalytics += matches.length;
+			report += addMatches(matches);
+		}
+		//usingRecommendations: "CoveoRecommendation"
+		reg = /CoveoRecommendation/g;
+		matches = content.match(reg);
+		if (matches) {
+			report += '<b>Recommendations found:</b><br><span class="mycode" >';
+			__report__.usingRecommendations = true;
+			reg = /[.\S\s ]{10}CoveoRecommendation[.\S\s ]{50}/g;
+			matches = content.match(reg);
+			report += addMatches(matches);
+		}
+		reg = /CoveoFacet/g;
+		matches = content.match(reg);
+		if (matches) {
+			report += '<b>Facets found</b><br><span class="mycode" >';
+			__report__.usingFacets = true;
+			reg = /[.\S\s ]{10}CoveoFacet[.\S\s ]{60}/g;
+			matches = content.match(reg);
+			report += addMatches(matches);
+		}
+		reg = /CoveoTab/g;
+		matches = content.match(reg);
+		if (matches) {
+			report += '<b>Tabs found:</b><br><span class="mycode" >';
+			__report__.usingTabs = true;
+			reg = /[.\S\s ]{10}CoveoTab[.\S\s ]{40}/g;
+			matches = content.match(reg);
+			report += addMatches(matches);
+		}
 	  /*reg = /result-template/g;
-	  matches = String(content).match(reg);
+	  matches = content.match(reg);
 	  if (matches)
 	  {
 		nrOfResultTemplates = nrOfResultTemplates+matches.length;
 		report += "<BR>";
 	  }*/
-	  reg = /(window.Sfdc)|(sfdcId)|(CoveoV2Search)/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		fromSystem = 'Salesforce';
-		report += '<b>Salesforce UI found.</b><br>';
-		reg = /data-aura/g;
-		matches = String(content).match(reg);
+		reg = /(window.Sfdc)|(sfdcId)|(CoveoV2Search)/g;
+		matches = content.match(reg);
 		if (matches) {
-		  fromSystem = 'Salesforce - Lightning';
-		  report += '<b>Salesforce UI - Lightning found.</b><br>';
-		}
-		reg = /CoveoBoxHeader/g;
-		matches = String(content).match(reg);
-		if (matches) {
-		  report += '<b>Salesforce UI - Service Cloud found.</b><br>';
-		  fromSystem = 'Salesforce - ServiceCloud';
-		}
-	  }
-	  reg = /(CoveoForSitecore)/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Sitecore UI found.</b><br>';
-		fromSystem = 'Sitecore';
-	  }
-	  reg = /@media.*\(max/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Responsive design found.</b><br>';
-		responsive = true;
-	  }
-	  reg = /data-enable-search-as-you-type=.?true/g;
-	  matches = String(content).match(reg);
-	  if (matches) {
-		report += '<b>Search As You Type found:</b><br><span class="mycode" >';
-		usingSearchAsYouType = true;
-		reg = /[.\S\s ]{10}data-enable-search-as-you-type=.?true[.\S\s ]{40}/g;
-		matches = String(content).match(reg);
-		report += addMatches(matches);
-	  }
-  
-	}
-	if (report != '') {
-	  if (external) {
-		report = "<br><b><strong>Found in file: <a target='_blank' href='" + name + "'>" + name.substr(name.length - 45) + "</a></strong></b><BR>" + report;
-	  }
-	  else {
-		report = "<br><b><strong>Found In file: " + name + "</strong></b><BR>" + report;
-	  }
-  
-	}
-	return report;
-  }
-  
-  
-  function getReport() {
-	indicator = 0;
-	difficulty = 0;
-	usingLazy = false;
-	usingRecommendations = false;
-	uiVersion = 'Not present';
-	usingPartialMatch = false;
-	usingLQ = false;
-	usingSearchAsYouType = false;
-	fromSystem = 'Unknown';
-	hardcodedAccessTokens = false;
-	usingFacets = false;
-	usingTabs = false;
-	nrOfResultTemplates = 0;
-	usingState = false;
-	usingQRE = false;
-	usingCustomEvents = false;
-	onpremise = false;
-	customEvents = [];
-	usingTokens = false;
-	nrofraw = 0;
-	usingCulture = false;
-	cultures = [];
-	responsive = false;
-	usingAdditionalSearch = 0;
-	usingAdditionalAnalytics = 0;
-	pipelines = '';
-	var html = document.documentElement.outerHTML;
-	pagesize = html.length;
-	detailed_report = '';
-	var allCoveoComponentsUsed = $("*[class^='Coveo'],*[class*=' Coveo']", html);
-	var allClasses = [];
-	$.each(allCoveoComponentsUsed, function (obj) {
-	  var classes = allCoveoComponentsUsed[obj].className.split(' ');
-	  $.each(classes, function (cls) {
-		if (classes[cls].includes('Coveo')) {
-		  if (!allClasses.includes(classes[cls])) {
-			allClasses.push(classes[cls]);
-		  }
-		}
-	  });
-	});
-	//Get from the page the number of result templates
-	var resulttemplates = $('.result-template', html);
-	nrOfResultTemplates = resulttemplates.length;
-	var underscoretemplates = $('.result-template[type="text/underscore"]').length + $('.result-template[type="text/x-underscore-template"]').length;
-  
-	var nroffacets = $('.coveo-facet-header', html).length;
-	var nrofsorts = $('.coveo-sort-icon-descending', html).length;
-	//Also parse the page to get some contents
-	//var version = Coveo.version['lib'];
-	//uiVersion=version;
-	var analyticsFailures = $('#myanalyticsfailure').length;
-	detailed_report += parseScript('Original HTML', html, true, false);
-	//We now want to load all scripts
-	//For each script we want:
-	var scripts = $('script');
-	$.each(scripts, function (script) {
-	  if (scripts[script].innerHTML == "") {
-		//External, load it
-		all = true;
-		if (scripts[script].src.includes('/js/CoveoJsSearch') || scripts[script].src.includes('/coveoua.js') || scripts[script].src.includes('/CoveoForSitecore') || scripts[script].src.includes('/core.js')) {
-		  all = false;
-		}
-		var src = '';
-		//if (all)
-		{
-		  $.ajax({
-			url: scripts[script].src,
-			async: false,
-			success: function (data) {
-			  src = data;
-			  if (src != undefined) {
-				pagesize = pagesize + src.length;
-			  }
+			__report__.fromSystem = 'Salesforce';
+			report += '<b>Salesforce UI found.</b><br>';
+			reg = /data-aura/g;
+			matches = content.match(reg);
+			if (matches) {
+				__report__.fromSystem = 'Salesforce - Lightning';
+				report += '<b>Salesforce UI - Lightning found.</b><br>';
 			}
-		  });
+			reg = /CoveoBoxHeader/g;
+			matches = content.match(reg);
+			if (matches) {
+				report += '<b>Salesforce UI - Service Cloud found.</b><br>';
+				__report__.fromSystem = 'Salesforce - ServiceCloud';
+			}
 		}
-		//Do not parse internal files
-		var cont = true;
-		//Do not parse internal files
-		if (src == undefined) {
-  
+		reg = /(CoveoForSitecore)/g;
+		matches = content.match(reg);
+		if (matches) {
+			report += '<b>Sitecore UI found.</b><br>';
+			__report__.fromSystem = 'Sitecore';
+		}
+		reg = /@media.*\(max/g;
+		matches = content.match(reg);
+		if (matches) {
+			report += '<b>Responsive design found.</b><br>';
+			__report__.responsive = true;
+		}
+		reg = /data-enable-search-as-you-type=.?true/g;
+		matches = content.match(reg);
+		if (matches) {
+			report += '<b>Search As You Type found:</b><br><span class="mycode" >';
+			__report__.usingSearchAsYouType = true;
+			reg = /[.\S\s ]{10}data-enable-search-as-you-type=.?true[.\S\s ]{40}/g;
+			matches = content.match(reg);
+			report += addMatches(matches);
+		}
+
+	}
+	if (report !== '') {
+		if (external) {
+			report = "<br><b><strong>Found in file: <a target='_blank' href='" + name + "'>" + name.substr(name.length - 45) + "</a></strong></b><BR>" + report;
 		}
 		else {
-		  if (src.includes('if( window.Coveo === undefined) {')) {
-			//cont=false;
-			all = false;
-		  }
-		  if (src.startsWith('webpackJsonpCoveo')) {
-			cont = false;
-		  }
-		  if (cont) {
-			detailed_report += parseScript(scripts[script].src, src, all, true);
-		  }
+			report = "<br><b><strong>Found In file: " + name + "</strong></b><BR>" + report;
 		}
-	  }
-	  else {
-		detailed_report += parseScript('Original file, Inner script.', scripts[script].innerHTML, true, false);
-	  }
+
+	}
+	return __report__;
+}
+
+function initReport() {
+	THIS_PAGE_COVEO_REPORT = {
+		cultures: [],
+		customEvents: [],
+		difficulty: 0,
+		fromSystem: 'Unknown',
+		hardcodedAccessTokens: false,
+		indicator: 0,
+		nrofraw: 0,
+		nrOfResultTemplates: 0,
+		onpremise: false,
+		pipelines: '',
+		responsive: false,
+		uiVersion: 'Not present',
+		usingAdditionalAnalytics: 0,
+		usingAdditionalSearch: 0,
+		usingCulture: false,
+		usingCustomEvents: false,
+		usingFacets: false,
+		usingLazy: false,
+		usingLQ: false,
+		usingPartialMatch: false,
+		usingQRE: false,
+		usingRecommendations: false,
+		usingSearchAsYouType: false,
+		usingState: false,
+		usingTabs: false,
+		usingTokens: false,
+	};
+
+	return THIS_PAGE_COVEO_REPORT;
+}
+
+function getReport() {
+	console.log('getReport - 1');
+
+	let theReport = initReport();
+
+	console.log('getReport - 2');
+
+	let html = document.documentElement.outerHTML;
+	let pageSize = html.length;
+
+	let detailed_report = '';
+	var allCoveoComponentsUsed = document.querySelectorAll("*[class^='Coveo'],*[class*=' Coveo']");
+	let allClasses = [];
+	allCoveoComponentsUsed.forEach(function (obj) {
+		obj.classList.forEach(function (cls) {
+			if (cls.includes('Coveo') && !allClasses.includes(cls)) {
+				allClasses.push(cls);
+			}
+		});
+	});
+	//Get from the page the number of result templates
+	theReport.nrOfResultTemplates = document.querySelectorAll('.result-template').length;
+
+	theReport.underscoretemplates = document.querySelectorAll('.result-template[type="text/underscore"]').length + document.querySelectorAll('.result-template[type="text/x-underscore-template"]').length;
+
+	theReport.nroffacets = document.querySelectorAll('.coveo-facet-header').length;
+	theReport.nrofsorts = document.querySelectorAll('.coveo-sort-icon-descending').length;
+
+	console.log('THE REPORT SO FAR: ', JSON.stringify(theReport,2,2));
+
+	// Also parse the page to get some contents
+	theReport.uiVersion = window.Coveo && window.Coveo.version['lib'];
+
+	// TODO - count FAILURES
+	// let analyticsFailures = $('#myanalyticsfailure').length;
+
+	detailed_report += parseScript('Original HTML', html, true, false, theReport);
+	//We now want to load all scripts
+	//For each script we want:
+	let scripts = document.querySelectorAll('script');
+	scripts.forEach(function (_script_) {
+		if (_script_.innerHTML === "") {
+			//External, load it
+			let all = true;
+			let src = _script_.src;
+			if (src.includes('/js/CoveoJsSearch') || src.includes('/coveoua.js') || src.includes('/CoveoForSitecore') || src.includes('/core.js')) {
+				all = false;
+			}
+
+			let sourceContent = '';
+
+			// TODO -- PARSE ALL SCRIPTS
+
+			if (all) {
+
+				let request = new XMLHttpRequest();
+				request.open('GET', src, false);  // `false` makes the request synchronous
+				request.send(null);
+
+				if (request.status === 200) {
+					sourceContent = request.responseText;
+					console.log(src);
+					if (sourceContent !== undefined) {
+						pageSize += sourceContent.length;
+					}
+				}
+			}
+			//Do not parse internal files
+			let cont = true;
+			//Do not parse internal files
+			if (sourceContent) {
+				if (sourceContent.includes('if( window.Coveo === undefined) {')) {
+					//cont=false;
+					all = false;
+				}
+				if (sourceContent.startsWith('webpackJsonpCoveo')) {
+					cont = false;
+				}
+				if (cont) {
+					detailed_report += parseScript(src, sourceContent, all, true, theReport);
+				}
+			}
+
+		}
+		else {
+			detailed_report += parseScript('Original file, Inner script.', _script_.innerHTML, true, false, theReport);
+		}
 	});
 	//var mes=$.getScript($('script')[2].src);
-	report += "Components used: " + allClasses.filter(onlyUnique).join('<BR>');
-	//console.log(report);
+	report += "Components used: " + allClasses.join('<BR>');
+
 	//alert('Your Coveo implementation score: '+indicator+'/10, reasons: '+indicator_report.substring(1)+'\n\nDifficulty of implemenation: '+difficulty+', reasons: '+difficulty_report.substring(1)+'\nSee developer console for more details.');
 	//$('#myreport').html('Your Coveo implementation score: '+indicator+'/10, reasons: '+indicator_report.substring(1)+'<BR><BR>Difficulty of implemenation: '+difficulty+', reasons: '+difficulty_report.substring(1)+"<BR>"+report);
-  
+
 	var report = '';
 	//
 	report += "<table cellpadding=2 class='myreporttable'>";
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>General information:</b></tr>";
-	indic = 'lightgreen';
-	if (uiVersion.indexOf(currentUI) == -1) indic = '#ef1a45';
-	report += "<tr><td>JS UI version:<br>Should be: " + currentUI + "</td><td style='background-color:" + indic + "'>" + uiVersion + "</td></tr>";
-	report += "<tr><td>Integrated in UI:</td><td>" + fromSystem + "</td></tr>";
-	indic = '#ef1a45';
-	if (hardcodedAccessTokens) {
-	  report += "<tr><td>Hard coded Access Tokens<br>(Should NOT be done!!):</td><td style='background-color:" + indic + "'>" + hardcodedAccessTokens + "</td></tr>";
+
+	console.log('getReport - 3', theReport.uiVersion);
+
+	let indic = 'lightgreen';
+	if (theReport.uiVersion) {
+		if (theReport.uiVersion.indexOf(EXPECTED.currentUI) === -1) { indic = '#ef1a45'; }
+		report += "<tr><td>JS UI version:<br>Should be: " + EXPECTED.currentUI + "</td><td style='background-color:" + indic + "'>" + theReport.uiVersion + "</td></tr>";
+		report += "<tr><td>Integrated in UI:</td><td>" + theReport.fromSystem + "</td></tr>";
 	}
+
+	console.log('getReport - 4');
+
 	indic = '#ef1a45';
-	if (alertsError != "") {
-	  report += "<tr><td>Search alerts error<br>(Bad access to search alert subscriptions)<br>Or remove component class='CoveoSearchAlerts':</td><td style='background-color:" + indic + "'>" + alertsError + "</td></tr>";
+	if (theReport.hardcodedAccessTokens) {
+		report += "<tr><td>Hard coded Access Tokens<br>(Should NOT be done!!):</td><td style='background-color:" + indic + "'>" + theReport.hardcodedAccessTokens + "</td></tr>";
 	}
-	indic = '#ef1a45';
-	if (analyticsFailures != 0) {
-	  report += "<tr><td>Searches executed without sending analytics<br>(Manual triggered search did not sent analytics):</td><td style='background-color:" + indic + "'>" + "true" + "</td></tr>";
-	}
-  
-  
+
+	// indic = '#ef1a45';
+	// if (alertsError !== "") {
+	// 	report += "<tr><td>Search alerts error<br>(Bad access to search alert subscriptions)<br>Or remove component class='CoveoSearchAlerts':</td><td style='background-color:" + indic + "'>" + alertsError + "</td></tr>";
+	// }
+	// indic = '#ef1a45';
+	// if (analyticsFailures !== 0) {
+	// 	report += "<tr><td>Searches executed without sending analytics<br>(Manual triggered search did not sent analytics):</td><td style='background-color:" + indic + "'>" + "true" + "</td></tr>";
+	// }
+
+
 	//Behavior
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Behavior information:</b></tr>";
+
+	// indic = 'lightgreen';
+	// if (nrofsearches > 1) { indic = '#ef1a45'; }
+	// report += "<tr><td>Nr of searches executed<br>(should be 1):</td><td style='background-color:" + indic + "'>" + nrofsearches + "</td></tr>";
+
+	// indic = 'lightgreen';
+	// if (!searchSent) { indic = '#ef1a45'; }
+	// report += "<tr><td>Search Events Sent<br>using our api (should be true):</td><td style='background-color:" + indic + "'>" + searchSent + "</td></tr>";
+
+	// indic = 'lightgreen';
+	// if (!analyticsSent) { indic = '#ef1a45'; }
+	// report += "<tr><td>Analytics Sent<br>(should be true):</td><td style='background-color:" + indic + "'>" + analyticsSent + "</td></tr>";
+
 	indic = 'lightgreen';
-	if (nrofsearches > 1) indic = '#ef1a45';
-	report += "<tr><td>Nr of searches executed<br>(should be 1):</td><td style='background-color:" + indic + "'>" + nrofsearches + "</td></tr>";
-	indic = 'lightgreen';
-	if (searchSent == false) indic = '#ef1a45';
-	report += "<tr><td>Search Events Sent<br>using our api (should be true):</td><td style='background-color:" + indic + "'>" + searchSent + "</td></tr>";
-	indic = 'lightgreen';
-	if (analyticsSent == false) indic = '#ef1a45';
-	report += "<tr><td>Analytics Sent<br>(should be true):</td><td style='background-color:" + indic + "'>" + analyticsSent + "</td></tr>";
-	indic = 'lightgreen';
-	if (usingSearchAsYouType == true) indic = '#ef1a45';
-	report += "<tr><td>Using search as you type<br>Eats performance!!! (should be false):</td><td style='background-color:" + indic + "'>" + usingSearchAsYouType + "</td></tr>";
-	indic = 'lightgreen';
-	if (suggestSent == false) indic = '#ef1a45';
-	report += "<tr><td>Using ML Powered Query Completions<br>(should be true):</td><td style='background-color:" + indic + "'>" + suggestSent + "</td></tr>";
-	indic = 'lightgreen';
-	if (topQueriesSent == false) indic = '#ef1a45';
-	if (topQueriesSent == true && suggestSent == true) indic = '#ef1a45';
-	if (topQueriesSent == false && suggestSent == true) indic = 'lightgreen';
-	report += "<tr><td>Using Analytics Query Completions<br>(should be true)<br>if ML Powered Query Completions enabled, then it should be false:</td><td style='background-color:" + indic + "'>" + topQueriesSent + "</td></tr>";
-  
+	if (theReport.usingSearchAsYouType) { indic = '#ef1a45'; }
+	report += "<tr><td>Using search as you type<br>Eats performance!!! (should be false):</td><td style='background-color:" + indic + "'>" + theReport.usingSearchAsYouType + "</td></tr>";
+
+	// indic = 'lightgreen';
+	// if (!suggestSent) { indic = '#ef1a45'; }
+	// report += "<tr><td>Using ML Powered Query Completions<br>(should be true):</td><td style='background-color:" + indic + "'>" + suggestSent + "</td></tr>";
+
+	// indic = 'lightgreen';
+	// if (!topQueriesSent) { indic = '#ef1a45'; }
+	// if (topQueriesSent && suggestSent) { indic = '#ef1a45'; }
+	// if (!topQueriesSent && suggestSent) { indic = 'lightgreen'; }
+	// report += "<tr><td>Using Analytics Query Completions<br>(should be true)<br>if ML Powered Query Completions enabled, then it should be false:</td><td style='background-color:" + indic + "'>" + topQueriesSent + "</td></tr>";
+
 	//implementation
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Implementation information:</b></tr>";
-	report += "<tr><td>Pagesize in kB:</td><td>" + Math.round(pagesize / 1024) + " kB</td></tr>";
+	report += "<tr><td>Pagesize in kB:</td><td>" + Math.round(pageSize / 1024) + " kB</td></tr>";
+
 	indic = 'lightgreen';
-	if (usingState == true) indic = '#ef1a45';
-	report += "<tr><td>Using state in code<br>(more complicated):</td><td style='background-color:" + indic + "'>" + usingState + "</td></tr>";
-	indic = 'lightgreen';
-	if (partialMatchUsed == true) indic = '#ef1a45';
-	report += "<tr><td>Using partial match<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + partialMatchUsed + "</td></tr>";
-	indic = 'lightgreen';
-	if (lqUsed == true) indic = '#ef1a45';
-	report += "<tr><td>Using Long Queries (ML)<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + lqUsed + "</td></tr>";
-	indic = 'lightgreen';
-	if (usingQRE == true) indic = '#ef1a45';
-	report += "<tr><td>Using QRE<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + usingQRE + "</td></tr>";
-	indic = 'lightgreen';
-	if (filterFieldUsed == true) indic = '#ef1a45';
-	report += "<tr><td>Using Filter Field (Folding)<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + filterFieldUsed + "</td></tr>";
-	indic = 'lightgreen';
-	if (contextUsed == true) indic = '#ef1a45';
-	report += "<tr><td>Using Context<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + contextUsed + "</td></tr>";
-	indic = 'lightgreen';
-	if (pipelines == '' || pipelines.indexOf('default') != -1) indic = '#ef1a45';
-	report += "<tr><td>Using default pipelines<br>(ML should use dedicated pipelines):</td><td style='background-color:" + indic + "'>" + pipelines + "</td></tr>";
-	indic = 'lightgreen';
-	if (usingTokens == true || hardcodedAccessTokens) indic = '#ef1a45';
-	report += "<tr><td>Setting tokens by code<br>(API keys in code?):</td><td style='background-color:" + indic + "'>" + (usingTokens || hardcodedAccessTokens) + "</td></tr>";
-	indic = 'lightgreen';
-	if (usingCustomEvents == true) indic = '#ef1a45';
-	report += "<tr><td>Additional custom events<br>(more complicated):</td><td style='background-color:" + indic + "'>" + usingCustomEvents + "<BR>" + customEvents.join('<BR>') + "</td></tr>";
-	indic = 'lightgreen';
-	if (usingAdditionalSearch > 0) indic = '#ef1a45';
-	report += "<tr><td>Additional search events are coded<br>(more complicated):</td><td style='background-color:" + indic + "'>" + usingAdditionalSearch + "</td></tr>";
-	indic = 'lightgreen';
-	if (usingAdditionalAnalytics > 1) indic = '#ef1a45';
-	report += "<tr><td>Additional analytic events are coded<br>(more complicated):</td><td style='background-color:" + indic + "'>" + usingAdditionalAnalytics + "</td></tr>";
-	indic = 'lightgreen';
-	if (onpremise == true) indic = '#ef1a45';
-	report += "<tr><td>On-premise index<br>(better to use cloud):</td><td style='background-color:" + indic + "'>" + onpremise + "</td></tr>";
-  
-	//UI
-	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>UI information:</b></tr>";
-	indic = 'lightgreen';
-	if (!usingLazy) indic = '#ef1a45';
-	report += "<tr><td>Lazy Loading<br>(Should be true, better performance):</td><td style='background-color:" + indic + "'>" + usingLazy + "</td></tr>";
-  
-	report += "<tr><td>Using Facets:</td><td>" + usingFacets + "</td></tr>";
-	report += "<tr><td>Using Tabbed interfaces:</td><td>" + usingTabs + "</td></tr>";
-	var indic;
-	indic = 'lightgreen';
-	if (usingFacets == false) indic = '#ef1a45';
-	report += "<tr><td>Using Facets<br>(should be true):</td><td style='background-color:" + indic + "'>" + usingFacets + "</td></tr>";
-	indic = 'lightgreen';
-	if (nroffacets > 5) indic = '#ef1a45';
-	report += "<tr><td>Nr of active Facets<br>(should less then 5):</td><td style='background-color:" + indic + "'>" + nroffacets + "</td></tr>";
-	indic = 'lightgreen';
-	if (nrofsorts > 3) indic = '#ef1a45';
-	report += "<tr><td>Nr of active Sorts<br>(should less then 3):</td><td style='background-color:" + indic + "'>" + nrofsorts + "</td></tr>";
-	indic = 'lightgreen';
-	if (usingTabs == false) indic = '#ef1a45';
-	report += "<tr><td>Using Tabs<br>(should be true):</td><td style='background-color:" + indic + "'>" + usingTabs + "</td></tr>";
-	indic = 'lightgreen';
-	if (usingRecommendations == false) indic = '#ef1a45';
-	report += "<tr><td>Using ML Recommendations<br>(should be true):</td><td style='background-color:" + indic + "'>" + usingRecommendations + "</td></tr>";
-	indic = 'lightgreen';
-	if (nrOfResultTemplates > 5) indic = '#ef1a45';
-	report += "<tr><td>Nr of result templates<br>(should less then 5):</td><td style='background-color:" + indic + "'>" + nrOfResultTemplates + "</td></tr>";
-	indic = 'lightgreen';
-	if (underscoretemplates > 0) indic = '#ef1a45';
-	report += "<tr><td>Nr of underscore result templates<br>(should less then 1):</td><td style='background-color:" + indic + "'>" + underscoretemplates + "</td></tr>";
-	indic = 'lightgreen';
-	if (nrofraw > 5) indic = '#ef1a45';
-	report += "<tr><td>Nr of raw. use<br>(should less then 5):</td><td style='background-color:" + indic + "'>" + nrofraw + "</td></tr>";
-	indic = 'lightgreen';
-	if (usingCulture == true) indic = '#ef1a45';
-	report += "<tr><td>Additional cultures<br>(more complicated):</td><td style='background-color:" + indic + "'>" + cultures + "<BR>" + cultures.join('<BR>') + "</td></tr>";
-	report += "<tr><td>Components used in the UI:</td><td>" + allClasses.join('<BR>') + "</td></tr>";
-  
-	//Tokens
-	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Token information:</b></tr>";
-	report += "<tr><td colspan=2 style='text-align:left'>Searches executed with token info:</td></tr>";
-	indic = 'lightgreen';
-	try {
-	  if (searchToken.indexOf('Bearer') != -1) indic = '#ef1a45';
-	  report += "<tr><td colspan=2 style='word-wrap:break-word;font-family:courier;text-align:left;background-color:" + indic + "'><pre style='width:820px;overflow:hidden'>" + searchToken + "</pre></td></tr>";
-	  report += "<tr><td colspan=2 style='text-align:left'>Analytics executed with token info:</td></tr>";
-	  indic = 'lightgreen';
-	  if (analyticsToken.indexOf('Bearer') != -1) indic = '#ef1a45';
-	  report += "<tr><td style='word-wrap:break-word;font-family:courier;text-align:left;background-color:" + indic + "' colspan=2><pre  style='width:820px;overflow:hidden'>" + analyticsToken + "</pre></td></tr>";
-	}
-	catch (e) {
-  
-	}
+	if (theReport.usingState) { indic = '#ef1a45'; }
+	report += "<tr><td>Using state in code<br>(more complicated):</td><td style='background-color:" + indic + "'>" + theReport.usingState + "</td></tr>";
+
+	// indic = 'lightgreen';
+	// if (partialMatchUsed) { indic = '#ef1a45'; }
+	// report += "<tr><td>Using partial match<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + partialMatchUsed + "</td></tr>";
+
+	// indic = 'lightgreen';
+	// if (lqUsed) { indic = '#ef1a45'; }
+	// report += "<tr><td>Using Long Queries (ML)<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + lqUsed + "</td></tr>";
+
+	// indic = 'lightgreen';
+	// if (usingQRE) { indic = '#ef1a45'; }
+	// report += "<tr><td>Using QRE<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + usingQRE + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (filterFieldUsed) { indic = '#ef1a45'; }
+	// report += "<tr><td>Using Filter Field (Folding)<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + filterFieldUsed + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (contextUsed) { indic = '#ef1a45'; }
+	// report += "<tr><td>Using Context<br>(more fine tuning needed):</td><td style='background-color:" + indic + "'>" + contextUsed + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (pipelines === '' || pipelines.indexOf('default') !== -1) { indic = '#ef1a45'; }
+	// report += "<tr><td>Using default pipelines<br>(ML should use dedicated pipelines):</td><td style='background-color:" + indic + "'>" + pipelines + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (usingTokens || hardcodedAccessTokens) { indic = '#ef1a45'; }
+	// report += "<tr><td>Setting tokens by code<br>(API keys in code?):</td><td style='background-color:" + indic + "'>" + (usingTokens || hardcodedAccessTokens) + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (usingCustomEvents) { indic = '#ef1a45'; }
+	// report += "<tr><td>Additional custom events<br>(more complicated):</td><td style='background-color:" + indic + "'>" + usingCustomEvents + "<BR>" + customEvents.join('<BR>') + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (usingAdditionalSearch > 0) { indic = '#ef1a45'; }
+	// report += "<tr><td>Additional search events are coded<br>(more complicated):</td><td style='background-color:" + indic + "'>" + usingAdditionalSearch + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (usingAdditionalAnalytics > 1) { indic = '#ef1a45'; }
+	// report += "<tr><td>Additional analytic events are coded<br>(more complicated):</td><td style='background-color:" + indic + "'>" + usingAdditionalAnalytics + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (onpremise) { indic = '#ef1a45'; }
+	// report += "<tr><td>On-premise index<br>(better to use cloud):</td><td style='background-color:" + indic + "'>" + onpremise + "</td></tr>";
+
+	// //UI
+	// report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>UI information:</b></tr>";
+	// indic = 'lightgreen';
+	// if (!usingLazy) { indic = '#ef1a45'; }
+	// report += "<tr><td>Lazy Loading<br>(Should be true, better performance):</td><td style='background-color:" + indic + "'>" + usingLazy + "</td></tr>";
+
+	// report += "<tr><td>Using Facets:</td><td>" + usingFacets + "</td></tr>";
+	// report += "<tr><td>Using Tabbed interfaces:</td><td>" + usingTabs + "</td></tr>";
+	// var indic;
+	// indic = 'lightgreen';
+	// if (!usingFacets) { indic = '#ef1a45'; }
+	// report += "<tr><td>Using Facets<br>(should be true):</td><td style='background-color:" + indic + "'>" + usingFacets + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (nroffacets > 5) { indic = '#ef1a45'; }
+	// report += "<tr><td>Nr of active Facets<br>(should less then 5):</td><td style='background-color:" + indic + "'>" + nroffacets + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (nrofsorts > 3) { indic = '#ef1a45'; }
+	// report += "<tr><td>Nr of active Sorts<br>(should less then 3):</td><td style='background-color:" + indic + "'>" + nrofsorts + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (!usingTabs) { indic = '#ef1a45'; }
+	// report += "<tr><td>Using Tabs<br>(should be true):</td><td style='background-color:" + indic + "'>" + usingTabs + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (!usingRecommendations) { indic = '#ef1a45'; }
+	// report += "<tr><td>Using ML Recommendations<br>(should be true):</td><td style='background-color:" + indic + "'>" + usingRecommendations + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (nrOfResultTemplates > 5) { indic = '#ef1a45'; }
+	// report += "<tr><td>Nr of result templates<br>(should less then 5):</td><td style='background-color:" + indic + "'>" + nrOfResultTemplates + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (underscoretemplates > 0) { indic = '#ef1a45'; }
+	// report += "<tr><td>Nr of underscore result templates<br>(should less then 1):</td><td style='background-color:" + indic + "'>" + underscoretemplates + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (nrofraw > 5) { indic = '#ef1a45'; }
+	// report += "<tr><td>Nr of raw. use<br>(should less then 5):</td><td style='background-color:" + indic + "'>" + nrofraw + "</td></tr>";
+	// indic = 'lightgreen';
+	// if (usingCulture) { indic = '#ef1a45'; }
+	// report += "<tr><td>Additional cultures<br>(more complicated):</td><td style='background-color:" + indic + "'>" + cultures + "<BR>" + cultures.join('<BR>') + "</td></tr>";
+	// report += "<tr><td>Components used in the UI:</td><td>" + allClasses.join('<BR>') + "</td></tr>";
+
+	// //Tokens
+	// report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Token information:</b></tr>";
+	// report += "<tr><td colspan=2 style='text-align:left'>Searches executed with token info:</td></tr>";
+	// indic = 'lightgreen';
+	// try {
+	// 	if (searchToken.indexOf('Bearer') !== -1) { indic = '#ef1a45'; }
+	// 	report += "<tr><td colspan=2 style='word-wrap:break-word;font-family:courier;text-align:left;background-color:" + indic + "'><pre style='width:820px;overflow:hidden'>" + searchToken + "</pre></td></tr>";
+	// 	report += "<tr><td colspan=2 style='text-align:left'>Analytics executed with token info:</td></tr>";
+	// 	indic = 'lightgreen';
+	// 	if (analyticsToken.indexOf('Bearer') !== -1) { indic = '#ef1a45'; }
+	// 	report += "<tr><td style='word-wrap:break-word;font-family:courier;text-align:left;background-color:" + indic + "' colspan=2><pre  style='width:820px;overflow:hidden'>" + analyticsToken + "</pre></td></tr>";
+	// }
+	// catch (e) {
+	// }
+
 	//Details
 	report += "<trstyle='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Detailed information:</b></tr>";
 	report += "<tr><td colspan=2 style='text-align:left'>" + detailed_report + "</td></tr>";
-  
-	$('#myreportdetails').html(report);
-  }
+
+	// $('#myreportdetails').html(report);
+
+	return theReport;
+}
+
+console.log('CONTENT is loaded');

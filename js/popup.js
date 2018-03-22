@@ -2,25 +2,6 @@
 // jshint -W110, -W003
 /*global chrome, createWheel*/
 
-var currentTab;
-var currentUI = '2.3679';
-var myenabled;
-var myenabledsearch;
-var analyticsSent;
-var nrofsearches;
-var searchSent;
-var suggestSent;
-var topQueriesSent;
-var dqUsed;
-var lqUsed;
-var filterFieldUsed;
-var partialMatchUsed;
-var contextUsed;
-var alertsError;
-var analyticsToken;
-var searchToken;
-
-
 let processDetail = (data) => {
   let lines = data.lines.map(line => {
 
@@ -66,91 +47,166 @@ let processDetail = (data) => {
  *  Generates the report in the Popup window.
  */
 let processReport = (data) => {
-  let scores = data.map(createWheel);
-  document.getElementById('scores').innerHTML = scores.join('\n');
+  let sections = [
+    {
+      label: 'General information', attributes: [
+        { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3679', expected: '2.3679' },
+        { key: 'fromSystem', label: 'Integrated in UI' },
+        { key: 'hardcodedAccessTokens', label: 'Hard coded Access Tokens', hint: 'Should NOT be done!!', expected: '' },
+        { key: 'alertsError', label: 'Search alerts error', hint: `Bad access to search alert subscriptions Or remove component class='CoveoSearchAlerts'`, expected: '' },
+        { key: 'analyticsFailures', label: 'Searches executed without sending analytics', hint: 'Manual triggered search did not sent analytics', expected: 0 },
+      ]
+    },
+    {
+      label: 'Behavior information', attributes: [
+        { key: 'nrofsearches', label: 'Nr of searches executed', hint: 'Should be 1', expected: 1 },
+        { key: 'searchSent', label: 'Search Events Sent', hint: 'Should be true', expected: true },
+        { key: 'analyticsSent', label: 'Analytics Sent', hint: 'Should be true', expected: true },
+        { key: 'usingSearchAsYouType', label: 'Using search as you type', hint: 'Degrades performance, should be false', expected: false },
+        { key: 'suggestSent', label: 'Using ML Powered Query Completions', hint: 'Should be true', expected: true },
+        { key: 'topQueriesSent', label: 'Using Analytics Query Completions', hint: 'Should be true', expected: true },
+      ]
+    },
+    {
+      label: 'Implementation information', attributes: [
+        { key: 'usingState', label: 'Using state in code' },
+        { key: 'partialMatchUsed', label: 'Using partial match', hint: 'more fine tuning needed', expected: false },
+        { key: 'lqUsed', label: 'Using Long Queries (ML)', hint: 'more fine tuning needed', expected: false },
+        { key: 'usingQRE', label: 'Using QRE', hint: 'more fine tuning needed', expected: false },
+        { key: 'filterFieldUsed', label: 'Using Filter Field (Folding)', hint: 'more fine tuning needed', expected: false },
+        { key: 'contextUsed', label: 'Using Context', hint: 'more fine tuning needed', expected: false },
+        // {key: '', label: '', hint: '', expected: 1},
+      ]
+    },
+  ];
 
-  let details = data.map(processDetail);
-  document.getElementById('details').innerHTML = details.join('\n');
+  let html = [`<table class="report"><tbody>`];
+  sections.forEach(section => {
+    let htmlSection = [`<tr class="section-header"><td colspan="2" style="padding-top: 28px">${section.label}</td></tr>`];
+    section.attributes.forEach(attr => {
+      let value = data[attr.key],
+        isValid = (attr.expected === undefined || value === attr.expected),
+        cssClass = isValid ? 'valid' : 'invalid';
+      htmlSection.push(`<tr class="${cssClass}"><td>${attr.label}</td><td class="value">${value}</td></tr>`);
+    });
+    html.push(htmlSection.join('\n'));
+  });
+  html.push(`</table>`);
 
-  $('#details .collapsible').collapsible();
+  document.getElementById('details').innerHTML = html.join('\n') + '<pre>' + JSON.stringify(data, 2, 2) + '</pre>';
 
-  $('#loading-main').hide();
+  // let scores = data.map(createWheel);
+  // document.getElementById('scores').innerHTML = scores.join('\n');
+
+  // let details = data.map(processDetail);
+  // document.getElementById('details').innerHTML = details.join('\n');
+
+  // $('#details .collapsible').collapsible();
+
+  $('#loading').hide();
+};
+
+let processState = (data) => {
+  console.log('processState: ', data);
+  $('#loading').hide();
+  if (!data) {
+    return;
+  }
+  if (data.image) {
+    setScreenShot(data.image);
+  }
+  if (data.json) {
+    processReport(data.json);
+  }
+
+  if (data.json || data.image) {
+    $('#instructions').hide();
+  }
+
+  $('#setSearchTracker input').prop('checked', data.enableSearchTracker);
 };
 
 
-document.addEventListener('DOMContentLoaded', function() {
-  myenabledsearch = false;
-  $('#getReport').click(function () {
-    //getReport();
-    getNumbers();
-  });
-  $('#setSearchTracker').click(function () {
-    toggleTracker();
-  });
-  $('#reset').click(function () {
-    reset();
-  });
-});
 
+function getReport() {
+  $('#loading').show();
+  $('#instructions').hide();
+  $('#myscreenimage').css('background-image', 'none').hide();
+  document.getElementById('details').innerHTML = '';
 
-function getReport(){
-  //first get a screenshot, the next event will be gathering the numbers, then the analyzePage
-  chrome.runtime.sendMessage({ type: 'getScreen' });
+  sendMessage('getScreen');
 }
 
-function toggleTracker(){
-  //first get a screenshot, the next event will be gathering the numbers, then the analyzePage
-  myenabledsearch = !myenabledsearch;
-  if (myenabledsearch){
-      $('setSearchTracker').text('Search is being tracked');
-  }
-  else{
-      $('setSearchTracker').text('Enable Searchtracker');
-  }
-  chrome.runtime.sendMessage({ type: 'enablesearch', enabled: myenabledsearch });
+let getState = () => {
+  sendMessage('getState', processState);
+};
+
+function toggleTracker(e) {
+  let myenabledsearch = $('#setSearchTracker input').prop('checked') ? true : false;
+  sendMessage({ type: 'enablesearch', enable: myenabledsearch });
 }
 
-function reset(){
+function reset() {
   //reset all parameters
-  chrome.runtime.sendMessage({ type: 'reset' });
+  $('#instructions').show();
+  $('#myscreenimage').css('background-image', 'none').hide();
+  $('#setSearchTracker input').prop('checked', false);
+  document.getElementById('details').innerHTML = '';
+
+  sendMessage('reset', getState);
 }
 
-function getNumbers(){
-  chrome.runtime.sendMessage({ type: 'getNumbers' });
+function sendMessage(typeOrMessage, callback) {
+  if (typeof typeOrMessage === 'string') {
+    typeOrMessage = { type: typeOrMessage };
+  }
+
+  if (callback) {
+    chrome.runtime.sendMessage(typeOrMessage, null, callback);
+  }
+  else {
+    chrome.runtime.sendMessage(typeOrMessage);
+  }
+}
+
+function setScreenShot(dataurl) {
+  $('#myscreenimage').css('background-image', 'url(' + dataurl + ')').show();
 }
 
 if (chrome && chrome.runtime && chrome.runtime.onMessage) {
   chrome.runtime.onMessage.addListener(
     function (reportData/*, sender, sendResponse*/) {
-      if (reportData.type === 'gotScreen'){
-        $('#myscreenimage').attr('src',reportData.src);
-        getNumbers();
+
+      if (reportData.type === 'gotScreen') {
+        setScreenShot(reportData.src);
+        sendMessage('getNumbers');
       }
-      if (reportData.type === 'gotNumbers'){
-        analyticsSent = reportData.analyticsSent;
-        nrofsearches = reportData.nrofsearches;
-        searchSent = reportData.searchSent;
-        suggestSent = reportData.suggestSent;
-        topQueriesSent = reportData.topQueriesSent;
-        dqUsed = reportData.dqUsed;
-        lqUsed = reportData.lqUsed;
-        filterFieldUsed = reportData.filterFieldUsed;
-        partialMatchUsed = reportData.partialMatchUsed;
-        contextUsed = reportData.contextUsed;
-        alertsError = reportData.alertsError;
-        analyticsToken = reportData.analyticsToken;
-        searchToken = reportData.searchToken;
-        processReport([{
-          title: "Overall",
-          value: 31, max: 60,
-          lines: [
-            { label: "# of search executed (should be 1)", value: nrofsearches, expected: 1 },
-            { label: "Search Events sent using our api?", value: searchSent, expected: true },
-            { label: "Analytics sent?", value: analyticsSent, expected: true },
-            { label: "Using search as you type (degrades performances)", value: false, expected: false },
-            { label: "Using ML Powered Query Completions", value: topQueriesSent, expected: true },
-          ]
-        }]);
+      else if (reportData.type === 'gotNumbers') {
+        processReport(reportData);
+        // analyticsSent = reportData.analyticsSent;
+        // nrofsearches = reportData.nrofsearches;
+        // searchSent = reportData.searchSent;
+        // suggestSent = reportData.suggestSent;
+        // topQueriesSent = reportData.topQueriesSent;
+        // dqUsed = reportData.dqUsed;
+        // lqUsed = reportData.lqUsed;
+        // filterFieldUsed = reportData.filterFieldUsed;
+        // partialMatchUsed = reportData.partialMatchUsed;
+        // contextUsed = reportData.contextUsed;
+        // alertsError = reportData.alertsError;
+        // analyticsToken = reportData.analyticsToken;
+        // searchToken = reportData.searchToken;
+        // processReport([{
+        //   title: "Overall",
+        //   value: 31, max: 60,
+        //   lines: [
+        //     { label: "# of search executed (should be 1)", value: nrofsearches, expected: 1 },
+        //     { label: "Search Events sent using our api?", value: searchSent, expected: true },
+        //     { label: "Analytics sent?", value: analyticsSent, expected: true },
+        //     { label: "Using search as you type (degrades performances)", value: false, expected: false },
+        //     { label: "Using ML Powered Query Completions", value: topQueriesSent, expected: true },
+        //   ]
+        // }]);
         //chrome.tabs.sendMessage(currentTab, { analyzePage: true });
       }
       if (reportData && reportData.length && reportData[0].value && reportData[0].max && reportData[0].title) {
@@ -158,14 +214,6 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
       }
     }
   );
-
-  document.addEventListener("DOMContentLoaded", function () {
-    chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-      var activeTab = tabs[0];
-      currentTab = activeTab.id;
-      //chrome.tabs.sendMessage(activeTab.id, { analyzePage: true });
-    });
-  });
 }
 else {
   setTimeout(function () {
@@ -182,3 +230,20 @@ else {
     }]);
   });
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Handle clicks on slide-toggle buttons
+  $('.coveo-slide-toggle + button').click(function (jQueryEventObject) {
+    $(this).prev().click();
+    jQueryEventObject.preventDefault();
+  });
+
+  $('#showInstructions').click(() => {
+    $('#instructions').show();
+  });
+  $('#getReport').click(getReport);
+  $('#setSearchTracker').on('change', toggleTracker);
+  $('#reset').click(reset);
+
+  getState();
+});
