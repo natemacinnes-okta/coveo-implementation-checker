@@ -110,6 +110,22 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     setEnabledSearch(msg.enable);
     saveState({enableSearchTracker: msg.enable});
   }
+  else if (msg.type === 'getNumbersBackground') {
+       SendMessage({type: "gotNumbersBackground", global: { topQueriesSent: topQueriesSent,
+        analyticsSent: analyticsSent,
+        searchSent: searchSent,
+        suggestSent: suggestSent,
+        nrofsearches: nrofsearches,
+        //image: image,
+        dqUsed: dqUsed,
+        lqUsed: lqUsed,
+        filterFieldUsed: filterFieldUsed,
+        partialMatchUsed: partialMatchUsed,
+        contextUsed: contextUsed,
+        alertsError: alertsError,
+        searchToken: searchToken,
+        analyticsToken: analyticsToken}});
+     }
   else {
     // proxy to content (tabs)
     getTabId_Then(tabId=>{
