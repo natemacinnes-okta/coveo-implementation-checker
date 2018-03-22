@@ -5,9 +5,10 @@
 let processDetail = (section, data, tests) => {
   let lines = section.attributes.map(attr => {
 
-    let isValidCssClass = '';
+    let isValidCssClass = '',
+      value = data[attr.key],
+      hint = '';
 
-    let value = data[attr.key];
     if (attr.expected !== undefined) {
       let isValid = false;
       if (attr.expected.test) {
@@ -20,13 +21,20 @@ let processDetail = (section, data, tests) => {
       if (isValid) {
         tests.passed++;
       }
+      else {
+        // show hints when invalid.
+        hint = attr.hint;
+      }
 
       isValidCssClass = 'valid-' + isValid;
     }
     tests.total++;
 
     return `<tr class="${isValidCssClass}">
-        <td class="line-message">${attr.label}</td>
+        <td class="line-message">
+          ${attr.label}
+          <small>${hint}</small>
+        </td>
         <td class="line-result">${value}</td>
       </tr>`;
   });
@@ -71,12 +79,12 @@ let processReport = (data) => {
         { key: 'analyticsSent', label: 'Analytics Sent', hint: 'Should be true', expected: true },
         { key: 'usingSearchAsYouType', label: 'Using search as you type', hint: 'Degrades performance, should be false', expected: false },
         { key: 'suggestSent', label: 'Using ML Powered Query Completions', hint: 'Should be true', expected: true },
-        { key: 'topQueriesSent', label: 'Using Analytics Query Completions', hint: 'Should be true', expected: true },
+        { key: 'topQueriesSent', label: 'Using Analytics Query Completions', hint: 'Should be true. If ML Powered Query Completions enabled, then it should be false', expected: true },
       ]
     },
     {
       title: 'Implementation information', label: 'Implementation', attributes: [
-        { key: 'usingState', label: 'Using state in code', expected: false },
+        { key: 'usingState', label: 'Using state in code', hint: 'more complicated', expected: false },
         { key: 'partialMatchUsed', label: 'Using partial match', hint: 'more fine tuning needed', expected: false },
         { key: 'lqUsed', label: 'Using Long Queries (ML)', hint: 'more fine tuning needed', expected: false },
         { key: 'usingQRE', label: 'Using QRE', hint: 'more fine tuning needed', expected: false },
