@@ -8,6 +8,10 @@ body {
   height: 600px;
 }
 
+header.header {
+  min-height: 48px;
+}
+
 .header-section{
   font-size: 1.2em;
   font-weight: bold;
@@ -78,6 +82,28 @@ h3 i {
   min-width: 175px;
   min-height: 48px;
   height: 100%;
+}
+
+.report .section-header {
+  border: none;
+  color: #ecad00;
+}
+
+.report tr td.value {
+  background-image: url(../images/checkbox-checkmark.svg);
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 12px;
+  text-align: center;
+}
+
+.report tr.valid td.value {
+  color: #009830;
+}
+
+.report tr.invalid td.value {
+  color: #ce3f00;
+  background-image: url(../images/action-close.svg);
 }
 
 /* overrides of Vapor styles */

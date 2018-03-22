@@ -47,7 +47,54 @@ let processDetail = (data) => {
  *  Generates the report in the Popup window.
  */
 let processReport = (data) => {
-  document.getElementById('details').innerHTML = '<pre>' + JSON.stringify(data, 2, 2) + '</pre>';
+  let sections = [
+    {
+      label: 'General information', attributes: [
+        { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3679', expected: '2.3679' },
+        { key: 'fromSystem', label: 'Integrated in UI' },
+        { key: 'hardcodedAccessTokens', label: 'Hard coded Access Tokens', hint: 'Should NOT be done!!', expected: '' },
+        { key: 'alertsError', label: 'Search alerts error', hint: `Bad access to search alert subscriptions Or remove component class='CoveoSearchAlerts'`, expected: '' },
+        { key: 'analyticsFailures', label: 'Searches executed without sending analytics', hint: 'Manual triggered search did not sent analytics', expected: 0 },
+      ]
+    },
+    {
+      label: 'Behavior information', attributes: [
+        { key: 'nrofsearches', label: 'Nr of searches executed', hint: 'Should be 1', expected: 1 },
+        { key: 'searchSent', label: 'Search Events Sent', hint: 'Should be true', expected: true },
+        { key: 'analyticsSent', label: 'Analytics Sent', hint: 'Should be true', expected: true },
+        { key: 'usingSearchAsYouType', label: 'Using search as you type', hint: 'Degrades performance, should be false', expected: false },
+        { key: 'suggestSent', label: 'Using ML Powered Query Completions', hint: 'Should be true', expected: true },
+        { key: 'topQueriesSent', label: 'Using Analytics Query Completions', hint: 'Should be true', expected: true },
+      ]
+    },
+    {
+      label: 'Implementation information', attributes: [
+        { key: 'usingState', label: 'Using state in code' },
+        { key: 'partialMatchUsed', label: 'Using partial match', hint: 'more fine tuning needed', expected: false },
+        { key: 'lqUsed', label: 'Using Long Queries (ML)', hint: 'more fine tuning needed', expected: false },
+        { key: 'usingQRE', label: 'Using QRE', hint: 'more fine tuning needed', expected: false },
+        { key: 'filterFieldUsed', label: 'Using Filter Field (Folding)', hint: 'more fine tuning needed', expected: false },
+        { key: 'contextUsed', label: 'Using Context', hint: 'more fine tuning needed', expected: false },
+        // {key: '', label: '', hint: '', expected: 1},
+      ]
+    },
+  ];
+
+  let html = [`<table class="report"><tbody>`];
+  sections.forEach(section => {
+    let htmlSection = [`<tr class="section-header"><td colspan="2" style="padding-top: 28px">${section.label}</td></tr>`];
+    section.attributes.forEach(attr => {
+      let value = data[attr.key],
+        isValid = (attr.expected === undefined || value === attr.expected),
+        cssClass = isValid ? 'valid' : 'invalid';
+      htmlSection.push(`<tr class="${cssClass}"><td>${attr.label}</td><td class="value">${value}</td></tr>`);
+    });
+    html.push(htmlSection.join('\n'));
+  });
+  html.push(`</table>`);
+
+  document.getElementById('details').innerHTML = html.join('\n') + '<pre>' + JSON.stringify(data, 2, 2) + '</pre>';
+
   // let scores = data.map(createWheel);
   // document.getElementById('scores').innerHTML = scores.join('\n');
 
@@ -111,7 +158,7 @@ function reset() {
 
 function sendMessage(typeOrMessage, callback) {
   if (typeof typeOrMessage === 'string') {
-    typeOrMessage = {type: typeOrMessage};
+    typeOrMessage = { type: typeOrMessage };
   }
 
   if (callback) {
