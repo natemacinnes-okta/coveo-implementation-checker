@@ -2,25 +2,6 @@
 // jshint -W110, -W003
 /*global chrome, createWheel*/
 
-var currentTab;
-var currentUI = '2.3679';
-var myenabled;
-var myenabledsearch;
-var analyticsSent;
-var nrofsearches;
-var searchSent;
-var suggestSent;
-var topQueriesSent;
-var dqUsed;
-var lqUsed;
-var filterFieldUsed;
-var partialMatchUsed;
-var contextUsed;
-var alertsError;
-var analyticsToken;
-var searchToken;
-
-
 let processDetail = (data) => {
   let lines = data.lines.map(line => {
 
@@ -66,45 +47,74 @@ let processDetail = (data) => {
  *  Generates the report in the Popup window.
  */
 let processReport = (data) => {
-  let scores = data.map(createWheel);
-  document.getElementById('scores').innerHTML = scores.join('\n');
+  document.getElementById('details').innerHTML = '<pre>' + JSON.stringify(data, 2, 2) + '</pre>';
+  // let scores = data.map(createWheel);
+  // document.getElementById('scores').innerHTML = scores.join('\n');
 
-  let details = data.map(processDetail);
-  document.getElementById('details').innerHTML = details.join('\n');
+  // let details = data.map(processDetail);
+  // document.getElementById('details').innerHTML = details.join('\n');
 
-  $('#details .collapsible').collapsible();
+  // $('#details .collapsible').collapsible();
 
-  $('#loading-main').hide();
+  $('#loading').hide();
+};
+
+let processState = (data) => {
+  console.log('processState: ', data);
+  $('#loading').hide();
+  if (!data) {
+    return;
+  }
+  if (data.image) {
+    setScreenShot(data.image);
+  }
+  if (data.json) {
+    processReport(data.json);
+  }
+
+  if (data.json || data.image) {
+    $('#instructions').hide();
+  }
+
+  $('#setSearchTracker input').prop('checked', data.enableSearchTracker);
 };
 
 
-document.addEventListener('DOMContentLoaded', function () {
-  myenabledsearch = false;
-  $('#getReport').click(getNumbers);
-  $('#setSearchTracker').click(toggleTracker);
-  $('#reset').click(reset);
-});
-
 
 function getReport() {
-  //first get a screenshot, the next event will be gathering the numbers, then the analyzePage
+  $('#loading').show();
+  $('#instructions').hide();
+  $('#myscreenimage').css('background-image', 'none').hide();
+  document.getElementById('details').innerHTML = '';
+
   chrome.runtime.sendMessage({ type: 'getScreen' });
 }
 
-function toggleTracker() {
-  //first get a screenshot, the next event will be gathering the numbers, then the analyzePage
-  myenabledsearch = !myenabledsearch;
-  $('#setSearchTracker').text( myenabledsearch ? 'Search is being tracked' : 'Enable Searchtracker');
-  chrome.runtime.sendMessage({ type: 'enablesearch', enabled: myenabledsearch });
+let getState = () => {
+  chrome.runtime.sendMessage({ type: 'getState' }, null, processState);
+};
+
+function toggleTracker(e) {
+  let myenabledsearch = $('#setSearchTracker input').prop('checked') ? true : false;
+  chrome.runtime.sendMessage({ type: 'enablesearch', enable: myenabledsearch });
 }
 
 function reset() {
   //reset all parameters
-  chrome.runtime.sendMessage({ type: 'reset' });
+  $('#instructions').show();
+  $('#myscreenimage').css('background-image', 'none').hide();
+  $('#setSearchTracker input').prop('checked', false);
+  document.getElementById('details').innerHTML = '';
+
+  chrome.runtime.sendMessage({ type: 'reset' }, null, getState);
 }
 
 function getNumbers() {
   chrome.runtime.sendMessage({ type: 'getNumbers' });
+}
+
+function setScreenShot(dataurl) {
+  $('#myscreenimage').css('background-image', 'url(' + dataurl + ')').show();
 }
 
 if (chrome && chrome.runtime && chrome.runtime.onMessage) {
@@ -112,34 +122,35 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
     function (reportData/*, sender, sendResponse*/) {
 
       if (reportData.type === 'gotScreen') {
-        $('#myscreenimage').attr('src', reportData.src);
+        setScreenShot(reportData.src);
         getNumbers();
       }
-      if (reportData.type === 'gotNumbers') {
-        analyticsSent = reportData.analyticsSent;
-        nrofsearches = reportData.nrofsearches;
-        searchSent = reportData.searchSent;
-        suggestSent = reportData.suggestSent;
-        topQueriesSent = reportData.topQueriesSent;
-        dqUsed = reportData.dqUsed;
-        lqUsed = reportData.lqUsed;
-        filterFieldUsed = reportData.filterFieldUsed;
-        partialMatchUsed = reportData.partialMatchUsed;
-        contextUsed = reportData.contextUsed;
-        alertsError = reportData.alertsError;
-        analyticsToken = reportData.analyticsToken;
-        searchToken = reportData.searchToken;
-        processReport([{
-          title: "Overall",
-          value: 31, max: 60,
-          lines: [
-            { label: "# of search executed (should be 1)", value: nrofsearches, expected: 1 },
-            { label: "Search Events sent using our api?", value: searchSent, expected: true },
-            { label: "Analytics sent?", value: analyticsSent, expected: true },
-            { label: "Using search as you type (degrades performances)", value: false, expected: false },
-            { label: "Using ML Powered Query Completions", value: topQueriesSent, expected: true },
-          ]
-        }]);
+      else if (reportData.type === 'gotNumbers') {
+        processReport(reportData);
+        // analyticsSent = reportData.analyticsSent;
+        // nrofsearches = reportData.nrofsearches;
+        // searchSent = reportData.searchSent;
+        // suggestSent = reportData.suggestSent;
+        // topQueriesSent = reportData.topQueriesSent;
+        // dqUsed = reportData.dqUsed;
+        // lqUsed = reportData.lqUsed;
+        // filterFieldUsed = reportData.filterFieldUsed;
+        // partialMatchUsed = reportData.partialMatchUsed;
+        // contextUsed = reportData.contextUsed;
+        // alertsError = reportData.alertsError;
+        // analyticsToken = reportData.analyticsToken;
+        // searchToken = reportData.searchToken;
+        // processReport([{
+        //   title: "Overall",
+        //   value: 31, max: 60,
+        //   lines: [
+        //     { label: "# of search executed (should be 1)", value: nrofsearches, expected: 1 },
+        //     { label: "Search Events sent using our api?", value: searchSent, expected: true },
+        //     { label: "Analytics sent?", value: analyticsSent, expected: true },
+        //     { label: "Using search as you type (degrades performances)", value: false, expected: false },
+        //     { label: "Using ML Powered Query Completions", value: topQueriesSent, expected: true },
+        //   ]
+        // }]);
         //chrome.tabs.sendMessage(currentTab, { analyzePage: true });
       }
       if (reportData && reportData.length && reportData[0].value && reportData[0].max && reportData[0].title) {
@@ -147,14 +158,6 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
       }
     }
   );
-
-  document.addEventListener("DOMContentLoaded", function () {
-    chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-      var activeTab = tabs[0];
-      currentTab = activeTab.id;
-      //chrome.tabs.sendMessage(activeTab.id, { analyzePage: true });
-    });
-  });
 }
 else {
   setTimeout(function () {
@@ -171,3 +174,20 @@ else {
     }]);
   });
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Handle clicks on slide-toggle buttons
+  $('.coveo-slide-toggle + button').click(function (jQueryEventObject) {
+    $(this).prev().click();
+    jQueryEventObject.preventDefault();
+  });
+
+  $('#showInstructions').click(() => {
+    $('#instructions').show();
+  });
+  $('#getReport').click(getReport);
+  $('#setSearchTracker').on('change', toggleTracker);
+  $('#reset').click(reset);
+
+  getState();
+});

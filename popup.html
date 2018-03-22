@@ -27,20 +27,29 @@
     <div class="flex-auto"></div>
     <div class="header-section mod-padded flex flex-center">Implementation Checker </div>
   </header>
-  <div class="" style="overflow:auto">
+  <div class="popup-content">
     <div>
       <button id="showInstructions" class="btn">Show Instructions</button>
-      <button id="setSearchTracker" class="btn">Activate Search Tracker</button>
+      <label id="setSearchTracker" class="btn coveo-slide-toggle-label boxed" style="padding: 8.5px 16px; line-height: 16px;">
+        <span class="toggle-label" style="font-size: 12px;">Search Tracker</span>
+        <input type="checkbox" class="coveo-slide-toggle">
+        <button type="button" style="margin-top: -3px;"></button>
+      </label>
       <button id="getReport" class="btn">Get Report</button>
       <button id="reset" class="btn">Reset</button>
     </div>
-    <p>Instructions: Start doing a reload of the page, execute a search
-      <br> When ready: click on 'Activate Search Tracker'.
-      <br> After that: execute a SINGLE search.
-      <br> Then hit 'Get Report'.
-    </p>
-    <img id='myscreenimage' width='200px' height='200px' />
-    <div id="loading-main" class="loading-prompt">
+    <div id="instructions">
+      How to use this tool:
+      <ul>
+        <li>Start with reloading the page</li>
+        <li>Execute a search</li>
+        <li>When ready, activate <b>Search Tracker</b>.</li>
+        <li>Execute a <i>single</i> search.</li>
+        <li><b>Get Report</b></li>
+      </ul>
+    </div>
+    <div id="myscreenimage"></div>
+    <div id="loading" class="loading-prompt">
       <div>Currently loading. Please wait.</div>
       <div class="spinner">
         <div class="bounce1"></div>

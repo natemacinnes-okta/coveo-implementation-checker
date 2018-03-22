@@ -32,6 +32,40 @@ h3 i {
   font-style: italic;
 }
 
+.popup-content {
+  padding: 8px;
+  overflow: auto;
+}
+
+#instructions {
+  margin-top: 8px;
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+#instructions b {
+  font-weight: bold;
+}
+
+#instructions i {
+  font-style: italic;
+}
+
+#instructions ul {
+  list-style: inherit;
+  padding: 0 10px;
+  margin: 8px 12px;
+}
+
+#myscreenimage {
+  height: 200px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: top center;
+  margin: 10px 20px;
+  border: 1px solid silver;
+}
+
 #scores {
   text-align: center;
 }
@@ -42,7 +76,8 @@ h3 i {
   background-size: 165px 37px;
   background-repeat: no-repeat;
   min-width: 175px;
-  height: 54px;
+  min-height: 48px;
+  height: 100%;
 }
 
 /* overrides of Vapor styles */

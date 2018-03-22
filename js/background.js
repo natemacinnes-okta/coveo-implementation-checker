@@ -1,4 +1,7 @@
 'use strict';
+
+let STATES = {};
+
 /* globals chrome */
 var filterSearch = { urls: ["*://*/rest/search/*", "*://*/?errorsAsSuccess=1", "https://*/rest/search/v2/*", "https://*/coveo/rest/v2/*", "https://cloudplatform.coveo.com/rest/search/*", "*://platform.cloud.coveo.com/rest/search/v2/*", "https://search.cloud.coveo.com/rest/search/v2/*", "*://*/*/coveo/platform/rest/*", "*://*/coveo/rest/*"] };
 var filterAnalytics = { urls: ["*://usageanalytics.coveo.com/rest/*", "*://*/*/coveo/analytics/rest/*", "*://*/*/coveoanalytics/rest/*"] };
@@ -23,13 +26,10 @@ var analyticsToken;
 var searchToken;
 var image;
 
-function onlyUnique(value, index, self) {
-  return self.indexOf(value) === index;
-}
 
 function setEnabled(enabled) {
   myenabled = enabled;
-  if (myenabled == false) {
+  if (!myenabled) {
     reset();
   }
 }
@@ -50,47 +50,93 @@ let SendMessage = (parameters) => {
   });
 };
 
+let getTabId_Then = (callback) => {
+  chrome.tabs.query({ active: true }, (tabs) => {
+    callback(tabs[0].id);
+  });
+};
 
-chrome.runtime.onMessage.addListener(function (msg/*, sender, sendResponse*/) {
-  if (msg.type === 'getScreen') {
+let getState = (tabId) => {
+  let state = STATES[tabId];
+  if (!state) {
+    state = {tabId};
+    STATES[tabId] = state;
+  }
+  return state;
+};
+
+let saveState = (obj) => {
+  getTabId_Then(tabId=>{
+    let state = Object.assign(getState(tabId), obj);
+    STATES[tabId] = state;
+  });
+};
+
+chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+  console.log('BACKGROUND MSG: ', msg, sender, sendResponse);
+
+  if (msg.type === 'getState') {
+    getTabId_Then(tabId=>{
+      sendResponse(STATES[tabId] || {tabId});
+    });
+    return true;
+  }
+  else if (msg.type === 'getScreen') {
     //Get screenshot
     chrome.tabs.captureVisibleTab(null, {
       "format": "png"
     }, function (dataURI) {
       if (typeof dataURI !== "undefined") {
         image = dataURI;
+        saveState({image});
         SendMessage({ type: 'gotScreen', src: image });
       }
     });
   }
-  if (msg.type === 'enable') {
+  else if (msg.type === 'gotNumbers') {
+    saveState({json: msg.json});
+  }
+  else if (msg.type === 'enable') {
     setEnabled(msg.enable);
   }
   else if (msg.type === 'reset') {
-    reset();
+    getTabId_Then(tabId=>{
+      delete STATES[tabId];
+      sendResponse({tabId});
+    });
+    return true;
   }
   else if (msg.type === 'enablesearch') {
     setEnabledSearch(msg.enable);
+    saveState({enableSearchTracker: msg.enable});
   }
-  else if (msg.type === 'getNumbers') {
-    SendMessage({
-      type: "gotNumbers",
-      topQueriesSent: topQueriesSent,
-      analyticsSent: analyticsSent,
-      searchSent: searchSent,
-      suggestSent: suggestSent,
-      nrofsearches: nrofsearches,
-      //image: image,
-      dqUsed: dqUsed,
-      lqUsed: lqUsed,
-      filterFieldUsed: filterFieldUsed,
-      partialMatchUsed: partialMatchUsed,
-      contextUsed: contextUsed,
-      alertsError: alertsError,
-      searchToken: searchToken,
-      analyticsToken: analyticsToken
+  else {
+    // proxy to content (tabs)
+    getTabId_Then(tabId=>{
+      chrome.tabs.sendMessage(tabId || null, msg);
     });
   }
+
+  // DELETE THIS - ???
+  // else if (msg.type === 'getNumbers??') {
+  //   SendMessage({
+  //     type: "gotNumbers",
+  //     topQueriesSent: topQueriesSent,
+  //     analyticsSent: analyticsSent,
+  //     searchSent: searchSent,
+  //     suggestSent: suggestSent,
+  //     nrofsearches: nrofsearches,
+  //     //image: image,
+  //     dqUsed: dqUsed,
+  //     lqUsed: lqUsed,
+  //     filterFieldUsed: filterFieldUsed,
+  //     partialMatchUsed: partialMatchUsed,
+  //     contextUsed: contextUsed,
+  //     alertsError: alertsError,
+  //     searchToken: searchToken,
+  //     analyticsToken: analyticsToken
+  //   });
+  // }
 });
 
 
