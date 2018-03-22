@@ -52,7 +52,7 @@ let processReport = (data) => {
       label: 'General information', attributes: [
         { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3679', expected: '2.3679' },
         { key: 'fromSystem', label: 'Integrated in UI' },
-        { key: 'hardcodedAccessTokens', label: 'Hard coded Access Tokens', hint: 'Should NOT be done!!', expected: '' },
+        { key: 'hardcodedAccessTokens', label: 'Hard coded Access Tokens', hint: 'Should NOT be done!!', expected: false },
         { key: 'alertsError', label: 'Search alerts error', hint: `Bad access to search alert subscriptions Or remove component class='CoveoSearchAlerts'`, expected: '' },
         { key: 'analyticsFailures', label: 'Searches executed without sending analytics', hint: 'Manual triggered search did not sent analytics', expected: 0 },
       ]
@@ -179,10 +179,13 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 
       if (reportData.type === 'gotScreen') {
         setScreenShot(reportData.src);
-        sendMessage('getNumbers');
+        sendMessage('getNumbersBackground');
+      }
+      else if (reportData.type === 'gotNumbersBackground') {
+        sendMessage({type:'getNumbers', global: reportData.global });
       }
       else if (reportData.type === 'gotNumbers') {
-        processReport(reportData);
+        processReport(reportData.json);
         // analyticsSent = reportData.analyticsSent;
         // nrofsearches = reportData.nrofsearches;
         // searchSent = reportData.searchSent;
