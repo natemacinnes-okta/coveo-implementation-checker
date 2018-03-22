@@ -3,9 +3,6 @@
 /*global chrome*/
 
 let THIS_PAGE_COVEO_REPORT = {};
-const EXPECTED = {
-	currentUI: '2.3679'
-};
 
 function addConsoleTracker() {
 	var html = '';
@@ -185,7 +182,7 @@ function parseScript(name, content, all, external, __report__) {
 	var reg = /[\"']?lib[\"']? ?: ?[\"']\d[^m](.*?)[\"'],/g;///"?lib"? ?: ?['"](.*)['"].*\n?.*"?product"?: ?['"](.*)['"],/g;
 	let matches = content.match(reg);
 	if (matches) {
-		__report__.uiVersion = '' + matches[0].replace('lib', '').replace(/:/g, '').replace(/\'/g, '').replace(',', '').replace(/"/g, '');
+		__report__.uiVersion = matches[0].replace(/lib\w*/g, '').replace(/[:',"]/g, '');
 		reg = /[.\S\s ]{19}[\"']?lib[\"']? ?: ?[\"']\d[^m](.*?)[\"'],[.\S\s ]{40}/g;
 		matches = content.match(reg);
 		report += '<b>UI Version found:</b><BR><span class="mycode">' + matches[0].replace('\n', ' ').replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</span><BR>";
@@ -455,12 +452,7 @@ function initReport() {
 }
 
 function getReport() {
-	console.log('getReport - 1');
-
 	let theReport = initReport();
-
-	console.log('getReport - 2');
-
 	let html = document.documentElement.outerHTML;
 	let pageSize = html.length;
 
@@ -482,11 +474,6 @@ function getReport() {
 	theReport.nroffacets = document.querySelectorAll('.coveo-facet-header').length;
 	theReport.nrofsorts = document.querySelectorAll('.coveo-sort-icon-descending').length;
 
-	console.log('THE REPORT SO FAR: ', JSON.stringify(theReport,2,2));
-
-	// Also parse the page to get some contents
-	theReport.uiVersion = window.Coveo && window.Coveo.version['lib'];
-
 	// TODO - count FAILURES
 	// let analyticsFailures = $('#myanalyticsfailure').length;
 
@@ -499,23 +486,21 @@ function getReport() {
 			//External, load it
 			let all = true;
 			let src = _script_.src;
-			if (src.includes('/js/CoveoJsSearch') || src.includes('/coveoua.js') || src.includes('/CoveoForSitecore') || src.includes('/core.js')) {
-				all = false;
-			}
+			// if (src.includes('/js/CoveoJsSearch') || src.includes('/coveoua.js') || src.includes('/CoveoForSitecore') || src.includes('/core.js')) {
+			// 	all = false;
+			// }
 
 			let sourceContent = '';
 
 			// TODO -- PARSE ALL SCRIPTS
 
 			if (all) {
-
 				let request = new XMLHttpRequest();
 				request.open('GET', src, false);  // `false` makes the request synchronous
 				request.send(null);
 
 				if (request.status === 200) {
 					sourceContent = request.responseText;
-					console.log(src);
 					if (sourceContent !== undefined) {
 						pageSize += sourceContent.length;
 					}
@@ -553,16 +538,12 @@ function getReport() {
 	report += "<table cellpadding=2 class='myreporttable'>";
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>General information:</b></tr>";
 
-	console.log('getReport - 3', theReport.uiVersion);
-
 	let indic = 'lightgreen';
-	if (theReport.uiVersion) {
-		if (theReport.uiVersion.indexOf(EXPECTED.currentUI) === -1) { indic = '#ef1a45'; }
-		report += "<tr><td>JS UI version:<br>Should be: " + EXPECTED.currentUI + "</td><td style='background-color:" + indic + "'>" + theReport.uiVersion + "</td></tr>";
-		report += "<tr><td>Integrated in UI:</td><td>" + theReport.fromSystem + "</td></tr>";
-	}
-
-	console.log('getReport - 4');
+	// if (theReport.uiVersion) {
+	// 	if (theReport.uiVersion.indexOf(EXPECTED.currentUI) === -1) { indic = '#ef1a45'; }
+	// 	report += "<tr><td>JS UI version:<br>Should be: " + EXPECTED.currentUI + "</td><td style='background-color:" + indic + "'>" + theReport.uiVersion + "</td></tr>";
+	// 	report += "<tr><td>Integrated in UI:</td><td>" + theReport.fromSystem + "</td></tr>";
+	// }
 
 	indic = '#ef1a45';
 	if (theReport.hardcodedAccessTokens) {
@@ -713,5 +694,3 @@ function getReport() {
 
 	return theReport;
 }
-
-console.log('CONTENT is loaded');

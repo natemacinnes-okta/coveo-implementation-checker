@@ -57,7 +57,7 @@ let processReport = (data) => {
   let sections = [
     {
       title: 'General information', label: 'General', attributes: [
-        { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3679', expected: '2.3679' },
+        { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3679', expected: /^2\.3679/ },
         { key: 'fromSystem', label: 'Integrated in UI' },
         { key: 'hardcodedAccessTokens', label: 'Hard coded Access Tokens', hint: 'Should NOT be done!!', expected: false },
         { key: 'alertsError', label: 'Search alerts error', hint: `Bad access to search alert subscriptions Or remove component class='CoveoSearchAlerts'`, expected: '' },
@@ -107,7 +107,6 @@ let processReport = (data) => {
 };
 
 let processState = (data) => {
-  console.log('processState: ', data);
   $('#loading').hide();
   if (!data) {
     return;
