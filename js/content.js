@@ -93,6 +93,8 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 			}
 			else if (request.type === 'getNumbers') {
 				let reportJson = getReport();
+				//We also have the global numbers so merge them with the json
+				reportJson = extend(reportJson, request.global);
 				SendMessage({
 					type: "gotNumbers",
 					json: reportJson
@@ -149,6 +151,12 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 // var onpremise;
 // var nrofraw;
 // var generated;
+function extend(obj, src) {
+    for (var key in src) {
+        if (src.hasOwnProperty(key)) obj[key] = src[key];
+    }
+    return obj;
+}
 
 function cleanMatch(match) {
 	return match.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace('\n', '<BR>¶ ') + "<BR>";
@@ -704,7 +712,7 @@ function getReport() {
 	// }
 
 	//Details
-	report += "<trstyle='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Detailed information:</b></tr>";
+	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Detailed information:</b></tr>";
 	report += "<tr><td colspan=2 style='text-align:left'>" + detailed_report + "</td></tr>";
 
 	// $('#myreportdetails').html(report);
