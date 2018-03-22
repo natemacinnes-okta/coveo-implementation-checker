@@ -41,12 +41,6 @@ let SendMessage = (parameters) => {
 	});
 };
 
-let getScreen = () => {
-	SendMessage({ type: 'getScreen' });
-};
-
-var reportJson;
-
 /**
  * Analyze the Page and creates a Report spec for the Popup
  */
