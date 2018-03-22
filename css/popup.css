@@ -130,13 +130,17 @@ h3 i {
   display: none;
 }
 
+.coveo-styleguide .collapsible .collapsible-body {
+  padding: 0 10px 10px;
+}
+
 .coveo-styleguide table:not(.datepicker-table) td.line-result {
   font-variant: small-caps;
   text-align: center;
 }
 
 tr td.line-result {
-  background-position: right 14px;
+  background-position: right 6px top 14px;
   background-repeat: no-repeat;
   background-size: 12px;
   text-align: center;
