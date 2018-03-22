@@ -2,35 +2,42 @@
 // jshint -W110, -W003
 /*global chrome, createWheel*/
 
-let processDetail = (data) => {
-  let lines = data.lines.map(line => {
+let processDetail = (section, data, tests) => {
+  let lines = section.attributes.map(attr => {
 
     let isValidCssClass = '';
-    if (line.expected !== undefined) {
+
+    let value = data[attr.key];
+    if (attr.expected !== undefined) {
       let isValid = false;
-      if (line.expected.test) {
-        isValid = line.expected.test(line.value);
+      if (attr.expected.test) {
+        isValid = attr.expected.test(value);
       }
       else {
-        isValid = (line.value === line.expected);
+        isValid = (value === attr.expected);
       }
 
-      isValidCssClass = 'line-valid-' + isValid;
+      if (isValid) {
+        tests.passed++;
+      }
+
+      isValidCssClass = 'valid-' + isValid;
     }
+    tests.total++;
 
     return `<tr class="${isValidCssClass}">
-        <td class="line-message">${line.label}</td>
-        <td class="line-result">${line.value}</td>
+        <td class="line-message">${attr.label}</td>
+        <td class="line-result">${value}</td>
       </tr>`;
   });
 
-  let score = createWheel(data);
+  let score = createWheel({title: section.title, value: tests.passed, max: tests.total});
 
-  return `<ul class="collapsible" data-collapsible="expandable">
+  return `<ul id="${section.label}" class="collapsible" data-collapsible="expandable">
       <li>
           <button type="button" class="collapsible-header active btn with-icon">
               <div class="msg">
-                ${data.title}
+                ${section.title}
               </div>
               <div class="result" style="">${score}</div>
           </button>
@@ -49,7 +56,7 @@ let processDetail = (data) => {
 let processReport = (data) => {
   let sections = [
     {
-      label: 'General information', attributes: [
+      title: 'General information', label: 'General', attributes: [
         { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3679', expected: '2.3679' },
         { key: 'fromSystem', label: 'Integrated in UI' },
         { key: 'hardcodedAccessTokens', label: 'Hard coded Access Tokens', hint: 'Should NOT be done!!', expected: false },
@@ -58,7 +65,7 @@ let processReport = (data) => {
       ]
     },
     {
-      label: 'Behavior information', attributes: [
+      title: 'Behavior information', label: 'Behavior', attributes: [
         { key: 'nrofsearches', label: 'Nr of searches executed', hint: 'Should be 1', expected: 1 },
         { key: 'searchSent', label: 'Search Events Sent', hint: 'Should be true', expected: true },
         { key: 'analyticsSent', label: 'Analytics Sent', hint: 'Should be true', expected: true },
@@ -68,8 +75,8 @@ let processReport = (data) => {
       ]
     },
     {
-      label: 'Implementation information', attributes: [
-        { key: 'usingState', label: 'Using state in code' },
+      title: 'Implementation information', label: 'Implementation', attributes: [
+        { key: 'usingState', label: 'Using state in code', expected: false },
         { key: 'partialMatchUsed', label: 'Using partial match', hint: 'more fine tuning needed', expected: false },
         { key: 'lqUsed', label: 'Using Long Queries (ML)', hint: 'more fine tuning needed', expected: false },
         { key: 'usingQRE', label: 'Using QRE', hint: 'more fine tuning needed', expected: false },
@@ -80,28 +87,21 @@ let processReport = (data) => {
     },
   ];
 
-  let html = [`<table class="report"><tbody>`];
+  let sectionCharts = [];
+  let html = [];
   sections.forEach(section => {
-    let htmlSection = [`<tr class="section-header"><td colspan="2" style="padding-top: 28px">${section.label}</td></tr>`];
-    section.attributes.forEach(attr => {
-      let value = data[attr.key],
-        isValid = (attr.expected === undefined || value === attr.expected),
-        cssClass = isValid ? 'valid' : 'invalid';
-      htmlSection.push(`<tr class="${cssClass}"><td>${attr.label}</td><td class="value">${value}</td></tr>`);
-    });
-    html.push(htmlSection.join('\n'));
+    let tests = {passed:0, total: 0};
+    let htmlSection = processDetail(section, data, tests);
+    html.push(htmlSection);
+
+    sectionCharts.push({title: section.label, value: tests.passed, max: tests.total});
   });
-  html.push(`</table>`);
+
+  let scores = sectionCharts.map(createWheel);
+  document.getElementById('scores').innerHTML = scores.join('\n');
 
   document.getElementById('details').innerHTML = html.join('\n') + '<pre>' + JSON.stringify(data, 2, 2) + '</pre>';
-
-  // let scores = data.map(createWheel);
-  // document.getElementById('scores').innerHTML = scores.join('\n');
-
-  // let details = data.map(processDetail);
-  // document.getElementById('details').innerHTML = details.join('\n');
-
-  // $('#details .collapsible').collapsible();
+  $('#details .collapsible').collapsible();
 
   $('#loading').hide();
 };
@@ -132,6 +132,7 @@ function getReport() {
   $('#loading').show();
   $('#instructions').hide();
   $('#myscreenimage').css('background-image', 'none').hide();
+  document.getElementById('scores').innerHTML = '';
   document.getElementById('details').innerHTML = '';
 
   sendMessage('getScreen');
@@ -151,6 +152,7 @@ function reset() {
   $('#instructions').show();
   $('#myscreenimage').css('background-image', 'none').hide();
   $('#setSearchTracker input').prop('checked', false);
+  document.getElementById('scores').innerHTML = '';
   document.getElementById('details').innerHTML = '';
 
   sendMessage('reset', getState);

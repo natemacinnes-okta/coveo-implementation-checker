@@ -10,7 +10,7 @@ let createWheel = (data) => {
   }
   v = C * v;
 
-  return `<div class="wheel ${cssClass}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  return `<div class="wheel ${cssClass}"><a href="#${data.title}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
       <circle class="back-ring" cx="50" cy="50" r="${r}" stroke-width="8"></circle>
       <circle class="value" fill="none" cx="50" cy="50" r="${r}" stroke-width="8" stroke-dasharray="${v} ${C}" ></circle>
       <text
@@ -19,6 +19,6 @@ let createWheel = (data) => {
         transform="rotate(90 50,50)"
         lengthAdjust="spacingAndGlyphs" x="50" y="68">${data.value}</text>
     </svg>
-    <div class="wheel-title">${data.title || ''}</div>
+    <div class="wheel-title">${data.title || ''}</div></a>
     </div>`;
 };

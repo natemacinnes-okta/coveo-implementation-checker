@@ -84,26 +84,8 @@ h3 i {
   height: 100%;
 }
 
-.report .section-header {
-  border: none;
-  color: #ecad00;
-}
-
-.report tr td.value {
-  background-image: url(../images/checkbox-checkmark.svg);
-  background-position: right 12px center;
-  background-repeat: no-repeat;
-  background-size: 12px;
-  text-align: center;
-}
-
-.report tr.valid td.value {
-  color: #009830;
-}
-
-.report tr.invalid td.value {
-  color: #ce3f00;
-  background-image: url(../images/action-close.svg);
+#scores div.wheel a svg {
+  cursor: pointer;
 }
 
 /* overrides of Vapor styles */
@@ -153,12 +135,21 @@ h3 i {
   text-align: center;
 }
 
-.line-valid-true td.line-result {
-  color: #009830;
+tr td.line-result {
+  background-position: right 14px;
+  background-repeat: no-repeat;
+  background-size: 12px;
+  text-align: center;
 }
 
-.line-valid-false td.line-result {
+.valid-true td.line-result {
+  color: #009830;
+  background-image: url(../images/checkbox-checkmark.svg);
+}
+
+.valid-false td.line-result {
   color: #ce3f00;
+  background-image: url(../images/action-close.svg);
 }
 
 /* Override of admin css */
