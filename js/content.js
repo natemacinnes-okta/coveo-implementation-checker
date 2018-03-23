@@ -423,6 +423,7 @@ function initReport() {
 		cultures: [],
 		customEvents: [],
 		difficulty: 0,
+		theUrl: '',
 		fromSystem: 'Unknown',
 		hardcodedAccessTokens: false,
 		indicator: 0,
@@ -466,6 +467,8 @@ function getReport() {
 			}
 		});
 	});
+	//Get the url
+	theReport.theUrl = window.location.protocol + '//' + window.location.hostname;
 	//Get from the page the number of result templates
 	theReport.nrOfResultTemplates = document.querySelectorAll('.result-template').length;
 
