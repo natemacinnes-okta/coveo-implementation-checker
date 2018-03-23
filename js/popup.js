@@ -158,7 +158,7 @@ let processReport = (data) => {
           </div>
       </button>
       <div class="collapsible-body">
-        <table><tbody><tr><td>
+        <table><tbody><tr><td style='padding-left: 1px;'>
           ${data.details}
         </tbody></td></tr></table>
       </div>
@@ -306,7 +306,8 @@ document.addEventListener('DOMContentLoaded', function () {
     $(this).prev().click();
     jQueryEventObject.preventDefault();
   });
-
+  $('#myscreenimage').css('background-image', 'none').hide();
+  
   $('#showInstructions').click(() => {
     $('#instructions').show();
   });
