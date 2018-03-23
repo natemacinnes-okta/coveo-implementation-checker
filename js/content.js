@@ -185,7 +185,7 @@ function parseScript(name, content, all, external, __report__) {
 		__report__.uiVersion = matches[0].replace(/lib\w*/g, '').replace(/[:',"]/g, '');
 		reg = /[.\S\s ]{19}[\"']?lib[\"']? ?: ?[\"']\d[^m](.*?)[\"'],[.\S\s ]{40}/g;
 		matches = content.match(reg);
-		report += '<b>UI Version found:</b><BR><span class="mycode">' + matches[0].replace('\n', ' ').replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</span><BR>";
+		report += '<BR><b>UI Version found:</b><BR><span class="mycode">' + matches[0].replace('\n', ' ').replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</span><BR>";
 	}
 	//Seems the below token is in the sample endpoint, we do not want to match that
 	//We need to remove the sampleTokens from the content
@@ -194,7 +194,7 @@ function parseScript(name, content, all, external, __report__) {
 	matches = content.match(reg);
 	if (matches) {
 		__report__.hardcodedAccessTokens = true;
-		report += '<b>Hardcoded accessTokens:</b><br><span class="mycode">';
+		report += '<BR><b>Hardcoded accessTokens:</b><br><span class="mycode">';
 		reg = /[.\S\s ]{10}(accessToken[:=] ?[\"'](?!xx564559b1-0045-48e1-953c-3addd1ee4457)(.*?)[\"'])[.\S\s ]{70}/g;
 		matches = content.match(reg);
 		report += addMatches(matches);
@@ -206,7 +206,7 @@ function parseScript(name, content, all, external, __report__) {
 		if (matches) {
 			__report__.usingQRE = true;
 			__report__.difficulty++;
-			report += '<b>Use of QRE:</b><BR><span class="mycode" >';
+			report += '<BR><b>Use of QRE:</b><BR><span class="mycode" >';
 			reg = /[.\S\s ]{10}(\$qre)[.\S\s ]{40}|[.\S\s ]{10}(\$correlateUsingIdf)[.\S\s ]{40}|[.\S\s ]{10}(\$some)[.\S\s ]{40}/g;
 			matches = content.match(reg);
 			report += addMatches(matches);
@@ -218,7 +218,7 @@ function parseScript(name, content, all, external, __report__) {
 			__report__.nrofraw += matches.length;
 			__report__.difficulty++;
 
-			report += '<b>Use of raw. found:</b><BR><span class="mycode" >';
+			report += '<BR><b>Use of raw. found:</b><BR><span class="mycode" >';
 			reg = /[.\S\s ]{10}raw\.[.\S\s ]{40}/g;
 			matches = content.match(reg);
 			report += addMatches(matches);
@@ -229,7 +229,7 @@ function parseScript(name, content, all, external, __report__) {
 		if (matches) {
 			__report__.onpremise = true;
 			__report__.difficulty++;
-			report += '<b>On premise found:</b><BR><span class="mycode" >';
+			report += '<BR><b>On premise found:</b><BR><span class="mycode" >';
 			reg = /[.\S\s ]{10}configureOnPremiseEndpoint[.\S\s ]{40}/g;
 			matches = content.match(reg);
 			report += addMatches(matches);
@@ -240,7 +240,7 @@ function parseScript(name, content, all, external, __report__) {
 		if (matches) {
 			__report__.usingState = true;
 			__report__.difficulty++;
-			report += '<b>State found:</b><BR><span class="mycode" >';
+			report += '<BR><b>State found:</b><BR><span class="mycode" >';
 			reg = /[.\S\s ]{10}coveo\(.?state.?,[.\S\s ]{40}/g;
 			matches = content.match(reg);
 			report += addMatches(matches);
@@ -249,7 +249,7 @@ function parseScript(name, content, all, external, __report__) {
 		reg = /(data-pipeline=?[\"'](.*?)[\"'])|(options.pipeline ?=(.*);)/g;
 		matches = content.match(reg);
 		if (matches) {
-			report += '<b>Pipelines:</b><br><span class="mycode" >';
+			report += '<BR><b>Pipelines:</b><br><span class="mycode" >';
 			matches.forEach(function (m) {
 				if (m !== undefined) {
 					__report__.pipelines = (__report__.pipelines || '') + " " + cleanMatch(m);
@@ -265,7 +265,7 @@ function parseScript(name, content, all, external, __report__) {
 		matches = content.match(reg);
 		if (matches) {
 			__report__.usingCustomEvents = true;
-			report += '<b>Custom Events:</b><br><span class="mycode" >';
+			report += '<BR><b>Custom Events:</b><br><span class="mycode" >';
 			matches.forEach(function (m) {
 				if (m !== undefined) {
 					if (!__report__.customEvents.includes(m)) {
@@ -283,7 +283,7 @@ function parseScript(name, content, all, external, __report__) {
 		reg = /(options.token)|(options.accessToken)/g;
 		matches = content.match(reg);
 		if (matches) {
-			report += '<b>Tokens:</b><br><span class="mycode" >';
+			report += '<BR><b>Tokens:</b><br><span class="mycode" >';
 			reg = /[.\S\s ]{40}(options.token)[.\S\s ][.\S\s ]{40}|[.\S\s ]{40}(options.accessToken)[.\S\s ][.\S\s ]{40}/g;
 			matches = content.match(reg);
 			report += addMatches(matches);
@@ -295,7 +295,7 @@ function parseScript(name, content, all, external, __report__) {
 		matches = content.match(reg);
 		if (matches) {
 			__report__.usingCulture = true;
-			report += '<b>Cultures:</b><br><span class="mycode" >';
+			report += '<BR><b>Cultures:</b><br><span class="mycode" >';
 			__report__.difficulty += matches.length;
 			matches.forEach(function (m) {
 				if (m !== undefined) {
@@ -313,7 +313,7 @@ function parseScript(name, content, all, external, __report__) {
 		reg = /getEndpoint\(\).search\([\w\.\(\)]*\).done\( ?function/g;
 		matches = content.match(reg);
 		if (matches) {
-			report += '<b>Additional Search:</b><br><span class="mycode" >';
+			report += '<BR><b>Additional Search:</b><br><span class="mycode" >';
 			reg = /[.\S\s ]{10}getEndpoint\(\).search\([\w\.\(\)]*\).done\( ?function[.\S\s ]{40}/g;
 			matches = content.match(reg);
 			report += addMatches(matches);
@@ -321,11 +321,11 @@ function parseScript(name, content, all, external, __report__) {
 			__report__.difficulty += matches.length;
 		}
 		//usingAnalytics: "(analytics.js\/coveoua.js)|CoveoAnalytics"
-		reg = /(analytics.js\/coveoua.js)|CoveoAnalytics/g;
+		reg = /(analytics.js\/coveoua.js)|[\'\"]CoveoAnalytics[\'\"]CoveoAnalytics[\'\"]CoveoAnalytics[\'\"]/g;
 		matches = content.match(reg);
 		if (matches) {
-			report += '<b>Additional Analytics:</b><br><span class="mycode" >';
-			reg = /[.\S\s ]{10}(analytics.js\/coveoua.js)[.\S\s ]{40}|[.\S\s ]{10}CoveoAnalytics[.\S\s ]{40}/g;
+			report += '<BR><b>Additional Analytics:</b><br><span class="mycode" >';
+			reg = /[.\S\s ]{10}(analytics.js\/coveoua.js)[.\S\s ]{40}|[.\S\s ]{10}[\'\"]CoveoAnalytics[\'\"]CoveoAnalytics[\'\"]CoveoAnalytics[\'\"][.\S\s ]{40}/g;
 			matches = content.match(reg);
 			__report__.usingAdditionalAnalytics += matches.length;
 			report += addMatches(matches);
@@ -334,7 +334,7 @@ function parseScript(name, content, all, external, __report__) {
 		reg = /CoveoRecommendation/g;
 		matches = content.match(reg);
 		if (matches) {
-			report += '<b>Recommendations found:</b><br><span class="mycode" >';
+			report += '<BR><b>Recommendations found:</b><br><span class="mycode" >';
 			__report__.usingRecommendations = true;
 			reg = /[.\S\s ]{10}CoveoRecommendation[.\S\s ]{50}/g;
 			matches = content.match(reg);
@@ -343,7 +343,7 @@ function parseScript(name, content, all, external, __report__) {
 		reg = /CoveoFacet/g;
 		matches = content.match(reg);
 		if (matches) {
-			report += '<b>Facets found</b><br><span class="mycode" >';
+			report += '<BR><b>Facets found</b><br><span class="mycode" >';
 			__report__.usingFacets = true;
 			reg = /[.\S\s ]{10}CoveoFacet[.\S\s ]{60}/g;
 			matches = content.match(reg);
@@ -352,7 +352,7 @@ function parseScript(name, content, all, external, __report__) {
 		reg = /CoveoTab/g;
 		matches = content.match(reg);
 		if (matches) {
-			report += '<b>Tabs found:</b><br><span class="mycode" >';
+			report += '<BR><b>Tabs found:</b><br><span class="mycode" >';
 			__report__.usingTabs = true;
 			reg = /[.\S\s ]{10}CoveoTab[.\S\s ]{40}/g;
 			matches = content.match(reg);
@@ -398,7 +398,7 @@ function parseScript(name, content, all, external, __report__) {
 		reg = /data-enable-search-as-you-type=.?true/g;
 		matches = content.match(reg);
 		if (matches) {
-			report += '<b>Search As You Type found:</b><br><span class="mycode" >';
+			report += '<BR><b>Search As You Type found:</b><br><span class="mycode" >';
 			__report__.usingSearchAsYouType = true;
 			reg = /[.\S\s ]{10}data-enable-search-as-you-type=.?true[.\S\s ]{40}/g;
 			matches = content.match(reg);
@@ -408,13 +408,14 @@ function parseScript(name, content, all, external, __report__) {
 	}
 	if (report !== '') {
 		if (external) {
-			report = "<br><b><strong>Found in file: <a target='_blank' href='" + name + "'>" + name.substr(name.length - 45) + "</a></strong></b><BR>" + report;
+			report = "<br><hr><b><strong>Found in file: <a target='_blank' href='" + name + "'>" + name.substr(name.length - 45) + "</a></strong></b><BR>" + report;
 		}
 		else {
-			report = "<br><b><strong>Found In file: " + name + "</strong></b><BR>" + report;
+			report = "<br><hr><b><strong>Found In file: " + name + "</strong></b><BR>" + report;
 		}
 
 	}
+	__report__.details+=report;
 	return __report__;
 }
 
@@ -453,6 +454,7 @@ function initReport() {
 		usingTabs: false,
 		usingContext: false,
 		usingTokens: false,
+		details: '',
 		/*usingFilterField: false,
 		usingDQ: false,*/
 	};
@@ -499,9 +501,10 @@ function getReport() {
 			//External, load it
 			let all = true;
 			let src = _script_.src;
-			// if (src.includes('/js/CoveoJsSearch') || src.includes('/coveoua.js') || src.includes('/CoveoForSitecore') || src.includes('/core.js')) {
-			// 	all = false;
-			// }
+			//if (src.includes('/js/CoveoJsSearch') || src.includes('/coveoua.js') || src.includes('/CoveoForSitecore') || src.includes('/core.js')) {
+			if (src.includes('/coveoua.js') || src.includes('/CoveoForSitecore') || src.includes('/core.js')) {
+			 	all = false;
+			 }
 
 			let sourceContent = '';
 
@@ -532,6 +535,9 @@ function getReport() {
 			if (sourceContent) {
 				if (sourceContent.includes('if( window.Coveo === undefined) {')) {
 					//cont=false;
+					all = false;
+				}
+				if (sourceContent.includes('return window&&window.Coveo&&window.Coveo.$?window.Coveo')){
 					all = false;
 				}
 				if (sourceContent.startsWith('webpackJsonpCoveo')) {
@@ -709,7 +715,7 @@ function getReport() {
 	//Details
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Detailed information:</b></tr>";
 	report += "<tr><td colspan=2 style='text-align:left'>" + detailed_report + "</td></tr>";
-
+   // theReport.details = detailed_report;
 	// $('#myreportdetails').html(report);
 
 	return theReport;
