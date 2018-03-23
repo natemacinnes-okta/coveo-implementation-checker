@@ -99,6 +99,23 @@ h3 i {
   flex: 1;
 }
 
+.coveo-styleguide table:not(.datepicker-table) tr:hover td {
+  background-color: transparent;
+}
+
+#details {
+  
+}
+#details b {
+  font-weight: bold;
+}
+
+#details i {
+  font-style: italic;
+}
+
+.mycode {  font-family:courier;  }
+
 .coveo-styleguide .collapsible .collapsible-header .details {
   color: #ce3f00;
   font-size: 8px;
