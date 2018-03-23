@@ -444,8 +444,8 @@ function initReport() {
 		usingCustomEvents: false,
 		usingFacets: false,
 		usingLazy: false,
-		usingLQ: false,
-		usingPartialMatch: false,
+		/*usingLQ: false,
+		usingPartialMatch: false,*/
 		usingQRE: false,
 		usingRecommendations: false,
 		usingSearchAsYouType: false,
@@ -453,8 +453,8 @@ function initReport() {
 		usingTabs: false,
 		usingContext: false,
 		usingTokens: false,
-		usingFilterField: false,
-		usingDQ: false,
+		/*usingFilterField: false,
+		usingDQ: false,*/
 	};
 
 	return THIS_PAGE_COVEO_REPORT;
