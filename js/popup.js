@@ -93,7 +93,10 @@ let processReport = (data) => {
         { key: 'usingQRE', label: 'Using QRE', hint: 'QRE needs more finetuning to have better relevance', expected: false },
         { key: 'usingFilterField', label: 'Using Filter Field (Folding)', hint: 'Folding needs seperate result templates, more UI code', expected: false },
         { key: 'usingContext', label: 'Using Context', hint: 'Context needs more setup in Analytics/Pipelines and/or ML', expected: false },
-        { key: 'pipelines', label: 'Using Query Pipelines', hint: 'Dedicated Query Pipelines should be setup', expected: 'default' },
+        { key: 'pipelines', label: 'Using Query Pipelines', hint: 'Dedicated Query Pipelines should be setup', expected: {
+               test: value => (value != 'default')
+           }
+        },
         { key: 'usingTokens', label: 'Using Options.Tokens', hint: 'Hard coded tokens (except for public sites) should not be used', expected: false },
         { key: 'hardcodedAccessTokens', label: 'Using accesToken', hint: 'Hard coded accessToken (except for public sites) should not be used', expected: false },
         { key: 'usingCustomEvents', label: 'Using Custom Events', hint: 'Overriding custom events creates more complicated code', expected: false },
@@ -107,14 +110,26 @@ let processReport = (data) => {
     {
       title: 'UI information', label: 'UI', attributes: [
         { key: 'usingFacets', label: 'Using Facets', hint: 'Better user experience', expected: true },
-        { key: 'nroffacets', label: 'Active Facets in UI', hint: 'More Facets, slower queries, users get overwhelmed with information', expected: 5 },
+        { key: 'nroffacets', label: 'Active Facets in UI (<5)', hint: 'More Facets, slower queries, users get overwhelmed with information', expected: {
+          test: value => (value < 5)
+         }
+        },
         { key: 'usingTabs', label: 'Using Tabs', hint: 'Better user experience', expected: true },
-        { key: 'nrofsorts', label: 'Nr of Sorts', hint: 'More sorts, slower performance, users can get confused', expected: 3 },
+        { key: 'nrofsorts', label: 'No of Sorts (<3)', hint: 'More sorts, slower performance, users can get confused', expected: {
+          test: value => (value < 3)
+           }
+        },
         { key: 'usingRecommendations', label: 'Using ML Recommendations', hint: 'Better user experience, give them what they do not know', expected: true },
-        { key: 'nrOfResultTemplates', label: 'No of Result Templates', hint: 'More result templates, more complicated implementations', expected: 5 },
-        { key: 'underscoretemplates', label: 'No of Underscore Templates', hint: 'Try to use Result Templates as much as possible', expected: 0 },
-        { key: 'nrofraw', label: 'No raw field access in code', hint: 'More raw, more complicated implementations', expected: 5 },
-        { key: 'usingCulture', label: 'No of Cultures used', hint: 'Provide a UI in several cultures, better user experience', expected: 2 },
+        { key: 'nrOfResultTemplates', label: 'No of Result Templates (<5)', hint: 'More result templates, more complicated implementations', expected: {
+          test: value => (value < 5)
+        } },
+        { key: 'underscoretemplates', label: 'No of Underscore Templates (<5)', hint: 'Try to use Result Templates as much as possible', expected: 0 },
+        { key: 'nrofraw', label: 'No raw field access in code', hint: 'More raw, more complicated implementations', expected: {
+          test: value => (value < 5)
+        } },
+        { key: 'usingCulture', label: 'No of Cultures used', hint: 'Provide a UI in several cultures (>2), better user experience', expected: {
+          test: value => (value >=2 )
+        } },
 
       ]
     },
@@ -133,7 +148,22 @@ let processReport = (data) => {
   let scores = sectionCharts.map(createWheel);
   document.getElementById('scores').innerHTML = scores.join('\n');
 
-  document.getElementById('details').innerHTML = html.join('\n') + '<pre>' + JSON.stringify(data, 2, 2) + '</pre>';
+  let details=`<ul id="Details" class="collapsible" data-collapsible="expandable">
+  <li>
+      <button type="button" class="collapsible-header active btn with-icon">
+          <div class="msg">
+            Details
+          </div>
+      </button>
+      <div class="collapsible-body">
+        <table><tbody><tr><td>
+          ${data.details}
+        </tbody></td></tr></table>
+      </div>
+  </li>
+  </ul>`;
+  document.getElementById('details').innerHTML = html.join('\n')+details;
+  
   $('#details .collapsible').collapsible();
 
   $('#loading').hide();
