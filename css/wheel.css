@@ -3,6 +3,7 @@ div.wheel {
   text-align: center;
   margin: 5px 10px;
   cursor: default;
+  width: 180px;
 }
 
 div.wheel svg {
@@ -14,6 +15,7 @@ div.wheel svg {
 
 div.wheel .wheel-title {
   margin-top: 5px;
+  font-size: 1.4em;
 }
 
 div.wheel svg .back-ring {
