@@ -111,7 +111,12 @@ h3 i {
   font-style: italic;
 }
 
-.mycode {  font-family:courier;  }
+.mycode {  
+  font-family:courier;  
+  word-wrap:break-word;
+  white-space:pre-wrap;
+  word-break:break-all;
+}
 
 .coveo-styleguide .collapsible .collapsible-header .details {
   color: #ce3f00;
