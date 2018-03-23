@@ -76,22 +76,46 @@ let processReport = (data) => {
     {
       title: 'Behavior information', label: 'Behavior', attributes: [
         { key: 'nrofsearches', label: 'Nr of searches executed', hint: 'Should be 1', expected: 1 },
-        { key: 'searchSent', label: 'Search Events Sent', hint: 'Should be true', expected: true },
-        { key: 'analyticsSent', label: 'Analytics Sent', hint: 'Should be true', expected: true },
+        { key: 'searchSent', label: 'Search Events Sent', hint: 'Should be true, proper use of our Search API', expected: true },
+        { key: 'analyticsSent', label: 'Analytics Sent', hint: 'Should be true, proper use of Analytics and ML', expected: true },
         { key: 'usingSearchAsYouType', label: 'Using search as you type', hint: 'Degrades performance, should be false', expected: false },
-        { key: 'suggestSent', label: 'Using ML Powered Query Completions', hint: 'Should be true', expected: true },
-        { key: 'topQueriesSent', label: 'Using Analytics Query Completions', hint: 'Should be true. If ML Powered Query Completions enabled, then it should be false', expected: true },
+        { key: 'suggestSent', label: 'Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', expected: true },
+        { key: 'topQueriesSent', label: 'Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', expected: false },
       ]
     },
     {
       title: 'Implementation information', label: 'Implementation', attributes: [
-        { key: 'usingState', label: 'Using state in code', hint: 'more complicated', expected: false },
-        { key: 'partialMatchUsed', label: 'Using partial match', hint: 'more fine tuning needed', expected: false },
-        { key: 'lqUsed', label: 'Using Long Queries (ML)', hint: 'more fine tuning needed', expected: false },
-        { key: 'usingQRE', label: 'Using QRE', hint: 'more fine tuning needed', expected: false },
-        { key: 'filterFieldUsed', label: 'Using Filter Field (Folding)', hint: 'more fine tuning needed', expected: false },
-        { key: 'contextUsed', label: 'Using Context', hint: 'more fine tuning needed', expected: false },
-        // {key: '', label: '', hint: '', expected: 1},
+        { key: 'pageSize', label: 'Total page size', hint: 'more complicated' },
+        { key: 'usingState', label: 'Using state in code', hint: 'Retrieving state creates more complicated code logic', expected: false },
+        { key: 'usingPartialMatch', label: 'Using partial match', hint: 'Partial matching needs better tuning, match %, nr of words to match', expected: false },
+        { key: 'usingLQ', label: 'Using Long Queries (ML)', hint: 'Long Queries need ML capabilities, more tuning', expected: false },
+        { key: 'usingDQ', label: 'Using disjunction queries', hint: 'Disjunction (big OR query) could lead to false results, more tuning needed', expected: false },
+        { key: 'usingQRE', label: 'Using QRE', hint: 'QRE needs more finetuning to have better relevance', expected: false },
+        { key: 'usingFilterField', label: 'Using Filter Field (Folding)', hint: 'Folding needs seperate result templates, more UI code', expected: false },
+        { key: 'usingContext', label: 'Using Context', hint: 'Context needs more setup in Analytics/Pipelines and/or ML', expected: false },
+        { key: 'pipelines', label: 'Using Query Pipelines', hint: 'Dedicated Query Pipelines should be setup', expected: 'default' },
+        { key: 'usingTokens', label: 'Using Options.Tokens', hint: 'Hard coded tokens (except for public sites) should not be used', expected: false },
+        { key: 'hardcodedAccessTokens', label: 'Using accesToken', hint: 'Hard coded accessToken (except for public sites) should not be used', expected: false },
+        { key: 'usingCustomEvents', label: 'Using Custom Events', hint: 'Overriding custom events creates more complicated code', expected: false },
+        { key: 'usingAdditionalSearch', label: 'Using Additional Search Events', hint: 'Additional search events could create multiple queries, which could influence performance', expected: 0 },
+        { key: 'usingAdditionalAnalytics', label: 'Using Additional Analytic Events', hint: 'Addtional Analytic events is a must with custom behavior, if that is not the case it should not be needed', expected: 0 },
+        { key: 'onpremise', label: 'On-premise Installation', hint: 'On-premise installation, consider moving to the Cloud', expected: false },
+        { key: 'searchToken', label: 'Search Token used', hint: '' },
+        { key: 'analyticsToken', label: 'Analytics Token used', hint: '' },
+          ]
+    },
+    {
+      title: 'UI information', label: 'UI', attributes: [
+        { key: 'usingFacets', label: 'Using Facets', hint: 'Better user experience', expected: true },
+        { key: 'nroffacets', label: 'Active Facets in UI', hint: 'More Facets, slower queries, users get overwhelmed with information', expected: 5 },
+        { key: 'usingTabs', label: 'Using Tabs', hint: 'Better user experience', expected: true },
+        { key: 'nrofsorts', label: 'Nr of Sorts', hint: 'More sorts, slower performance, users can get confused', expected: 3 },
+        { key: 'usingRecommendations', label: 'Using ML Recommendations', hint: 'Better user experience, give them what they do not know', expected: true },
+        { key: 'nrOfResultTemplates', label: 'No of Result Templates', hint: 'More result templates, more complicated implementations', expected: 5 },
+        { key: 'underscoretemplates', label: 'No of Underscore Templates', hint: 'Try to use Result Templates as much as possible', expected: 0 },
+        { key: 'nrofraw', label: 'No raw field access in code', hint: 'More raw, more complicated implementations', expected: 5 },
+        { key: 'usingCulture', label: 'No of Cultures used', hint: 'Provide a UI in several cultures, better user experience', expected: 2 },
+
       ]
     },
   ];

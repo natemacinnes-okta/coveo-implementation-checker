@@ -424,6 +424,7 @@ function initReport() {
 		customEvents: [],
 		difficulty: 0,
 		theUrl: '',
+		pageSize: '',
 		fromSystem: 'Unknown',
 		hardcodedAccessTokens: false,
 		indicator: 0,
@@ -450,7 +451,10 @@ function initReport() {
 		usingSearchAsYouType: false,
 		usingState: false,
 		usingTabs: false,
+		usingContext: false,
 		usingTokens: false,
+		usingFilterField: false,
+		usingDQ: false,
 	};
 
 	return THIS_PAGE_COVEO_REPORT;
@@ -483,9 +487,9 @@ function getReport() {
 
 	// TODO - count FAILURES
 	// let analyticsFailures = $('#myanalyticsfailure').length;
-	let analyticsFailures = $('#myanalyticsfailure').length;
+	let analyticsFailures = document.querySelectorAll('#myanalyticsfailure').length;
 	theReport.analyticsFailures = analyticsFailures;
-	
+
 	detailed_report += parseScript('Original HTML', html, true, false, theReport);
 	//We now want to load all scripts
 	//For each script we want:
@@ -608,7 +612,7 @@ function getReport() {
 	//implementation
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Implementation information:</b></tr>";
 	report += "<tr><td>Pagesize in kB:</td><td>" + Math.round(pageSize / 1024) + " kB</td></tr>";
-
+    theReport.pageSize = Math.round(pageSize / 1024)+' kB';
 	indic = 'lightgreen';
 	if (theReport.usingState) { indic = '#ef1a45'; }
 	report += "<tr><td>Using state in code<br>(more complicated):</td><td style='background-color:" + indic + "'>" + theReport.usingState + "</td></tr>";
