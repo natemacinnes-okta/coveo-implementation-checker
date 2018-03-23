@@ -79,8 +79,10 @@ let processReport = (data) => {
         { key: 'searchSent', label: 'Search Events Sent', hint: 'Should be true, proper use of our Search API', expected: true },
         { key: 'analyticsSent', label: 'Analytics Sent', hint: 'Should be true, proper use of Analytics and ML', expected: true },
         { key: 'usingSearchAsYouType', label: 'Using search as you type', hint: 'Degrades performance, should be false', expected: false },
-        { key: 'suggestSent', label: 'Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', expected: true },
-        { key: 'topQueriesSent', label: 'Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', expected: false },
+        { key: 'initSuggestSent', label: 'Searchbox, Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', expected: true },
+        { key: 'initTopQueriesSent', label: 'Searchbox, Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', expected: false },
+        { key: 'suggestSent', label: 'Full Search Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', expected: true },
+        { key: 'topQueriesSent', label: 'Full Search Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', expected: false },
       ]
     },
     {

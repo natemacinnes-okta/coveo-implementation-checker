@@ -10,7 +10,9 @@ var analyticsSent;
 var nrofsearches;
 var searchSent;
 var suggestSent;
+var initSuggestSent;
 var topQueriesSent;
+var initTopQueriesSent;
 var ready;
 var myenabled;
 var myenabledsearch;
@@ -38,6 +40,8 @@ function setEnabled(enabled) {
 function setEnabledSearch(enabled) {
   myenabledsearch = enabled;
   nrofsearches = 0;
+  suggestSent=false;
+  topQueriesSent=false;
 }
 
 
@@ -124,6 +128,8 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         usingContext: usingContext,
         alertsError: alertsError,
         searchToken: searchToken,
+        initSuggestSent: initSuggestSent,
+        initTopQueriesSent: initTopQueriesSent,
         analyticsToken: analyticsToken}});
      }
   else {
@@ -194,6 +200,8 @@ function reset() {
   searchSent = false;
   analyticsSent = false;
   topQueriesSent = false;
+  initSuggestSent = false;
+  initTopQueriesSent = false;
   myenabled = true;
   usingDQ = false;
   usingLQ = false;
@@ -240,8 +248,17 @@ chrome.tabs.onUpdated.addListener(function (tabId, info) {
 var responseSearch = function (details) {
   if (myenabled) {
     if (details.url.includes('querySuggest')) {
-      console.log("CATCHED querySuggest " + details.url);
-      suggestSent = true;
+      if (myenabledsearch)
+      {
+        console.log("CATCHED querySuggest " + details.url);
+        suggestSent = true;
+  
+      }
+      else
+      {
+      console.log("CATCHED INIT querySuggest " + details.url);
+      initSuggestSent = true;
+      }
     }
     else {
       console.log("CATCHED Search " + details.url);
@@ -297,8 +314,17 @@ var responseSearch = function (details) {
 var responseAnalytics = function (details) {
   if (myenabled) {
     if (details.url.includes('topQueries')) {
-      console.log("CATCHED topQueries " + details.url);
-      topQueriesSent = true;
+      if (myenabledsearch)
+      {
+        console.log("CATCHED topQueries " + details.url);
+        topQueriesSent = true;
+  
+      }
+      else
+      {
+      console.log("CATCHED init topQueries " + details.url);
+        initTopQueriesSent = true;
+      }
     }
     else {
       console.log("CATCHED Analytics " + details.url);
