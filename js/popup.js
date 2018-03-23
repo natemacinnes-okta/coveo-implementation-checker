@@ -65,6 +65,7 @@ let processReport = (data) => {
   let sections = [
     {
       title: 'General information', label: 'General', attributes: [
+        { key: 'theUrl', label: 'Url', hint: '' },
         { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3679', expected: /^2\.3679/ },
         { key: 'fromSystem', label: 'Integrated in UI' },
         { key: 'hardcodedAccessTokens', label: 'Hard coded Access Tokens', hint: 'Should NOT be done!!', expected: false },
