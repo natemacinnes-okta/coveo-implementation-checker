@@ -15,11 +15,11 @@ var ready;
 var myenabled;
 var myenabledsearch;
 var port;
-var dqUsed;
-var lqUsed;
-var filterFieldUsed;
-var partialMatchUsed;
-var contextUsed;
+var usingDQ;
+var usingLQ;
+var usingFilterField;
+var usingPartialMatch;
+var usingContext;
 var alertsError;
 var visible;
 var analyticsToken;
@@ -117,11 +117,11 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         suggestSent: suggestSent,
         nrofsearches: nrofsearches,
         //image: image,
-        dqUsed: dqUsed,
-        lqUsed: lqUsed,
-        filterFieldUsed: filterFieldUsed,
-        partialMatchUsed: partialMatchUsed,
-        contextUsed: contextUsed,
+        usingDQ: usingDQ,
+        usingLQ: usingLQ,
+        usingFilterField: usingFilterField,
+        usingPartialMatch: usingPartialMatch,
+        usingContext: usingContext,
         alertsError: alertsError,
         searchToken: searchToken,
         analyticsToken: analyticsToken}});
@@ -143,11 +143,11 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   //     suggestSent: suggestSent,
   //     nrofsearches: nrofsearches,
   //     //image: image,
-  //     dqUsed: dqUsed,
-  //     lqUsed: lqUsed,
-  //     filterFieldUsed: filterFieldUsed,
-  //     partialMatchUsed: partialMatchUsed,
-  //     contextUsed: contextUsed,
+  //     usingDQ: usingDQ,
+  //     usingLQ: usingLQ,
+  //     usingFilterField: usingFilterField,
+  //     usingPartialMatch: usingPartialMatch,
+  //     usingContext: usingContext,
   //     alertsError: alertsError,
   //     searchToken: searchToken,
   //     analyticsToken: analyticsToken
@@ -195,17 +195,19 @@ function reset() {
   analyticsSent = false;
   topQueriesSent = false;
   myenabled = true;
-  dqUsed = false;
-  lqUsed = false;
+  usingDQ = false;
+  usingLQ = false;
   alertsError = "";
-  filterFieldUsed = false;
-  partialMatchUsed = false;
-  contextUsed = false;
+  usingFilterField = false;
+  usingPartialMatch = false;
+  usingContext = false;
   visible = false;
   myenabledsearch = false;
   analyticsToken = '';
   searchToken = '';
 }
+
+
 
 chrome.tabs.onActiveChanged.addListener(function (tabId, changeInfo, tab) {
   //reset();
@@ -265,19 +267,19 @@ var responseSearch = function (details) {
           try {
             if (postedString != undefined) {
               if (postedString.indexOf('dq=') != -1) {
-                dqUsed = true;
+                usingDQ = true;
               }
               if (postedString.indexOf('lq=') != -1) {
-                lqUsed = true;
+                usingLQ = true;
               }
               if (postedString.indexOf('filterField=') != -1) {
-                filterFieldUsed = true;
+                usingFilterField = true;
               }
               if (postedString.indexOf('partialMatch=true') != -1) {
-                partialMatchUsed = true;
+                usingPartialMatch = true;
               }
               if (postedString.indexOf('context=') != -1) {
-                contextUsed = true;
+                usingContext = true;
               }
             }
 
