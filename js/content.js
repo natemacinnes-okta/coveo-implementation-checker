@@ -428,10 +428,14 @@ function initReport() {
 		hardcodedAccessTokens: false,
 		indicator: 0,
 		nrofraw: 0,
+		nroffacets: 0,
+		nrofsorts: 0,
 		nrOfResultTemplates: 0,
 		onpremise: false,
 		pipelines: '',
 		responsive: false,
+		analyticsFailures: 0,
+		underscoretemplates: 0,
 		uiVersion: 'Not present',
 		usingAdditionalAnalytics: 0,
 		usingAdditionalSearch: 0,
@@ -479,7 +483,9 @@ function getReport() {
 
 	// TODO - count FAILURES
 	// let analyticsFailures = $('#myanalyticsfailure').length;
-
+	let analyticsFailures = $('#myanalyticsfailure').length;
+	theReport.analyticsFailures = analyticsFailures;
+	
 	detailed_report += parseScript('Original HTML', html, true, false, theReport);
 	//We now want to load all scripts
 	//For each script we want:
