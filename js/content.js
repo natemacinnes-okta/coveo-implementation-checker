@@ -498,15 +498,22 @@ function getReport() {
 			// TODO -- PARSE ALL SCRIPTS
 
 			if (all) {
-				let request = new XMLHttpRequest();
-				request.open('GET', src, false);  // `false` makes the request synchronous
-				request.send(null);
+				try
+				{
+					let request = new XMLHttpRequest();
+					request.open('GET', src, false);  // `false` makes the request synchronous
+					request.send(null);
 
-				if (request.status === 200) {
-					sourceContent = request.responseText;
-					if (sourceContent !== undefined) {
-						pageSize += sourceContent.length;
+					if (request.status === 200) {
+						sourceContent = request.responseText;
+						if (sourceContent !== undefined) {
+							pageSize += sourceContent.length;
+						}
 					}
+				}
+				catch(e)
+				{
+					console.log("Error loading script: "+src);
 				}
 			}
 			//Do not parse internal files
