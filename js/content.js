@@ -12,7 +12,7 @@ function addConsoleTracker() {
 	html += " var old = console.log;";
 	html += " console.log = function(){";
 	html += "    var message = Array.prototype.slice.apply(arguments).join(' '); ";
-	html += "      if (message.indexOf('A search was triggered, but no analytics')!=-1) {";
+	html += "      if (message.indexOf('A search was triggered, but no analytics')!=-1 || message.indexOf('warnAboutSearchEvent')!=-1) {";
 	html += "          $('body').append('<div id=myanalyticsfailure></div>'); ";
 	html += "      Array.prototype.unshift.call(arguments, 'MAYDAY: '); ";
 	html += "      }";
