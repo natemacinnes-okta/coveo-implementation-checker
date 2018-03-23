@@ -9,8 +9,12 @@ let processDetail = (section, data, tests) => {
       value = data[attr.key],
       hint = '';
     let additionalClass = '';
+    let mandatory = false;
     if (attr.additionalClass !== undefined) {
       additionalClass = attr.additionalClass;
+    }
+    if (attr.mandatory !== undefined) {
+      mandatory = true;
     }
     if (attr.expected !== undefined) {
       let isValid = false;
@@ -22,7 +26,14 @@ let processDetail = (section, data, tests) => {
       }
 
       if (isValid) {
-        tests.passed++;
+        //If it should not be calculated for the total score
+        if (attr.notForTotal !== undefined)
+        {
+        }
+        else
+        {
+          tests.passed++;
+        }
       }
       else {
         // show hints when invalid.
@@ -30,8 +41,26 @@ let processDetail = (section, data, tests) => {
       }
 
       isValidCssClass = 'valid-' + isValid;
+      if (mandatory){
+        if (isValid)
+        {
+          isValidCssClass += ' mandatory';
+        }
+        else
+        {
+          isValidCssClass += ' mandatoryFAIL';
+          
+        }
+      }
     }
-    tests.total++;
+    //If it should not be calculated for the total score
+    if (attr.notForTotal !== undefined)
+    {
+    }
+    else
+    {
+      tests.total++;
+    }
 
     return `<tr class="${isValidCssClass}">
         <td class="line-message">
@@ -72,20 +101,20 @@ let processReport = (data) => {
         { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3679', expected: /^2\.3679/ },
         { key: 'fromSystem', label: 'Integrated in UI' },
         { key: 'hardcodedAccessTokens', label: 'Hard coded Access Tokens', hint: 'Should NOT be done!!', expected: false },
-        { key: 'alertsError', label: 'No Search alerts error', hint: `Bad access to search alert subscriptions Or remove component class='CoveoSearchAlerts'`, expected: '' },
-        { key: 'analyticsFailures', label: 'Searches executed without sending analytics', hint: 'Manual triggered search did not sent analytics', expected: 0 },
+        { key: 'alertsError', mandatory: true, label: 'No Search alerts error', hint: `Bad access to search alert subscriptions Or remove component class='CoveoSearchAlerts'`, expected: '' },
+        { key: 'analyticsFailures',mandatory: true, label: 'Searches executed without sending analytics', hint: 'Manual triggered search did not sent analytics', expected: 0 },
       ]
     },
     {
       title: 'Behavior information', label: 'Behavior', attributes: [
         { key: 'nrofsearches', label: 'Nr of searches executed', hint: 'Should be 1', expected: 1 },
-        { key: 'searchSent', label: 'Search Events Sent', hint: 'Should be true, proper use of our Search API', expected: true },
-        { key: 'analyticsSent', label: 'Analytics Sent', hint: 'Should be true, proper use of Analytics and ML', expected: true },
+        { key: 'searchSent', mandatory: true,label: 'Search Events Sent', hint: 'Should be true, proper use of our Search API', expected: true },
+        { key: 'analyticsSent', mandatory: true,label: 'Analytics Sent', hint: 'Should be true, proper use of Analytics and ML', expected: true },
         { key: 'usingSearchAsYouType', label: 'Using search as you type', hint: 'Degrades performance, should be false', expected: false },
-        { key: 'initSuggestSent', label: 'Searchbox, Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', expected: true },
-        { key: 'initTopQueriesSent', label: 'Searchbox, Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', expected: false },
-        { key: 'suggestSent', label: 'Full Search Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', expected: true },
-        { key: 'topQueriesSent', label: 'Full Search Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', expected: false },
+        { key: 'initSuggestSent', mandatory: true,label: 'Searchbox, Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', expected: true },
+        { key: 'initTopQueriesSent', notForTotal: true, label: 'Searchbox, Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', expected: false },
+        { key: 'suggestSent',mandatory: true, label: 'Full Search Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', expected: true },
+        { key: 'topQueriesSent', notForTotal: true, label: 'Full Search Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', expected: false },
       ]
     },
     {
@@ -105,12 +134,12 @@ let processReport = (data) => {
         { key: 'usingQRE', label: 'Using QRE', hint: 'QRE needs more finetuning to have better relevance', expected: false },
         { key: 'usingFilterField', label: 'Using Filter Field (Folding)', hint: 'Folding needs seperate result templates, more UI code', expected: false },
         { key: 'usingContext', label: 'Using Context', hint: 'Context needs more setup in Analytics/Pipelines and/or ML', expected: false },
-        { key: 'pipelines', label: 'Using Query Pipelines', hint: 'Dedicated Query Pipelines should be setup', expected: {
+        { key: 'pipelines', mandatory: true, label: 'Using Query Pipelines', hint: 'Dedicated Query Pipelines should be setup', expected: {
                test: value => (value != 'default' && value !='')
            }
         },
         { key: 'usingTokens', label: 'Using Options.Tokens', hint: 'Hard coded tokens (except for public sites) should not be used', expected: false },
-        { key: 'hardcodedAccessTokens', label: 'Using accesToken', hint: 'Hard coded accessToken (except for public sites) should not be used', expected: false },
+        { key: 'hardcodedAccessTokens', mandatory: true, label: 'Using accesToken', hint: 'Hard coded accessToken (except for public sites) should not be used', expected: false },
         { key: 'usingCustomEvents', label: 'Using Custom Events', hint: 'Overriding custom events creates more complicated code', expected: false },
         { key: 'usingAdditionalSearch', label: 'Using Additional Search Events', hint: 'Additional search events could create multiple queries, which could influence performance', expected: 0 },
         { key: 'usingAdditionalAnalytics', label: 'Using Additional Analytic Events', hint: 'Addtional Analytic events is a must with custom behavior, if that is not the case it should not be needed', expected: 0 },
@@ -121,7 +150,7 @@ let processReport = (data) => {
     },
     {
       title: 'UI information', label: 'UI', attributes: [
-        { key: 'usingFacets', label: 'Using Facets', hint: 'Better user experience', expected: true },
+        { key: 'usingFacets', mandatory: true, label: 'Using Facets', hint: 'Better user experience', expected: true },
         { key: 'nroffacets', label: 'Active Facets in UI (<5)', hint: 'More Facets, slower queries, users get overwhelmed with information', expected: {
           test: value => (value < 5)
          }
@@ -159,7 +188,8 @@ let processReport = (data) => {
 
   let scores = sectionCharts.map(createWheel);
   document.getElementById('scores').innerHTML = scores.join('\n');
-
+  $('#legend').show();
+  
   let details=`<ul id="Details" class="collapsible" data-collapsible="expandable">
   <li>
       <button type="button" class="collapsible-header active btn with-icon">
@@ -317,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function () {
     jQueryEventObject.preventDefault();
   });
   $('#myscreenimage').css('background-image', 'none').hide();
-
+  $('#legend').hide();
   $('#showInstructions').click(() => {
     $('#instructions').show();
   });

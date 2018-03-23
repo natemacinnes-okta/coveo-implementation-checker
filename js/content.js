@@ -451,6 +451,7 @@ function initReport() {
 		usingQRE: false,
 		usingRecommendations: false,
 		usingSearchAsYouType: false,
+		
 		usingState: false,
 		usingTabs: false,
 		usingContext: false,
@@ -720,6 +721,7 @@ function getReport() {
    // theReport.details = detailed_report;
 	// $('#myreportdetails').html(report);
 	theReport.loadtime = (Date.now()-startTime)/1000;//Load time in seconds
-	
+	//Set searchcompletions
+
 	return theReport;
 }
