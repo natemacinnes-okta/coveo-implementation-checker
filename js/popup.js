@@ -94,7 +94,7 @@ let processReport = (data) => {
         { key: 'usingFilterField', label: 'Using Filter Field (Folding)', hint: 'Folding needs seperate result templates, more UI code', expected: false },
         { key: 'usingContext', label: 'Using Context', hint: 'Context needs more setup in Analytics/Pipelines and/or ML', expected: false },
         { key: 'pipelines', label: 'Using Query Pipelines', hint: 'Dedicated Query Pipelines should be setup', expected: {
-               test: value => (value != 'default')
+               test: value => (value != 'default' && value !='')
            }
         },
         { key: 'usingTokens', label: 'Using Options.Tokens', hint: 'Hard coded tokens (except for public sites) should not be used', expected: false },
