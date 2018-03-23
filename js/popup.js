@@ -69,7 +69,7 @@ let processReport = (data) => {
         { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3679', expected: /^2\.3679/ },
         { key: 'fromSystem', label: 'Integrated in UI' },
         { key: 'hardcodedAccessTokens', label: 'Hard coded Access Tokens', hint: 'Should NOT be done!!', expected: false },
-        { key: 'alertsError', label: 'Search alerts error', hint: `Bad access to search alert subscriptions Or remove component class='CoveoSearchAlerts'`, expected: '' },
+        { key: 'alertsError', label: 'No Search alerts error', hint: `Bad access to search alert subscriptions Or remove component class='CoveoSearchAlerts'`, expected: '' },
         { key: 'analyticsFailures', label: 'Searches executed without sending analytics', hint: 'Manual triggered search did not sent analytics', expected: 0 },
       ]
     },
