@@ -432,6 +432,7 @@ function initReport() {
 		nrofraw: 0,
 		nroffacets: 0,
 		nrofsorts: 0,
+		loadtime: 0,
 		nrOfResultTemplates: 0,
 		onpremise: false,
 		pipelines: '',
@@ -464,6 +465,7 @@ function initReport() {
 
 function getReport() {
 	let theReport = initReport();
+	let startTime = Date.now();
 	let html = document.documentElement.outerHTML;
 	let pageSize = html.length;
 
@@ -618,7 +620,7 @@ function getReport() {
 	//implementation
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Implementation information:</b></tr>";
 	report += "<tr><td>Pagesize in kB:</td><td>" + Math.round(pageSize / 1024) + " kB</td></tr>";
-    theReport.pageSize = Math.round(pageSize / 1024)+' kB';
+    theReport.pageSize = Math.round(pageSize / 1024);
 	indic = 'lightgreen';
 	if (theReport.usingState) { indic = '#ef1a45'; }
 	report += "<tr><td>Using state in code<br>(more complicated):</td><td style='background-color:" + indic + "'>" + theReport.usingState + "</td></tr>";
@@ -717,6 +719,7 @@ function getReport() {
 	report += "<tr><td colspan=2 style='text-align:left'>" + detailed_report + "</td></tr>";
    // theReport.details = detailed_report;
 	// $('#myreportdetails').html(report);
-
+	theReport.loadtime = (Date.now()-startTime)/1000;//Load time in seconds
+	
 	return theReport;
 }

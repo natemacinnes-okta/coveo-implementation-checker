@@ -8,7 +8,10 @@ let processDetail = (section, data, tests) => {
     let isValidCssClass = '',
       value = data[attr.key],
       hint = '';
-
+    let additionalClass = '';
+    if (attr.additionalClass !== undefined) {
+      additionalClass = attr.additionalClass;
+    }
     if (attr.expected !== undefined) {
       let isValid = false;
       if (attr.expected.test) {
@@ -35,7 +38,7 @@ let processDetail = (section, data, tests) => {
           ${attr.label}
           <small>${hint}</small>
         </td>
-        <td class="line-result">${value}</td>
+        <td class="line-result ${additionalClass}">${value}</td>
       </tr>`;
   });
 
@@ -87,7 +90,14 @@ let processReport = (data) => {
     },
     {
       title: 'Implementation information', label: 'Implementation', attributes: [
-        { key: 'pageSize', label: 'Total page size', hint: 'more complicated' },
+        { key: 'pageSize', label: 'Total page size (kB) (<3000)', hint: 'Bigger pages are loading slower, bad user experience' , expected: {
+          test: value => (value < 3000)
+           }
+        },
+        { key: 'loadtime', label: 'Total load time (s) (<2)', hint: 'Longer loading, bad user experience', expected: {
+          test: value => (value < 2)
+           }
+        },
         { key: 'usingState', label: 'Using state in code', hint: 'Retrieving state creates more complicated code logic', expected: false },
         { key: 'usingPartialMatch', label: 'Using partial match', hint: 'Partial matching needs better tuning, match %, nr of words to match', expected: false },
         { key: 'usingLQ', label: 'Using Long Queries (ML)', hint: 'Long Queries need ML capabilities, more tuning', expected: false },
@@ -105,8 +115,8 @@ let processReport = (data) => {
         { key: 'usingAdditionalSearch', label: 'Using Additional Search Events', hint: 'Additional search events could create multiple queries, which could influence performance', expected: 0 },
         { key: 'usingAdditionalAnalytics', label: 'Using Additional Analytic Events', hint: 'Addtional Analytic events is a must with custom behavior, if that is not the case it should not be needed', expected: 0 },
         { key: 'onpremise', label: 'On-premise Installation', hint: 'On-premise installation, consider moving to the Cloud', expected: false },
-        { key: 'searchToken', label: 'Search Token used', hint: '' },
-        { key: 'analyticsToken', label: 'Analytics Token used', hint: '' },
+        { key: 'searchToken', additionalClass:'mycode', label: 'Search Token used', hint: '' },
+        { key: 'analyticsToken', additionalClass:'mycode', label: 'Analytics Token used', hint: '' },
           ]
     },
     {
@@ -307,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
     jQueryEventObject.preventDefault();
   });
   $('#myscreenimage').css('background-image', 'none').hide();
-  
+
   $('#showInstructions').click(() => {
     $('#instructions').show();
   });

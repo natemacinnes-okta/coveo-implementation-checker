@@ -115,6 +115,7 @@ h3 i {
 
 .mycode {  
   font-family:courier;  
+  font-weight: normal !important;
   word-wrap:break-word;
   white-space:pre-wrap;
   word-break:break-all;
@@ -177,7 +178,7 @@ tr td.line-message small {
 
 tr td.line-message {
   text-align:right;
-  width:400px;
+  width:350px;
 }
 tr td.line-result {
   background-position: left 5px top 12px;
@@ -187,7 +188,7 @@ tr td.line-result {
   word-wrap:break-word;
   white-space:pre-wrap;
   word-break:break-all;
-  width: 400px;
+  width: 450px;
 
 }
 
