@@ -1,11 +1,10 @@
 html {
   width: 100%;
-  height: 800px;
   height: 600px;
 }
 body {
-  width: 600px;
-  height: 600px;
+  width: 800px;
+  height: 800px;
 }
 
 header.header {
@@ -131,13 +130,20 @@ h3 i {
 }
 
 .coveo-styleguide .collapsible .collapsible-body {
-  padding: 0 10px 10px;
+  /*padding: 0 10px 10px;*/
+  padding: 0;
 }
 
 .coveo-styleguide table:not(.datepicker-table) td.line-result {
   font-variant: small-caps;
-  text-align: center;
+  text-align: left;
+  font-weight: bold;
   vertical-align: top;
+  
+}
+
+.coveo-styleguide table:not(.datepicker-table) th:last-child, .coveo-styleguide table:not(.datepicker-table) td:last-child {
+  padding-left: 25px;
 }
 
 tr td.line-message small {
@@ -146,11 +152,17 @@ tr td.line-message small {
   display: block;
 }
 
+
+tr td.line-message {
+  text-align:right;
+  width:400px;
+}
 tr td.line-result {
-  background-position: right top 12px;
+  background-position: left 5px top 12px;
   background-repeat: no-repeat;
   background-size: 12px;
-  text-align: center;
+  text-align: left;
+  
 }
 
 .valid-true td.line-result {
