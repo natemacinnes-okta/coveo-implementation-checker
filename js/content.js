@@ -559,7 +559,8 @@ function getReport() {
 
 		}
 		else {
-			let name = 'Original file, ';
+			//Looks like we do not have to do this, because we already got it when parsing the full page...
+			/*let name = 'Original file, ';
 			if (_script_.className !==""){
                 name += " "+_script_.className;
 			}
@@ -567,7 +568,7 @@ function getReport() {
 			{
                 name += " Inner script.";
 			}
-			detailed_report += parseScript(name, _script_.innerHTML, true, false, theReport);
+			detailed_report += parseScript(name, _script_.innerHTML, true, false, theReport);*/
 		}
 	});
 	//var mes=$.getScript($('script')[2].src);
