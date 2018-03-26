@@ -155,18 +155,18 @@ let processReport = (data) => {
     {
       title: 'UI information', label: 'UI', attributes: [
         { key: 'usingFacets', mandatory: true, label: 'Using Facets', hint: 'Better user experience', expected: true },
-        { key: 'nroffacets', label: 'Active Facets in UI (<5)', hint: 'More Facets, slower queries, users get overwhelmed with information', expected: {
-          test: value => (value < 5)
+        { key: 'nroffacets', label: 'Active Facets in UI (2-5)', hint: 'More Facets, slower queries, users get overwhelmed with information', expected: {
+          test: value => (value >=2 && value <= 5)
          }
         },
         { key: 'usingTabs', label: 'Using Tabs', hint: 'Better user experience', expected: true },
-        { key: 'nrofsorts', label: 'No of Sorts (<3)', hint: 'More sorts, slower performance, users can get confused', expected: {
-          test: value => (value < 3)
+        { key: 'nrofsorts', label: 'No of Sorts (1-3)', hint: 'More sorts, slower performance, users can get confused', expected: {
+          test: value => (value >=1 && value <= 3)
            }
         },
         { key: 'usingRecommendations', label: 'Using ML Recommendations', hint: 'Better user experience, give them what they do not know', expected: true },
-        { key: 'nrOfResultTemplates', label: 'No of Result Templates (<5)', hint: 'More result templates, more complicated implementations', expected: {
-          test: value => (value < 5)
+        { key: 'nrOfResultTemplates', label: 'No of Result Templates (2-5)', hint: 'More result templates, more complicated implementations', expected: {
+          test: value => (value >=2 && value <= 5)
         } },
         { key: 'underscoretemplates', label: 'No of Underscore Templates (<5)', hint: 'Try to use Result Templates as much as possible', expected: 0 },
         { key: 'nrofraw', label: 'No raw field access in code', hint: 'More raw, more complicated implementations', expected: {
