@@ -210,6 +210,30 @@ tr td.line-result {
   
 }
 
+
+.copy {
+  padding-left: 28px;
+  height: 25px;
+  line-height: 25px;
+  background-position: left 1px top 1px;
+  background-repeat: no-repeat;
+  background-size: 24px;
+  background-image: url(../images/copy.svg);
+}
+
+.copysmall {
+  width: 28px;
+  height: 25px;
+  position: relative;
+  left: 30px;
+  line-height: 25px;
+  background-position: left 5px top 1px;
+  background-repeat: no-repeat;
+  background-size: 24px;
+  background-image: url(../images/copy.svg);
+}
+
+
 .valid-true td.line-result {
   color: #009830;
   background-image: url(../images/checkbox-checkmark.svg);
