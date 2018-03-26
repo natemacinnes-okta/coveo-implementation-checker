@@ -27,6 +27,10 @@ var visible;
 var analyticsToken;
 var searchToken;
 var image;
+var visitor;
+var visitorChanged;
+var usingVisitor;
+var usingQuickview;
 
 
 function setEnabled(enabled) {
@@ -129,6 +133,9 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         alertsError: alertsError,
         searchToken: searchToken,
         initSuggestSent: initSuggestSent,
+        usingQuickview: usingQuickview,
+        usingVisitor: usingVisitor,
+        visitorChanged: visitorChanged,
         initTopQueriesSent: initTopQueriesSent,
         analyticsToken: analyticsToken}});
      }
@@ -213,6 +220,10 @@ function reset() {
   myenabledsearch = false;
   analyticsToken = '';
   searchToken = '';
+  visitor='';
+  usingVisitor = false;
+  visitorChanged = false;
+  usingQuickview= false;
 }
 
 
@@ -247,6 +258,9 @@ chrome.tabs.onUpdated.addListener(function (tabId, info) {
 
 var responseSearch = function (details) {
   if (myenabled) {
+    if (details.url.includes('/click') || details.url.includes('/open')){
+      usingQuickview = true;
+    }
     if (details.url.includes('querySuggest')) {
       if (myenabledsearch)
       {
@@ -327,6 +341,27 @@ var responseAnalytics = function (details) {
       }
     }
     else {
+      //Get the visitor
+      //url is like: https://usageanalytics.coveo.com/rest/v15/analytics/searches?visitor=baa899f0-0982-4ca4-b0b1-29ead6cce7e8
+      // or: ttps://help.salesforce.com/services/apexrest/coveo/analytics/rest/v15/analytics/searches?visitor=092861ef-30ee-4719-ae5d-2c6dcdcffbee&access_token=eyJhbGciOiJIUzI1NiJ9.eyJmaWx0ZXIiOiIoKChAb2JqZWN0dHlwZT09KExpc3RpbmdDKSkgKEBzZmxpc3RpbmdjcHVibGljYz09VHJ1ZSkpIE9SIChAb2JqZWN0dHlwZT09KEhURGV2ZWxvcGVyRG9jdW1lbnRzQykpIE9SICgoQG9iamVjdHR5cGU9PShIZWxwRG9jcykpIChAc3lzc291cmNlPT1cIlNpdGVtYXAgLSBQcm9kLURvY3NDYWNoZVwiKSAoTk9UI
+      var url= details.url+' ';
+      const regex = /visitor=(.*)[ &$]/g;
+      matches = url.match(regex);
+      if (matches){
+        console.log('Visitor: '+matches[0]+' found.');
+           if (visitor=='')
+           {
+             visitor = matches[0];
+             usingVisitor = true;
+           }
+           else
+           {
+             if (visitor!=matches[0]){
+               visitorChanged = true;
+               visitor = matches[0];
+             }
+           }
+      }
       console.log("CATCHED Analytics " + details.url);
       analyticsSent = true;
     }

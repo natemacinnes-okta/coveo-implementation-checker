@@ -80,6 +80,7 @@ let processDetail = (section, data, tests) => {
                 ${section.title}
               </div>
               <div class="result" style="">${score}</div>
+              <div class="copysmall" style=""></div>
           </button>
           <div class="collapsible-body">
             <table><tbody>
@@ -110,11 +111,14 @@ let processReport = (data) => {
         { key: 'nrofsearches', label: 'Nr of searches executed', hint: 'Should be 1', expected: 1 },
         { key: 'searchSent', mandatory: true,label: 'Search Events Sent', hint: 'Should be true, proper use of our Search API', expected: true },
         { key: 'analyticsSent', mandatory: true,label: 'Analytics Sent', hint: 'Should be true, proper use of Analytics and ML', expected: true },
+        { key: 'usingVisitor', mandatory: true,label: 'Using Visitor', hint: 'Should be true, proper use of Analytics and ML', expected: true },
+        { key: 'visitorChanged', mandatory: true,label: 'Visitor changed during session', hint: 'Should be false, proper use of Analytics and ML', expected: false },
         { key: 'usingSearchAsYouType', label: 'Using search as you type', hint: 'Degrades performance, should be false', expected: false },
         { key: 'initSuggestSent', mandatory: true,label: 'Searchbox, Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', expected: true },
         { key: 'initTopQueriesSent', notForTotal: true, label: 'Searchbox, Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', expected: false },
         { key: 'suggestSent',mandatory: true, label: 'Full Search Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', expected: true },
         { key: 'topQueriesSent', notForTotal: true, label: 'Full Search Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', expected: false },
+        { key: 'usingQuickview', mandatory: true, label: 'Sending Quickview/Open Analytics event', hint: 'Should be true, proper use of Analytics and ML', expected: true },
       ]
     },
     {
@@ -189,6 +193,7 @@ let processReport = (data) => {
   let scores = sectionCharts.map(createWheel);
   document.getElementById('scores').innerHTML = scores.join('\n');
   $('#legend').show();
+  $('#copy').show();
   
   let details=`<ul id="Details" class="collapsible" data-collapsible="expandable">
   <li>
@@ -348,6 +353,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   $('#myscreenimage').css('background-image', 'none').hide();
   $('#legend').hide();
+  $('#copy').hide();
   $('#showInstructions').click(() => {
     $('#instructions').show();
   });
