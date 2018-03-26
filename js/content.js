@@ -190,12 +190,12 @@ function parseScript(name, content, all, external, __report__) {
 	//Seems the below token is in the sample endpoint, we do not want to match that
 	//We need to remove the sampleTokens from the content
 	content = content.replace(/configureSampleEndpoint[\S\s]*\.configureCloudEndpoint ?=/g, '');
-	reg = /(accessToken[:=] ?[\"'](?!xx564559b1-0045-48e1-953c-3addd1ee4457)(.*?)[\"'])/g;
+	reg = /(\.accessToken[:=] ?[\"'](?!xx564559b1-0045-48e1-953c-3addd1ee4457)(.*?)[\"'])/g;
 	matches = content.match(reg);
 	if (matches) {
 		__report__.hardcodedAccessTokens = true;
 		report += '<BR><b>Hardcoded accessTokens:</b><br><span class="mycode">';
-		reg = /[.\S\s ]{10}(accessToken[:=] ?[\"'](?!xx564559b1-0045-48e1-953c-3addd1ee4457)(.*?)[\"'])[.\S\s ]{70}/g;
+		reg = /[.\S\s ]{10}(\.accessToken[:=] ?[\"'](?!xx564559b1-0045-48e1-953c-3addd1ee4457)(.*?)[\"'])[.\S\s ]{70}/g;
 		matches = content.match(reg);
 		report += addMatches(matches);
 	}
@@ -280,18 +280,18 @@ function parseScript(name, content, all, external, __report__) {
 		}
 
 		//usingTokens: "(options.token)|(options.accessToken)",
-		reg = /(options.token)|(options.accessToken)/g;
+		reg = /(options.token[ ]?=)|(options.accessToken[ ]?=)/g;
 		matches = content.match(reg);
 		if (matches) {
 			report += '<BR><b>Tokens:</b><br><span class="mycode" >';
-			reg = /[.\S\s ]{40}(options.token)[.\S\s ][.\S\s ]{40}|[.\S\s ]{40}(options.accessToken)[.\S\s ][.\S\s ]{40}/g;
+			reg = /[.\S\s ]{40}(options.token[ ]?=)[.\S\s ][.\S\s ]{40}|[.\S\s ]{40}(options.accessToken[ ]?=)[.\S\s ][.\S\s ]{40}/g;
 			matches = content.match(reg);
 			report += addMatches(matches);
 			__report__.usingTokens = true;
 		}
 		//usingVersion: "\/searchui\/(.*)\/js;js/CoveoJsSearch",
 		//usingCultures: "\/js\/cultures\/(\w+)",
-		reg = /\/js\/cultures\/(\w+)/g;
+		reg = /\/js\/cultures\/([\w-]{2,5})\.js/g;
 		matches = content.match(reg);
 		if (matches) {
 			__report__.usingCulture = true;
@@ -305,7 +305,7 @@ function parseScript(name, content, all, external, __report__) {
 					}
 				}
 			});
-			reg = /[.\S\s ]{10}\/js\/cultures\/(\w+)[.\S\s ][.\S\s ]{40}/g;
+			reg = /[.\S\s ]{10}\/js\/cultures\/([\w-]{2,5})\.js[.\S\s ][.\S\s ]{40}/g;
 			matches = content.match(reg);
 			report += addMatches(matches);
 		}
@@ -340,21 +340,21 @@ function parseScript(name, content, all, external, __report__) {
 			matches = content.match(reg);
 			report += addMatches(matches);
 		}
-		reg = /CoveoFacet/g;
+		reg = /[^\\]\"CoveoFacet/g;
 		matches = content.match(reg);
 		if (matches) {
 			report += '<BR><b>Facets found</b><br><span class="mycode" >';
 			__report__.usingFacets = true;
-			reg = /[.\S\s ]{10}CoveoFacet[.\S\s ]{60}/g;
+			reg = /[.\S\s ]{10}[^\\]\"CoveoFacet[.\S\s ]{60}/g;
 			matches = content.match(reg);
 			report += addMatches(matches);
 		}
-		reg = /CoveoTab/g;
+		reg = /[^\\]\"CoveoTab/g;
 		matches = content.match(reg);
 		if (matches) {
 			report += '<BR><b>Tabs found:</b><br><span class="mycode" >';
 			__report__.usingTabs = true;
-			reg = /[.\S\s ]{10}CoveoTab[.\S\s ]{40}/g;
+			reg = /[.\S\s ]{10}[^\\]\"CoveoTab[.\S\s ]{40}/g;
 			matches = content.match(reg);
 			report += addMatches(matches);
 		}
@@ -504,6 +504,7 @@ function getReport() {
 			//External, load it
 			let all = true;
 			let src = _script_.src;
+			
 			//if (src.includes('/js/CoveoJsSearch') || src.includes('/coveoua.js') || src.includes('/CoveoForSitecore') || src.includes('/core.js')) {
 			if (src.includes('/coveoua.js') || src.includes('/CoveoForSitecore') || src.includes('/core.js')) {
 			 	all = false;
@@ -540,7 +541,12 @@ function getReport() {
 					//cont=false;
 					all = false;
 				}
-				if (sourceContent.includes('return window&&window.Coveo&&window.Coveo.$?window.Coveo')){
+				if (sourceContent.includes('Coveo.Ui.TemplateCache.registerTemplate') ||
+					sourceContent.includes('Coveo.TemplateCache.registerTemplate') || 
+					sourceContent.includes('secretFeatureVariable1309') || 
+					sourceContent.includes('window.Coveo = (Coveo || window.Coveo)') || 
+					sourceContent.includes('window&&window.Coveo&&window.Coveo') || 
+					sourceContent.includes('SearchEndpoint.configureSampleEndpoint')){
 					all = false;
 				}
 				if (sourceContent.startsWith('webpackJsonpCoveo')) {
@@ -553,7 +559,15 @@ function getReport() {
 
 		}
 		else {
-			detailed_report += parseScript('Original file, Inner script.', _script_.innerHTML, true, false, theReport);
+			let name = 'Original file, ';
+			if (_script_.className !==""){
+                name += " "+_script_.className;
+			}
+			else
+			{
+                name += " Inner script.";
+			}
+			detailed_report += parseScript(name, _script_.innerHTML, true, false, theReport);
 		}
 	});
 	//var mes=$.getScript($('script')[2].src);

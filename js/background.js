@@ -110,6 +110,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   else if (msg.type === 'reset') {
     getTabId_Then(tabId=>{
       delete STATES[tabId];
+      reset();
       sendResponse({tabId});
     });
     return true;
@@ -258,9 +259,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, info) {
 
 var responseSearch = function (details) {
   if (myenabled) {
-    if (details.url.includes('/click') || details.url.includes('/open')){
-      usingQuickview = true;
-    }
+    
     if (details.url.includes('querySuggest')) {
       if (myenabledsearch)
       {
@@ -327,6 +326,9 @@ var responseSearch = function (details) {
 
 var responseAnalytics = function (details) {
   if (myenabled) {
+    if (details.url.includes('/click') || details.url.includes('/open')){
+      usingQuickview = true;
+    }
     if (details.url.includes('topQueries')) {
       if (myenabledsearch)
       {
@@ -346,7 +348,7 @@ var responseAnalytics = function (details) {
       // or: ttps://help.salesforce.com/services/apexrest/coveo/analytics/rest/v15/analytics/searches?visitor=092861ef-30ee-4719-ae5d-2c6dcdcffbee&access_token=eyJhbGciOiJIUzI1NiJ9.eyJmaWx0ZXIiOiIoKChAb2JqZWN0dHlwZT09KExpc3RpbmdDKSkgKEBzZmxpc3RpbmdjcHVibGljYz09VHJ1ZSkpIE9SIChAb2JqZWN0dHlwZT09KEhURGV2ZWxvcGVyRG9jdW1lbnRzQykpIE9SICgoQG9iamVjdHR5cGU9PShIZWxwRG9jcykpIChAc3lzc291cmNlPT1cIlNpdGVtYXAgLSBQcm9kLURvY3NDYWNoZVwiKSAoTk9UI
       var url= details.url+' ';
       const regex = /visitor=(.*)[ &$]/g;
-      matches = url.match(regex);
+      var matches = url.match(regex);
       if (matches){
         console.log('Visitor: '+matches[0]+' found.');
            if (visitor=='')

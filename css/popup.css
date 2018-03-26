@@ -114,7 +114,8 @@ h3 i {
 }
 
 .mycode {  
-  font-family:courier;  
+  font-family:courier; 
+  font-variant: normal !important;
   font-weight: normal !important;
   word-wrap:break-word;
   white-space:pre-wrap;

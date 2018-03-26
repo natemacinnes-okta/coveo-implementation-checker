@@ -1,6 +1,7 @@
 let createWheel = (data) => {
   let r = 45, C = 2 * Math.PI * r;
   let v = (data.value / (data.max || 100));
+  let perc = Math.round(v*100);
   let cssClass = 'bad';
   if (v >= 0.75) {
     cssClass = 'good';
@@ -15,10 +16,10 @@ let createWheel = (data) => {
       <circle class="value" fill="none" cx="50" cy="50" r="${r}" stroke-width="8" stroke-dasharray="${v} ${C}" ></circle>
       <text
         text-anchor="middle"
-        font-size="50" font-family="Lato"
+        font-size="30" font-family="Lato"
         transform="rotate(90 50,50)"
-        lengthAdjust="spacingAndGlyphs" x="50" y="68">${data.value}</text>
+        lengthAdjust="spacingAndGlyphs" x="50" y="62">${perc}%</text>
     </svg>
-    <div class="wheel-title">${data.title || ''}</div></a>
+    <div class="wheel-title">${data.title || ''}<br>${data.value}/${data.max}</div></a>
     </div>`;
 };

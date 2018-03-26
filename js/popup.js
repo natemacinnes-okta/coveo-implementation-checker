@@ -98,9 +98,9 @@ let processReport = (data) => {
   let sections = [
     {
       title: 'General information', label: 'General', attributes: [
-        { key: 'theUrl', label: 'Url', hint: '' },
+        { key: 'theUrl', notForTotal: true,label: 'Url', hint: '' },
         { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3679', expected: /^2\.3679/ },
-        { key: 'fromSystem', label: 'Integrated in UI' },
+        { key: 'fromSystem', notForTotal: true,label: 'Integrated in UI' },
         { key: 'hardcodedAccessTokens', label: 'Hard coded Access Tokens', hint: 'Should NOT be done!!', expected: false },
         { key: 'alertsError', mandatory: true, label: 'No Search alerts error', hint: `Bad access to search alert subscriptions Or remove component class='CoveoSearchAlerts'`, expected: '' },
         { key: 'analyticsFailures',mandatory: true, label: 'Searches executed without sending analytics', hint: 'Manual triggered search did not sent analytics', expected: 0 },
@@ -172,9 +172,8 @@ let processReport = (data) => {
         { key: 'nrofraw', label: 'No raw field access in code', hint: 'More raw, more complicated implementations', expected: {
           test: value => (value < 5)
         } },
-        { key: 'usingCulture', label: 'No of Cultures used', hint: 'Provide a UI in several cultures (>2), better user experience', expected: {
-          test: value => (value >=2 )
-        } },
+        { key: 'usingCulture', label: 'Cultures used', hint: 'Provide a UI in several cultures, better user experience', expected: true },
+        { key: 'cultures', notForTotal: true, label: 'Cultures', hint: 'Provide a UI in several cultures, better user experience' },
 
       ]
     },
@@ -265,6 +264,7 @@ function reset() {
   document.getElementById('details').innerHTML = '';
 
   sendMessage('reset', getState);
+  window.close();
 }
 
 function sendMessage(typeOrMessage, callback) {
