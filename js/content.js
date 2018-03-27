@@ -79,7 +79,7 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 			if (request.analyzePage === true) {
 				analyzePage();
 			}
-			if (request.type ===  'getReport') {
+			if (request.type === 'getReport') {
 				getReport();
 			}
 			else if (request.type === 'getNumbers') {
@@ -143,10 +143,10 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 // var nrofraw;
 // var generated;
 function extend(obj, src) {
-    for (var key in src) {
-        if (src.hasOwnProperty(key)) obj[key] = src[key];
-    }
-    return obj;
+	for (var key in src) {
+		if (src.hasOwnProperty(key)) obj[key] = src[key];
+	}
+	return obj;
 }
 
 function cleanMatch(match) {
@@ -415,7 +415,7 @@ function parseScript(name, content, all, external, __report__) {
 		}
 
 	}
-	__report__.details+=report;
+	__report__.details += report;
 	return __report__;
 }
 
@@ -451,7 +451,7 @@ function initReport() {
 		usingQRE: false,
 		usingRecommendations: false,
 		usingSearchAsYouType: false,
-		
+
 		usingState: false,
 		usingTabs: false,
 		usingContext: false,
@@ -504,22 +504,21 @@ function getReport() {
 			//External, load it
 			let all = true;
 			let src = _script_.src;
-			
+
 			//if (src.includes('/js/CoveoJsSearch') || src.includes('/coveoua.js') || src.includes('/CoveoForSitecore') || src.includes('/core.js')) {
-			if (src.includes('/coveoua.js') || 
-			src.includes('/aura_proddebug.js') || 
-			src.includes('/CoveoForSitecore') || 
-			src.includes('/core.js')) {
-			 	all = false;
-			 }
+			if (src.includes('/coveoua.js') ||
+				src.includes('/aura_proddebug.js') ||
+				src.includes('/CoveoForSitecore') ||
+				src.includes('/core.js')) {
+				all = false;
+			}
 
 			let sourceContent = '';
 
 			// TODO -- PARSE ALL SCRIPTS
 
 			if (all) {
-				try
-				{
+				try {
 					let request = new XMLHttpRequest();
 					request.open('GET', src, false);  // `false` makes the request synchronous
 					request.send(null);
@@ -531,9 +530,8 @@ function getReport() {
 						}
 					}
 				}
-				catch(e)
-				{
-					console.log("Error loading script: "+src);
+				catch (e) {
+					console.log("Error loading script: " + src);
 				}
 			}
 			//Do not parse internal files
@@ -545,11 +543,11 @@ function getReport() {
 					all = false;
 				}
 				if (sourceContent.includes('Coveo.Ui.TemplateCache.registerTemplate') ||
-					sourceContent.includes('Coveo.TemplateCache.registerTemplate') || 
-					sourceContent.includes('secretFeatureVariable1309') || 
-					sourceContent.includes('window.Coveo = (Coveo || window.Coveo)') || 
-					sourceContent.includes('window&&window.Coveo&&window.Coveo') || 
-					sourceContent.includes('SearchEndpoint.configureSampleEndpoint')){
+					sourceContent.includes('Coveo.TemplateCache.registerTemplate') ||
+					sourceContent.includes('secretFeatureVariable1309') ||
+					sourceContent.includes('window.Coveo = (Coveo || window.Coveo)') ||
+					sourceContent.includes('window&&window.Coveo&&window.Coveo') ||
+					sourceContent.includes('SearchEndpoint.configureSampleEndpoint')) {
 					all = false;
 				}
 				if (sourceContent.startsWith('webpackJsonpCoveo')) {
@@ -639,7 +637,7 @@ function getReport() {
 	//implementation
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Implementation information:</b></tr>";
 	report += "<tr><td>Pagesize in kB:</td><td>" + Math.round(pageSize / 1024) + " kB</td></tr>";
-    theReport.pageSize = Math.round(pageSize / 1024);
+	theReport.pageSize = Math.round(pageSize / 1024);
 	indic = 'lightgreen';
 	if (theReport.usingState) { indic = '#ef1a45'; }
 	report += "<tr><td>Using state in code<br>(more complicated):</td><td style='background-color:" + indic + "'>" + theReport.usingState + "</td></tr>";
@@ -736,9 +734,9 @@ function getReport() {
 	//Details
 	report += "<tr style='padding-top:10px;height:55px;'><td colspan=2 style='text-align:left'><b>Detailed information:</b></tr>";
 	report += "<tr><td colspan=2 style='text-align:left'>" + detailed_report + "</td></tr>";
-   // theReport.details = detailed_report;
+	// theReport.details = detailed_report;
 	// $('#myreportdetails').html(report);
-	theReport.loadtime = (Date.now()-startTime)/1000;//Load time in seconds
+	theReport.loadtime = (Date.now() - startTime) / 1000;//Load time in seconds
 	//Set searchcompletions
 
 	return theReport;

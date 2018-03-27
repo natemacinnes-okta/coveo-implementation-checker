@@ -47,8 +47,8 @@ function setEnabled(enabled) {
 function setEnabledSearch(enabled) {
   myenabledsearch = enabled;
   nrofsearches = 0;
-  suggestSent=false;
-  topQueriesSent=false;
+  suggestSent = false;
+  topQueriesSent = false;
 }
 
 
@@ -70,14 +70,14 @@ let getTabId_Then = (callback) => {
 let getState = (tabId) => {
   let state = STATES[tabId];
   if (!state) {
-    state = {tabId};
+    state = { tabId };
     STATES[tabId] = state;
   }
   return state;
 };
 
 let saveState = (obj) => {
-  getTabId_Then(tabId=>{
+  getTabId_Then(tabId => {
     let state = Object.assign(getState(tabId), obj);
     STATES[tabId] = state;
   });
@@ -87,8 +87,8 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   console.log('BACKGROUND MSG: ', msg, sender, sendResponse);
 
   if (msg.type === 'getState') {
-    getTabId_Then(tabId=>{
-      sendResponse(STATES[tabId] || {tabId});
+    getTabId_Then(tabId => {
+      sendResponse(STATES[tabId] || { tabId });
     });
     return true;
   }
@@ -99,31 +99,33 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     }, function (dataURI) {
       if (typeof dataURI !== "undefined") {
         image = dataURI;
-        saveState({image});
+        saveState({ image });
         SendMessage({ type: 'gotScreen', src: image });
       }
     });
   }
   else if (msg.type === 'gotNumbers') {
-    saveState({json: msg.json});
+    saveState({ json: msg.json });
   }
   else if (msg.type === 'enable') {
     setEnabled(msg.enable);
   }
   else if (msg.type === 'reset') {
-    getTabId_Then(tabId=>{
+    getTabId_Then(tabId => {
       delete STATES[tabId];
       reset();
-      sendResponse({tabId});
+      sendResponse({ tabId });
     });
     return true;
   }
   else if (msg.type === 'enablesearch') {
     setEnabledSearch(msg.enable);
-    saveState({enableSearchTracker: msg.enable});
+    saveState({ enableSearchTracker: msg.enable });
   }
   else if (msg.type === 'getNumbersBackground') {
-       SendMessage({type: "gotNumbersBackground", global: { topQueriesSent: topQueriesSent,
+    SendMessage({
+      type: "gotNumbersBackground", global: {
+        topQueriesSent: topQueriesSent,
         analyticsSent: analyticsSent,
         searchSent: searchSent,
         suggestSent: suggestSent,
@@ -144,11 +146,13 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         usingQREQuery: usingQREQuery,
         queryExecuted: queryExecuted,
         usingPipeline: usingPipeline,
-        analyticsToken: analyticsToken}});
-     }
+        analyticsToken: analyticsToken
+      }
+    });
+  }
   else {
     // proxy to content (tabs)
-    getTabId_Then(tabId=>{
+    getTabId_Then(tabId => {
       chrome.tabs.sendMessage(tabId || null, msg);
     });
   }
@@ -227,10 +231,10 @@ function reset() {
   myenabledsearch = false;
   analyticsToken = '';
   searchToken = '';
-  visitor='';
+  visitor = '';
   usingVisitor = false;
   visitorChanged = false;
-  usingQuickview= false;
+  usingQuickview = false;
   usingQREQuery = false;
   usingPipeline = false;
   queryExecuted = '';
@@ -268,18 +272,16 @@ chrome.tabs.onUpdated.addListener(function (tabId, info) {
 
 var responseSearch = function (details) {
   if (myenabled) {
-    
+
     if (details.url.includes('querySuggest')) {
-      if (myenabledsearch)
-      {
+      if (myenabledsearch) {
         console.log("CATCHED querySuggest " + details.url);
         suggestSent = true;
-  
+
       }
-      else
-      {
-      console.log("CATCHED INIT querySuggest " + details.url);
-      initSuggestSent = true;
+      else {
+        console.log("CATCHED INIT querySuggest " + details.url);
+        initSuggestSent = true;
       }
     }
     else {
@@ -304,34 +306,34 @@ var responseSearch = function (details) {
               new Uint8Array(details.requestBody.raw[0].bytes)));
           }
         }
-        if (details.requestBody.formData!=undefined){
-          if (details.requestBody.formData.q!=undefined){
-            postedString += " q="+details.requestBody.formData.q;
+        if (details.requestBody.formData != undefined) {
+          if (details.requestBody.formData.q != undefined) {
+            postedString += " q=" + details.requestBody.formData.q;
           }
-          if (details.requestBody.formData.aq!=undefined){
-            postedString += " aq="+details.requestBody.formData.aq;
+          if (details.requestBody.formData.aq != undefined) {
+            postedString += " aq=" + details.requestBody.formData.aq;
           }
-          if (details.requestBody.formData.dq!=undefined){
-            postedString += " dq="+details.requestBody.formData.dq;
+          if (details.requestBody.formData.dq != undefined) {
+            postedString += " dq=" + details.requestBody.formData.dq;
           }
-          if (details.requestBody.formData.lq!=undefined){
-            postedString += " lq="+details.requestBody.formData.lq;
+          if (details.requestBody.formData.lq != undefined) {
+            postedString += " lq=" + details.requestBody.formData.lq;
           }
-          if (details.requestBody.formData.filterField!=undefined){
-            postedString += " filterField="+details.requestBody.formData.filterField;
+          if (details.requestBody.formData.filterField != undefined) {
+            postedString += " filterField=" + details.requestBody.formData.filterField;
           }
-          if (details.requestBody.formData.partialMatch!=undefined){
-            postedString += " partialMatch="+details.requestBody.formData.partialMatch;
+          if (details.requestBody.formData.partialMatch != undefined) {
+            postedString += " partialMatch=" + details.requestBody.formData.partialMatch;
           }
-          if (details.requestBody.formData.context!=undefined){
-            postedString += " context="+details.requestBody.formData.context;
+          if (details.requestBody.formData.context != undefined) {
+            postedString += " context=" + details.requestBody.formData.context;
           }
-          if (details.requestBody.formData.pipeline!=undefined){
-            postedString += " pipeline="+details.requestBody.formData.pipeline;
+          if (details.requestBody.formData.pipeline != undefined) {
+            postedString += " pipeline=" + details.requestBody.formData.pipeline;
           }
-          
+
         }
-        if (postedString!=''){
+        if (postedString != '') {
           console.log(postedString);
           queryExecuted = postedString;
           try {
@@ -373,19 +375,17 @@ var responseSearch = function (details) {
 
 var responseAnalytics = function (details) {
   if (myenabled) {
-    if (details.url.includes('/click') || details.url.includes('/open')){
+    if (details.url.includes('/click') || details.url.includes('/open')) {
       usingQuickview = true;
     }
     if (details.url.includes('topQueries')) {
-      if (myenabledsearch)
-      {
+      if (myenabledsearch) {
         console.log("CATCHED topQueries " + details.url);
         topQueriesSent = true;
-  
+
       }
-      else
-      {
-      console.log("CATCHED init topQueries " + details.url);
+      else {
+        console.log("CATCHED init topQueries " + details.url);
         initTopQueriesSent = true;
       }
     }
@@ -393,23 +393,21 @@ var responseAnalytics = function (details) {
       //Get the visitor
       //url is like: https://usageanalytics.coveo.com/rest/v15/analytics/searches?visitor=baa899f0-0982-4ca4-b0b1-29ead6cce7e8
       // or: ttps://help.salesforce.com/services/apexrest/coveo/analytics/rest/v15/analytics/searches?visitor=092861ef-30ee-4719-ae5d-2c6dcdcffbee&access_token=eyJhbGciOiJIUzI1NiJ9.eyJmaWx0ZXIiOiIoKChAb2JqZWN0dHlwZT09KExpc3RpbmdDKSkgKEBzZmxpc3RpbmdjcHVibGljYz09VHJ1ZSkpIE9SIChAb2JqZWN0dHlwZT09KEhURGV2ZWxvcGVyRG9jdW1lbnRzQykpIE9SICgoQG9iamVjdHR5cGU9PShIZWxwRG9jcykpIChAc3lzc291cmNlPT1cIlNpdGVtYXAgLSBQcm9kLURvY3NDYWNoZVwiKSAoTk9UI
-      var url= details.url+' ';
+      var url = details.url + ' ';
       const regex = /visitor=(.*)[ &$]/g;
       var matches = url.match(regex);
-      if (matches){
-        console.log('Visitor: '+matches[0]+' found.');
-           if (visitor=='')
-           {
-             visitor = matches[0];
-             usingVisitor = true;
-           }
-           else
-           {
-             if (visitor!=matches[0]){
-               visitorChanged = true;
-               visitor = matches[0];
-             }
-           }
+      if (matches) {
+        console.log('Visitor: ' + matches[0] + ' found.');
+        if (visitor == '') {
+          visitor = matches[0];
+          usingVisitor = true;
+        }
+        else {
+          if (visitor != matches[0]) {
+            visitorChanged = true;
+            visitor = matches[0];
+          }
+        }
       }
       console.log("CATCHED Analytics " + details.url);
       analyticsSent = true;
