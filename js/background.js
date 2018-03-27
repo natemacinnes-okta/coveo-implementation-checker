@@ -31,6 +31,8 @@ var visitor;
 var visitorChanged;
 var usingVisitor;
 var usingQuickview;
+var usingQREQuery;
+var queryExecuted;
 
 
 function setEnabled(enabled) {
@@ -138,6 +140,8 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         usingVisitor: usingVisitor,
         visitorChanged: visitorChanged,
         initTopQueriesSent: initTopQueriesSent,
+        usingQREQuery: usingQREQuery,
+        queryExecuted: queryExecuted,
         analyticsToken: analyticsToken}});
      }
   else {
@@ -225,6 +229,8 @@ function reset() {
   usingVisitor = false;
   visitorChanged = false;
   usingQuickview= false;
+  usingQREQuery = false;
+  queryExecuted = '';
 }
 
 
@@ -294,8 +300,37 @@ var responseSearch = function (details) {
             postedString = decodeURIComponent(String.fromCharCode.apply(null,
               new Uint8Array(details.requestBody.raw[0].bytes)));
           }
+        }
+        if (details.requestBody.formData!=undefined){
+          if (details.requestBody.formData.q!=undefined){
+            postedString += " q="+details.requestBody.formData.q;
+          }
+          if (details.requestBody.formData.aq!=undefined){
+            postedString += " aq="+details.requestBody.formData.aq;
+          }
+          if (details.requestBody.formData.dq!=undefined){
+            postedString += " dq="+details.requestBody.formData.dq;
+          }
+          if (details.requestBody.formData.lq!=undefined){
+            postedString += " lq="+details.requestBody.formData.lq;
+          }
+          if (details.requestBody.formData.filterField!=undefined){
+            postedString += " filterField="+details.requestBody.formData.filterField;
+          }
+          if (details.requestBody.formData.partialMatch!=undefined){
+            postedString += " partialMatch="+details.requestBody.formData.partialMatch;
+          }
+          if (details.requestBody.formData.context!=undefined){
+            postedString += " context="+details.requestBody.formData.context;
+          }
+          
+        }
+        if (postedString!=''){
+          console.log(postedString);
+          queryExecuted = postedString;
           try {
             if (postedString != undefined) {
+
               if (postedString.indexOf('dq=') != -1) {
                 usingDQ = true;
               }
@@ -305,7 +340,10 @@ var responseSearch = function (details) {
               if (postedString.indexOf('filterField=') != -1) {
                 usingFilterField = true;
               }
-              if (postedString.indexOf('partialMatch=true') != -1) {
+              if (postedString.indexOf('$qre') != -1 || postedString.indexOf('$correlate') != -1) {
+                usingQREQuery = true;
+              }
+              if (postedString.indexOf('partialMatch=true') != -1 || postedString.indexOf('$some') != -1) {
                 usingPartialMatch = true;
               }
               if (postedString.indexOf('context=') != -1) {

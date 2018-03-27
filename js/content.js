@@ -212,14 +212,14 @@ function parseScript(name, content, all, external, __report__) {
 			report += addMatches(matches);
 		}
 
-		reg = /raw\./g;
+		reg = /\braw\./g;
 		matches = content.match(reg);
 		if (matches) {
 			__report__.nrofraw += matches.length;
 			__report__.difficulty++;
 
 			report += '<BR><b>Use of raw. found:</b><BR><span class="mycode" >';
-			reg = /[.\S\s ]{10}raw\.[.\S\s ]{40}/g;
+			reg = /[.\S\s ]{10}\braw\.[.\S\s ]{40}/g;
 			matches = content.match(reg);
 			report += addMatches(matches);
 		}
@@ -506,7 +506,10 @@ function getReport() {
 			let src = _script_.src;
 			
 			//if (src.includes('/js/CoveoJsSearch') || src.includes('/coveoua.js') || src.includes('/CoveoForSitecore') || src.includes('/core.js')) {
-			if (src.includes('/coveoua.js') || src.includes('/CoveoForSitecore') || src.includes('/core.js')) {
+			if (src.includes('/coveoua.js') || 
+			src.includes('/aura_proddebug.js') || 
+			src.includes('/CoveoForSitecore') || 
+			src.includes('/core.js')) {
 			 	all = false;
 			 }
 

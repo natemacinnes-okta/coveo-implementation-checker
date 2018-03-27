@@ -29,7 +29,7 @@
 		"css": [
 			"/css/inject.css"
 		],
-		"all_frames": false
+		"all_frames": true
 	}],
 	"permissions": [
 		"activeTab",

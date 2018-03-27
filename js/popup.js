@@ -135,7 +135,8 @@ let processReport = (data) => {
         { key: 'usingPartialMatch', label: 'Using partial match', hint: 'Partial matching needs better tuning, match %, nr of words to match', expected: false },
         { key: 'usingLQ', label: 'Using Long Queries (ML)', hint: 'Long Queries need ML capabilities, more tuning', expected: false },
         { key: 'usingDQ', label: 'Using disjunction queries', hint: 'Disjunction (big OR query) could lead to false results, more tuning needed', expected: false },
-        { key: 'usingQRE', label: 'Using QRE', hint: 'QRE needs more finetuning to have better relevance', expected: false },
+        { key: 'usingQRE', label: 'Using QRE in code', hint: 'QRE needs more finetuning to have better relevance', expected: false },
+        { key: 'usingQREQuery', label: 'Using QRE in query', hint: 'QRE needs more finetuning to have better relevance', expected: false },
         { key: 'usingFilterField', label: 'Using Filter Field (Folding)', hint: 'Folding needs seperate result templates, more UI code', expected: false },
         { key: 'usingContext', label: 'Using Context', hint: 'Context needs more setup in Analytics/Pipelines and/or ML', expected: false },
         { key: 'pipelines', mandatory: true, label: 'Using Query Pipelines', hint: 'Dedicated Query Pipelines should be setup', expected: {
@@ -148,8 +149,9 @@ let processReport = (data) => {
         { key: 'usingAdditionalSearch', label: 'Using Additional Search Events', hint: 'Additional search events could create multiple queries, which could influence performance', expected: 0 },
         { key: 'usingAdditionalAnalytics', label: 'Using Additional Analytic Events', hint: 'Addtional Analytic events is a must with custom behavior, if that is not the case it should not be needed', expected: 0 },
         { key: 'onpremise', label: 'On-premise Installation', hint: 'On-premise installation, consider moving to the Cloud', expected: false },
-        { key: 'searchToken', additionalClass:'mycode', label: 'Search Token used', hint: '' },
-        { key: 'analyticsToken', additionalClass:'mycode', label: 'Analytics Token used', hint: '' },
+        { key: 'queryExecuted',notForTotal: true, additionalClass:'mycode', label: 'Last Query', hint: '' },
+        { key: 'searchToken', notForTotal: true, additionalClass:'mycode', label: 'Search Token used', hint: '' },
+        { key: 'analyticsToken', notForTotal: true, additionalClass:'mycode', label: 'Analytics Token used', hint: '' },
           ]
     },
     {
