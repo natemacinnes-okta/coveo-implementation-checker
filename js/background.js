@@ -32,6 +32,7 @@ var visitorChanged;
 var usingVisitor;
 var usingQuickview;
 var usingQREQuery;
+var usingPipeline;
 var queryExecuted;
 
 
