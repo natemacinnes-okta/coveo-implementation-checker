@@ -139,7 +139,8 @@ let processReport = (data) => {
         { key: 'usingQREQuery', label: 'Using QRE in query', hint: 'QRE needs more finetuning to have better relevance', expected: false },
         { key: 'usingFilterField', label: 'Using Filter Field (Folding)', hint: 'Folding needs seperate result templates, more UI code', expected: false },
         { key: 'usingContext', label: 'Using Context', hint: 'Context needs more setup in Analytics/Pipelines and/or ML', expected: false },
-        { key: 'pipelines', mandatory: true, label: 'Using Query Pipelines', hint: 'Dedicated Query Pipelines should be setup', expected: {
+        { key: 'usingPipeline', mandatory: true, label: 'Using Query Pipeline', hint: 'Dedicated Query Pipelines should be setup', expected: true },
+        { key: 'pipelines', notForTotal: true, label: 'Used Query Pipelines (in code)', hint: 'Dedicated Query Pipelines should be setup', expected: {
                test: value => (value != 'default' && value !='')
            }
         },

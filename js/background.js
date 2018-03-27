@@ -142,6 +142,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         initTopQueriesSent: initTopQueriesSent,
         usingQREQuery: usingQREQuery,
         queryExecuted: queryExecuted,
+        usingPipeline: usingPipeline,
         analyticsToken: analyticsToken}});
      }
   else {
@@ -230,6 +231,7 @@ function reset() {
   visitorChanged = false;
   usingQuickview= false;
   usingQREQuery = false;
+  usingPipeline = false;
   queryExecuted = '';
 }
 
@@ -323,6 +325,9 @@ var responseSearch = function (details) {
           if (details.requestBody.formData.context!=undefined){
             postedString += " context="+details.requestBody.formData.context;
           }
+          if (details.requestBody.formData.pipeline!=undefined){
+            postedString += " pipeline="+details.requestBody.formData.pipeline;
+          }
           
         }
         if (postedString!=''){
@@ -339,6 +344,9 @@ var responseSearch = function (details) {
               }
               if (postedString.indexOf('filterField=') != -1) {
                 usingFilterField = true;
+              }
+              if (postedString.indexOf('pipeline=') != -1) {
+                usingPipeline = true;
               }
               if (postedString.indexOf('$qre') != -1 || postedString.indexOf('$correlate') != -1) {
                 usingQREQuery = true;
