@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
   <link rel="stylesheet" href="dependencies/CoveoJsAdmin.min.css">
   <link rel="stylesheet" href="dependencies/CoveoStyleGuide-2.10.0.css">
   <link rel="stylesheet" href="css/wheel.css">
@@ -29,6 +29,7 @@
   </header>
   <div class="popup-content">
     <div style="padding-top:5px;padding-bottom:5px;border-bottom:1px solid #bcc3ca">
+      <button id="download-global" class="btn" title="Download Report"></button>
       <button id="showInstructions" class="btn">Show Instructions</button>
       <label id="setSearchTracker" class="btn coveo-slide-toggle-label boxed" style="padding: 8.5px 16px; line-height: 16px;">
         <span class="toggle-label" style="font-size: 12px;">Search Tracker</span>
@@ -60,17 +61,18 @@
         <div class="bounce3"></div>
       </div>
     </div>
-    <div id="copy" class="copy">Copy Report</div>
-    <div id="myscreenimage"></div>
-    <div id="scores"></div>
-    <div id="legend">
-      <table>
-        <tr class="mandatory"><td>Mandatory item</td></tr>
-        <tr class="mandatoryFAIL"><td>Mandatory item, FAILED, should be corrected asap !!</td></tr>
-      </table>
-    </div>
+    <div id="globalReport">
+      <div id="myscreenimage"></div>
+      <div id="scores"></div>
+      <div id="legend">
+        <table>
+          <tr class="mandatory"><td>Mandatory item</td></tr>
+          <tr class="mandatoryFAIL"><td>Mandatory item, FAILED, should be corrected asap !!</td></tr>
+        </table>
+      </div>
 
-    <div id="details"></div>
+      <div id="details"></div>
+    </div>
 
   </div>
 </body>

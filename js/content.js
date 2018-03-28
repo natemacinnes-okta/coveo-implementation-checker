@@ -110,6 +110,9 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 				// //				$('#mywebsiteimage').attr('src', msg.image);
 
 			}
+			else if (request.type === 'download') {
+				downloadReport(request.name, request.text);
+			}
 		}
 	);
 }
@@ -740,4 +743,18 @@ function getReport() {
 	//Set searchcompletions
 
 	return theReport;
+}
+
+
+function downloadReport(filename, text) {
+	var element = document.createElement('a');
+	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+	element.setAttribute('download', filename);
+
+	element.style.display = 'none';
+	document.body.appendChild(element);
+
+	element.click();
+
+	document.body.removeChild(element);
 }

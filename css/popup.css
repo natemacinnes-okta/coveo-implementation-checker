@@ -100,7 +100,8 @@ h3 i {
 .coveo-styleguide .collapsible .collapsible-header {
   background-position: left 20px center;
   display: flex;
-  line-height: inherit;
+  line-height: 50px;
+  padding: 0 20px 0 40px;
 }
 
 .coveo-styleguide .collapsible .collapsible-header .msg {
@@ -136,6 +137,7 @@ h3 i {
 .coveo-styleguide .collapsible .collapsible-header .result {
   color: #ce3f00;
   margin: auto;
+  width: 50px;
 }
 
 .coveo-styleguide .collapsible .collapsible-header .result .wheel {
@@ -215,26 +217,25 @@ tr td.line-result {
   background-image: url(../images/mandatoryFail.svg);
 }
 
-.copy {
-  padding-left: 28px;
-  height: 25px;
-  line-height: 25px;
-  background-position: left 1px top 1px;
+#download-global,
+.download-section {
+  background-position: center;
   background-repeat: no-repeat;
   background-size: 24px;
-  background-image: url(../images/copy.svg);
+  background-image: url(../images/download.svg);
+  cursor: pointer;
 }
 
-.copysmall {
+#download-global {
+  float: right;
+  min-width: 50px;
+  height: 34px;
+  border-color: transparent;
+}
+
+.download-section {
   width: 28px;
-  height: 25px;
-  position: relative;
-  left: 30px;
-  line-height: 25px;
-  background-position: left 5px top 1px;
-  background-repeat: no-repeat;
-  background-size: 24px;
-  background-image: url(../images/copy.svg);
+  height: 50px;
 }
 
 .valid-true td.line-result {

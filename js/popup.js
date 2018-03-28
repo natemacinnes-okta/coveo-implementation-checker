@@ -5,42 +5,107 @@
 
 //CopyToClipboard so we can copy/paste the part of the report
 function copyToClipboard(text) {
-  if (window.clipboardData && window.clipboardData.setData) {
-    // IE specific code path to prevent textarea being shown while dialog is visible.
-    return clipboardData.setData("Text", text);
-  }
-  else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+
+  let html = `<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+<link rel="stylesheet" href="http://coveo.github.io/vapor/dist/css/CoveoStyleGuide.css">
+<link rel="stylesheet" href="https://static.cloud.coveo.com/styleguide/v2.10.0/css/CoveoStyleGuide.css">
+<style type="text/css">
+body.coveo-styleguide {display:block; padding: 0 30px 30px;}
+div.wheel {display: inline-block; text-align: center; margin: 5px 10px; cursor: default; width: 160px;}
+div.wheel svg {cursor: default; width: 80px; height: 80px; transform: rotate(-90deg);}
+div.wheel .wheel-title {margin-top: 5px; font-size: 1.4em;}
+div.wheel svg .back-ring {stroke: #E4EAED; fill: none;}
+div.wheel svg text {font-weight: bold;}
+div.wheel.good svg text {fill: #00983;}
+div.wheel.warn svg text {fill: #ecad00;}
+div.wheel.bad svg text {fill: #ce3f00;}
+div.wheel.good svg circle.value {stroke: #009830;}
+div.wheel.warn svg circle.value {stroke: #ecad00;}
+div.wheel.bad svg circle.value {stroke: #ce3f00;}
+header.header {min-height: 48px;}
+.header-section {font-size: 1.2em; font-weight: bold;}
+a {outline: none;}
+a img {outline: none;}
+img {border: 0;}
+a:focus {outline: none;}
+h3 {margin: 10px;}
+h3 i {font-style: italic;}
+.popup-content {padding-left: 8px; padding-right: 8px; padding-top: 0px; overflow: auto;}
+#myscreenimage {height: 200px; background-size: contain; background-repeat: no-repeat; background-position: top center; margin: 10px 20px; /*border: 1px solid silver;*/}
+#scores {text-align: center;}
+#scores div.wheel a svg {cursor: pointer;}
+
+.coveo-styleguide .collapsible .collapsible-header {background-position: left 20px center; display: flex; line-height: 50px;}
+.coveo-styleguide .collapsible .collapsible-header .msg {flex: 1;}
+.coveo-styleguide table:not(.datepicker-table) tr:hover td {background-color: transparent;}
+
+#details b {font-weight: bold;}
+#details i {font-style: italic;}
+.mycode {font-family: courier; font-variant: normal !important; font-weight: normal !important; word-wrap: break-word; white-space: pre-wrap; word-break: break-all;}
+.coveo-styleguide .collapsible .collapsible-header .details {color: #ce3f00; font-size: 8px;}
+.coveo-styleguide .collapsible .collapsible-header .result {color: #ce3f00; margin: auto;}
+.coveo-styleguide .collapsible .collapsible-header .result .wheel {position: relative; width: auto;}
+.coveo-styleguide .collapsible .collapsible-header .result .wheel svg {width: 40px; position: absolute; margin-top: -40px; margin-left: -10px;}
+.coveo-styleguide .collapsible .collapsible-header .result div.wheel svg .back-ring {stroke: #fff; fill: none;}
+.coveo-styleguide .collapsible .collapsible-header .result .wheel-title {display: none;}
+.coveo-styleguide .collapsible .collapsible-header.active {background-image: none;}
+.coveo-styleguide .collapsible .collapsible-body {padding: 0;}
+.coveo-styleguide table:not(.datepicker-table) td.line-result {font-variant: small-caps; text-align: left; font-weight: bold; vertical-align: top;}
+.coveo-styleguide table:not(.datepicker-table) th:last-child, .coveo-styleguide table:not(.datepicker-table) td:last-child {padding-left: 25px;}
+tr td.line-message small {font-size: small; color: #1d4f76; display: block; /*padding-left:25px;*/}
+tr td.line-message {text-align: right; width: 350px; padding-left: 25px !important;}
+tr td.line-result {background-position: left 5px top 12px; background-repeat: no-repeat; background-size: 12px; text-align: left; word-wrap: break-word; white-space: pre-wrap; word-break: break-all; width: 450px;}
+.mandatory {background-position: left 1px top 5px; background-repeat: no-repeat; background-size: 25px; background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><g fill="#373737"><path d="M250.5,447.3L53.2,250L250.5,52.7L447.8,250L250.5,447.3z M91.9,250l158.6,158.6L409.1,250L250.5,91.4L91.9,250z"/><rect height="109.5" width="27.4" x="236.8" y="167.8"/><rect height="27.4" width="27.4" x="236.8" y="304.7"/></g></svg>');}
+.mandatoryFAIL {background-position: left 1px top 5px; background-repeat: no-repeat; background-size: 25px; background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><g fill="#ce3f00"><polygon points="250.5,447.3 53.2,250 250.5,52.7 447.8,250 z"/><rect fill="white" height="150" width="50" x="225" y="130"/><rect fill="white" height="50" width="50" x="225" y="320"/></g></svg>');}
+.download-global, .download-section {display;none;}
+.valid-true td.line-result {color: #009830; background-image: url(../images/checkbox-checkmark.svg);}
+.valid-false td.line-result {color: #ce3f00; background-image: url(../images/action-close.svg);}
+
+</style>
+</head>
+<body class="coveo-styleguide">
+${text}
+</body>
+</html>`;
+
+  SendMessage({
+    type: 'download',
+    name: 'coveo-implementation-report.html',
+    text: html
+  });
+
+  if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
     var textarea = document.createElement("textarea");
     textarea.textContent = text;
-    textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
+    textarea.style.position = "fixed"; // Prevent scrolling to bottom of page in MS Edge.
     document.body.appendChild(textarea);
     textarea.select();
     try {
-      return document.execCommand("copy");  // Security exception may be thrown by some browsers.
+      return document.execCommand("copy"); // Security exception may be thrown by some browsers.
     }
     catch (ex) {
       console.warn("Copy to clipboard failed.", ex);
-      return false;
     }
     finally {
       document.body.removeChild(textarea);
     }
   }
+  return false;
 }
 
-//Copy the report
-function copyReport(id) {
+//Download the report
+function downloadReport(id) {
   try {
-    var html = document.getElementById(id).innerHTML;
-    //TODO: remove the copy buttons from the HTML?
-    var successful = copyToClipboard(html);
-    var msg = successful ? 'successful' : 'unsuccessful';
-    console.log('Copying Report to Clipboard was ' + msg);
-    alert("Report copied to clipboard.")
+    let html = document.getElementById(id).outerHTML,
+      successful = copyToClipboard(html);
+
+    console.log('Copying Report to Clipboard was ' + (successful ? 'successful' : 'unsuccessful'));
   }
   catch (err) {
-    console.log('Oops, unable to copy to Clipboard');
-    alert("Report WAS NOT copied to clipboard.")
+    console.log('Oops, unable to copy to Clipboard', err);
   }
 }
 
@@ -108,7 +173,7 @@ let processDetail = (section, data, tests) => {
                 ${section.title}
               </div>
               <div class="result" style="">${score}</div>
-              <div class="copysmall" style=""></div>
+              <div class="download-section" style=""></div>
           </button>
           <div class="collapsible-body">
             <table><tbody>
@@ -232,7 +297,7 @@ let processReport = (data) => {
   let scores = sectionCharts.map(createWheel);
   document.getElementById('scores').innerHTML = scores.join('\n');
   $('#legend').show();
-  $('#copy').show();
+  $('#download-global').show();
 
   let details = `<ul id="Details" class="collapsible" data-collapsible="expandable">
   <li>
@@ -251,6 +316,12 @@ let processReport = (data) => {
   document.getElementById('details').innerHTML = html.join('\n') + details;
 
   $('#details .collapsible').collapsible();
+  $('#details .download-section').click((e) => {
+    e.preventDefault();
+    let target = $(e.currentTarget)[0], parent = $(target).closest('ul')[0];
+    downloadReport(parent.id);
+    return true;
+  });
 
   $('#loading').hide();
 };
@@ -283,16 +354,16 @@ function getReport() {
   document.getElementById('scores').innerHTML = '';
   document.getElementById('details').innerHTML = '';
 
-  sendMessage('getScreen');
+  SendMessage('getScreen');
 }
 
 let getState = () => {
-  sendMessage('getState', processState);
+  SendMessage('getState', processState);
 };
 
 function toggleTracker(e) {
   let myenabledsearch = $('#setSearchTracker input').prop('checked') ? true : false;
-  sendMessage({ type: 'enablesearch', enable: myenabledsearch });
+  SendMessage({ type: 'enablesearch', enable: myenabledsearch });
 }
 
 function reset() {
@@ -303,11 +374,11 @@ function reset() {
   document.getElementById('scores').innerHTML = '';
   document.getElementById('details').innerHTML = '';
 
-  sendMessage('reset', getState);
+  SendMessage('reset', getState);
   window.close();
 }
 
-function sendMessage(typeOrMessage, callback) {
+function SendMessage(typeOrMessage, callback) {
   if (typeof typeOrMessage === 'string') {
     typeOrMessage = { type: typeOrMessage };
   }
@@ -330,10 +401,10 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 
       if (reportData.type === 'gotScreen') {
         setScreenShot(reportData.src);
-        sendMessage('getNumbersBackground');
+        SendMessage('getNumbersBackground');
       }
       else if (reportData.type === 'gotNumbersBackground') {
-        sendMessage({ type: 'getNumbers', global: reportData.global });
+        SendMessage({ type: 'getNumbers', global: reportData.global });
       }
       else if (reportData.type === 'gotNumbers') {
         processReport(reportData.json);
@@ -393,7 +464,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   $('#myscreenimage').css('background-image', 'none').hide();
   $('#legend').hide();
-  $('#copy').hide();
+  $('#download-global').hide().click(downloadReport.bind(null, 'globalReport'));
   $('#showInstructions').click(() => {
     $('#instructions').show();
   });
