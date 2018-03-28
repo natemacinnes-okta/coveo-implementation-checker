@@ -129,6 +129,10 @@ h3 i {
   word-break: break-all;
 }
 
+.coveo-styleguide ul.collapsible {
+  position: relative;
+}
+
 .coveo-styleguide .collapsible .collapsible-header .details {
   color: #ce3f00;
   font-size: 8px;
@@ -218,7 +222,7 @@ tr td.line-result {
 }
 
 #download-global,
-.download-section {
+.copy-section {
   background-position: center;
   background-repeat: no-repeat;
   background-size: 24px;
@@ -233,7 +237,10 @@ tr td.line-result {
   border-color: transparent;
 }
 
-.download-section {
+.copy-section {
+  position: absolute;
+  right: 0;
+  background-image: url(../images/copy.svg);
   width: 28px;
   height: 50px;
 }

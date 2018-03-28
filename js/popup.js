@@ -5,8 +5,30 @@
 
 //CopyToClipboard so we can copy/paste the part of the report
 function copyToClipboard(text) {
+  if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+    try {
+      let listener = (e) => {
+        e.clipboardData.setData("text/html", text);
+        e.clipboardData.setData("text/plain", text);
+        e.preventDefault();
+      };
+      document.addEventListener("copy", listener);
+      document.execCommand("copy");
+      document.removeEventListener("copy", listener);
+      return true;
+    }
+    catch (ex) {
+      console.warn("Copy to clipboard failed.", ex);
+    }
+  }
+  return false;
+}
 
-  let html = `<!DOCTYPE html>
+//Download the report
+function downloadReport(id) {
+  try {
+    let text = document.getElementById(id).outerHTML;
+    let html = `<!DOCTYPE html>
 <html>
 <head>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
@@ -60,7 +82,7 @@ tr td.line-message {text-align: right; width: 350px; padding-left: 25px !importa
 tr td.line-result {background-position: left 5px top 12px; background-repeat: no-repeat; background-size: 12px; text-align: left; word-wrap: break-word; white-space: pre-wrap; word-break: break-all; width: 450px;}
 .mandatory {background-position: left 1px top 5px; background-repeat: no-repeat; background-size: 25px; background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><g fill="#373737"><path d="M250.5,447.3L53.2,250L250.5,52.7L447.8,250L250.5,447.3z M91.9,250l158.6,158.6L409.1,250L250.5,91.4L91.9,250z"/><rect height="109.5" width="27.4" x="236.8" y="167.8"/><rect height="27.4" width="27.4" x="236.8" y="304.7"/></g></svg>');}
 .mandatoryFAIL {background-position: left 1px top 5px; background-repeat: no-repeat; background-size: 25px; background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><g fill="#ce3f00"><polygon points="250.5,447.3 53.2,250 250.5,52.7 447.8,250 z"/><rect fill="white" height="150" width="50" x="225" y="130"/><rect fill="white" height="50" width="50" x="225" y="320"/></g></svg>');}
-.download-global, .download-section {display;none;}
+.download-global, .copy-section {display;none;}
 .valid-true td.line-result {color: #009830; background-image: url(../images/checkbox-checkmark.svg);}
 .valid-false td.line-result {color: #ce3f00; background-image: url(../images/action-close.svg);}
 
@@ -71,44 +93,16 @@ ${text}
 </body>
 </html>`;
 
-  SendMessage({
-    type: 'download',
-    name: 'coveo-implementation-report.html',
-    text: html
-  });
-
-  if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
-    var textarea = document.createElement("textarea");
-    textarea.textContent = text;
-    textarea.style.position = "fixed"; // Prevent scrolling to bottom of page in MS Edge.
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      return document.execCommand("copy"); // Security exception may be thrown by some browsers.
-    }
-    catch (ex) {
-      console.warn("Copy to clipboard failed.", ex);
-    }
-    finally {
-      document.body.removeChild(textarea);
-    }
-  }
-  return false;
-}
-
-//Download the report
-function downloadReport(id) {
-  try {
-    let html = document.getElementById(id).outerHTML,
-      successful = copyToClipboard(html);
-
-    console.log('Copying Report to Clipboard was ' + (successful ? 'successful' : 'unsuccessful'));
+    SendMessage({
+      type: 'download',
+      name: 'coveo-implementation-report.html',
+      text: html
+    });
   }
   catch (err) {
     console.log('Oops, unable to copy to Clipboard', err);
   }
 }
-
 
 let processDetail = (section, data, tests) => {
   let lines = section.attributes.map(attr => {
@@ -167,21 +161,21 @@ let processDetail = (section, data, tests) => {
   let score = createWheel({ title: section.title, value: tests.passed, max: tests.total });
 
   return `<ul id="${section.label}" class="collapsible" data-collapsible="expandable">
-      <li>
-          <button type="button" class="collapsible-header active btn with-icon">
-              <div class="msg">
-                ${section.title}
-              </div>
-              <div class="result" style="">${score}</div>
-              <div class="download-section" style=""></div>
-          </button>
-          <div class="collapsible-body">
-            <table><tbody>
-              ${lines.join('\n')}
-            </tbody></table>
-          </div>
-      </li>
-    </ul>`;
+  <li>
+    <div class="copy-section" style=""></div>
+    <button type="button" class="collapsible-header active btn with-icon">
+      <div class="msg">
+        ${section.title}
+      </div>
+      <div class="result" style="">${score}</div>
+    </button>
+    <div class="collapsible-body">
+      <table><tbody>
+        ${lines.join('\n')}
+      </tbody></table>
+    </div>
+  </li>
+</ul>`;
 };
 
 /**
@@ -237,7 +231,7 @@ let processReport = (data) => {
         { key: 'usingPipeline', mandatory: true, label: 'Using Query Pipeline', hint: 'Dedicated Query Pipelines should be setup', expected: true },
         {
           key: 'pipelines', notForTotal: true, label: 'Used Query Pipelines (in code)', hint: 'Dedicated Query Pipelines should be setup', expected: {
-            test: value => (value != 'default' && value != '')
+            test: value => (value !== 'default' && value !== '')
           }
         },
         { key: 'usingTokens', label: 'Using Options.Tokens', hint: 'Hard coded tokens (except for public sites) should not be used', expected: false },
@@ -316,10 +310,10 @@ let processReport = (data) => {
   document.getElementById('details').innerHTML = html.join('\n') + details;
 
   $('#details .collapsible').collapsible();
-  $('#details .download-section').click((e) => {
+  $('#details .copy-section').click((e) => {
     e.preventDefault();
     let target = $(e.currentTarget)[0], parent = $(target).closest('ul')[0];
-    downloadReport(parent.id);
+    copyToClipboard(parent.outerHTML);
     return true;
   });
 
@@ -361,7 +355,7 @@ let getState = () => {
   SendMessage('getState', processState);
 };
 
-function toggleTracker(e) {
+function toggleTracker() {
   let myenabledsearch = $('#setSearchTracker input').prop('checked') ? true : false;
   SendMessage({ type: 'enablesearch', enable: myenabledsearch });
 }
