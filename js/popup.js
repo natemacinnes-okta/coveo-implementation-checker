@@ -2,7 +2,6 @@
 // jshint -W110, -W003
 /*global chrome, createWheel*/
 
-
 //CopyToClipboard so we can copy/paste the part of the report
 function copyToClipboard(text) {
   if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
@@ -402,31 +401,6 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
       }
       else if (reportData.type === 'gotNumbers') {
         processReport(reportData.json);
-        // analyticsSent = reportData.analyticsSent;
-        // nrofsearches = reportData.nrofsearches;
-        // searchSent = reportData.searchSent;
-        // suggestSent = reportData.suggestSent;
-        // topQueriesSent = reportData.topQueriesSent;
-        // dqUsed = reportData.dqUsed;
-        // lqUsed = reportData.lqUsed;
-        // filterFieldUsed = reportData.filterFieldUsed;
-        // partialMatchUsed = reportData.partialMatchUsed;
-        // contextUsed = reportData.contextUsed;
-        // alertsError = reportData.alertsError;
-        // analyticsToken = reportData.analyticsToken;
-        // searchToken = reportData.searchToken;
-        // processReport([{
-        //   title: "Overall",
-        //   value: 31, max: 60,
-        //   lines: [
-        //     { label: "# of search executed (should be 1)", value: nrofsearches, expected: 1 },
-        //     { label: "Search Events sent using our api?", value: searchSent, expected: true },
-        //     { label: "Analytics sent?", value: analyticsSent, expected: true },
-        //     { label: "Using search as you type (degrades performances)", value: false, expected: false },
-        //     { label: "Using ML Powered Query Completions", value: topQueriesSent, expected: true },
-        //   ]
-        // }]);
-        //chrome.tabs.sendMessage(currentTab, { analyzePage: true });
       }
       if (reportData && reportData.length && reportData[0].value && reportData[0].max && reportData[0].title) {
         processReport(reportData);

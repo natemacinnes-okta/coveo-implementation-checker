@@ -3,37 +3,37 @@
 let STATES = {};
 
 /* globals chrome */
-var filterSearch = { urls: ["*://*/rest/search/*", "*://*/?errorsAsSuccess=1", "https://*/rest/search/v2/*", "https://*/coveo/rest/v2/*", "https://cloudplatform.coveo.com/rest/search/*", "*://platform.cloud.coveo.com/rest/search/v2/*", "https://search.cloud.coveo.com/rest/search/v2/*", "*://*/*/coveo/platform/rest/*", "*://*/coveo/rest/*"] };
-var filterAnalytics = { urls: ["*://usageanalytics.coveo.com/rest/*", "*://*/*/coveo/analytics/rest/*", "*://*/*/coveoanalytics/rest/*"] };
-var filterOthers = { urls: ["*://*/rest/search/alerts*"] };
-var analyticsSent;
-var nrofsearches;
-var searchSent;
-var suggestSent;
-var initSuggestSent;
-var topQueriesSent;
-var initTopQueriesSent;
-var ready;
-var myenabled;
-var myenabledsearch;
-var port;
-var usingDQ;
-var usingLQ;
-var usingFilterField;
-var usingPartialMatch;
-var usingContext;
-var alertsError;
-var visible;
-var analyticsToken;
-var searchToken;
-var image;
-var visitor;
-var visitorChanged;
-var usingVisitor;
-var usingQuickview;
-var usingQREQuery;
-var usingPipeline;
-var queryExecuted;
+let filterSearch = { urls: ["*://*/rest/search/*", "*://*/?errorsAsSuccess=1", "https://*/rest/search/v2/*", "https://*/coveo/rest/v2/*", "https://cloudplatform.coveo.com/rest/search/*", "*://platform.cloud.coveo.com/rest/search/v2/*", "https://search.cloud.coveo.com/rest/search/v2/*", "*://*/*/coveo/platform/rest/*", "*://*/coveo/rest/*"] };
+let filterAnalytics = { urls: ["*://usageanalytics.coveo.com/rest/*", "*://*/*/coveo/analytics/rest/*", "*://*/*/coveoanalytics/rest/*"] };
+let filterOthers = { urls: ["*://*/rest/search/alerts*"] };
+let analyticsSent;
+let nrofsearches;
+let searchSent;
+let suggestSent;
+let initSuggestSent;
+let topQueriesSent;
+let initTopQueriesSent;
+let ready;
+let myenabled;
+let myenabledsearch;
+let port;
+let usingDQ;
+let usingLQ;
+let usingFilterField;
+let usingPartialMatch;
+let usingContext;
+let alertsError;
+let visible;
+let analyticsToken;
+let searchToken;
+let image;
+let visitor;
+let visitorChanged;
+let usingVisitor;
+let usingQuickview;
+let usingQREQuery;
+let usingPipeline;
+let queryExecuted;
 
 
 function setEnabled(enabled) {
@@ -156,61 +156,13 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       chrome.tabs.sendMessage(tabId || null, msg);
     });
   }
-
-  // DELETE THIS - ???
-  // else if (msg.type === 'getNumbers??') {
-  //   SendMessage({
-  //     type: "gotNumbers",
-  //     topQueriesSent: topQueriesSent,
-  //     analyticsSent: analyticsSent,
-  //     searchSent: searchSent,
-  //     suggestSent: suggestSent,
-  //     nrofsearches: nrofsearches,
-  //     //image: image,
-  //     usingDQ: usingDQ,
-  //     usingLQ: usingLQ,
-  //     usingFilterField: usingFilterField,
-  //     usingPartialMatch: usingPartialMatch,
-  //     usingContext: usingContext,
-  //     alertsError: alertsError,
-  //     searchToken: searchToken,
-  //     analyticsToken: analyticsToken
-  //   });
-  // }
 });
 
-
-function onCaptured(imageUri) {
-  console.log(imageUri);
-}
-
-function onError(error) {
-  console.log(`Error: ${error}`);
-}
-
 function checkToken(token) {
-  var part = token.split('.');
-  var decoded = JSON.parse(atob(part[1]));
+  let part = token.split('.');
+  let decoded = JSON.parse(atob(part[1]));
   return JSON.stringify(decoded, null, 2);
 }
-
-/*
-chrome.browserAction.onClicked.addListener(function (tab) {
-  if (port == undefined) {
-    this.port = chrome.extension.connect({ "name": "swap" });
-  }
-  if (!visible) {
-    visible = true;
-    this.port.postMessage({ "type": "enabled", enabled: myenabled });
-    this.port.postMessage({ "type": "addDiv" });
-  }
-  else {
-    visible = false;
-    this.port.postMessage({ "type": "enabled", enabled: myenabled });
-    this.port.postMessage({ "type": "removeDiv" });
-
-  }
-});*/
 
 function reset() {
   nrofsearches = 0;
@@ -240,16 +192,6 @@ function reset() {
   queryExecuted = '';
 }
 
-
-
-chrome.tabs.onActiveChanged.addListener(function (tabId, changeInfo, tab) {
-  //reset();
-});
-
-chrome.tabs.onCreated.addListener(function (tab) {
-  //reset();
-});
-
 if (nrofsearches == undefined) {
   reset();
   myenabled = true;
@@ -259,8 +201,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, info) {
   if (info.status === 'complete') {
     //sent message to content.js
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      var activeTab = tabs[0];
-      if (activeTab != undefined) {
+      let activeTab = tabs[0];
+      if (activeTab !== undefined) {
         ready = true;
       }
     });
@@ -270,7 +212,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, info) {
   }
 });
 
-var responseSearch = function (details) {
+let responseSearch = function (details) {
   if (myenabled) {
 
     if (details.url.includes('querySuggest')) {
@@ -290,13 +232,13 @@ var responseSearch = function (details) {
       if (myenabledsearch) {
         nrofsearches = nrofsearches + 1;
       }
-      if (details.requestBody != undefined) {
-        var postedString = '';
-        if (details.requestBody.raw != undefined) {
+      if (details.requestBody) {
+        let postedString = '';
+        if (details.requestBody.raw) {
           if (details.requestBody.raw.length == 2) {
-            var a = new Uint8Array(details.requestBody.raw[0].bytes);
-            var b = new Uint8Array(details.requestBody.raw[1].bytes);
-            var c = new (a.constructor)(a.length + b.length);
+            let a = new Uint8Array(details.requestBody.raw[0].bytes);
+            let b = new Uint8Array(details.requestBody.raw[1].bytes);
+            let c = new (a.constructor)(a.length + b.length);
             c.set(a, 0);
             c.set(b, a.length);
             postedString = decodeURIComponent(String.fromCharCode.apply(null, c));
@@ -306,65 +248,60 @@ var responseSearch = function (details) {
               new Uint8Array(details.requestBody.raw[0].bytes)));
           }
         }
-        if (details.requestBody.formData != undefined) {
-          if (details.requestBody.formData.q != undefined) {
+        if (details.requestBody.formData) {
+          if (details.requestBody.formData.q !== undefined) {
             postedString += " q=" + details.requestBody.formData.q;
           }
-          if (details.requestBody.formData.aq != undefined) {
+          if (details.requestBody.formData.aq !== undefined) {
             postedString += " aq=" + details.requestBody.formData.aq;
           }
-          if (details.requestBody.formData.dq != undefined) {
+          if (details.requestBody.formData.dq !== undefined) {
             postedString += " dq=" + details.requestBody.formData.dq;
           }
-          if (details.requestBody.formData.lq != undefined) {
+          if (details.requestBody.formData.lq !== undefined) {
             postedString += " lq=" + details.requestBody.formData.lq;
           }
-          if (details.requestBody.formData.filterField != undefined) {
+          if (details.requestBody.formData.filterField !== undefined) {
             postedString += " filterField=" + details.requestBody.formData.filterField;
           }
-          if (details.requestBody.formData.partialMatch != undefined) {
+          if (details.requestBody.formData.partialMatch !== undefined) {
             postedString += " partialMatch=" + details.requestBody.formData.partialMatch;
           }
-          if (details.requestBody.formData.context != undefined) {
+          if (details.requestBody.formData.context !== undefined) {
             postedString += " context=" + details.requestBody.formData.context;
           }
-          if (details.requestBody.formData.pipeline != undefined) {
+          if (details.requestBody.formData.pipeline !== undefined) {
             postedString += " pipeline=" + details.requestBody.formData.pipeline;
           }
 
         }
-        if (postedString != '') {
+        if (postedString) {
           console.log(postedString);
           queryExecuted = postedString;
           try {
-            if (postedString != undefined) {
-
-              if (postedString.indexOf('dq=') != -1) {
+              if (postedString.indexOf('dq=') !== -1) {
                 usingDQ = true;
               }
-              if (postedString.indexOf('lq=') != -1) {
+              if (postedString.indexOf('lq=') !== -1) {
                 usingLQ = true;
               }
-              if (postedString.indexOf('filterField=') != -1) {
+              if (postedString.indexOf('filterField=') !== -1) {
                 usingFilterField = true;
               }
-              if (postedString.indexOf('pipeline=') != -1) {
+              if (postedString.indexOf('pipeline=') !== -1) {
                 usingPipeline = true;
               }
-              if (postedString.indexOf('$qre') != -1 || postedString.indexOf('$correlate') != -1) {
+              if (postedString.indexOf('$qre') !== -1 || postedString.indexOf('$correlate') !== -1) {
                 usingQREQuery = true;
               }
-              if (postedString.indexOf('partialMatch=true') != -1 || postedString.indexOf('$some') != -1) {
+              if (postedString.indexOf('partialMatch=true') !== -1 || postedString.indexOf('$some') !== -1) {
                 usingPartialMatch = true;
               }
-              if (postedString.indexOf('context=') != -1) {
+              if (postedString.indexOf('context=') !== -1) {
                 usingContext = true;
               }
-            }
-
           }
           catch (err) {
-
           }
         }
       }
@@ -373,7 +310,7 @@ var responseSearch = function (details) {
   return { cancel: false };
 };
 
-var responseAnalytics = function (details) {
+let responseAnalytics = function (details) {
   if (myenabled) {
     if (details.url.includes('/click') || details.url.includes('/open')) {
       usingQuickview = true;
@@ -392,10 +329,10 @@ var responseAnalytics = function (details) {
     else {
       //Get the visitor
       //url is like: https://usageanalytics.coveo.com/rest/v15/analytics/searches?visitor=baa899f0-0982-4ca4-b0b1-29ead6cce7e8
-      // or: ttps://help.salesforce.com/services/apexrest/coveo/analytics/rest/v15/analytics/searches?visitor=092861ef-30ee-4719-ae5d-2c6dcdcffbee&access_token=eyJhbGciOiJIUzI1NiJ9.eyJmaWx0ZXIiOiIoKChAb2JqZWN0dHlwZT09KExpc3RpbmdDKSkgKEBzZmxpc3RpbmdjcHVibGljYz09VHJ1ZSkpIE9SIChAb2JqZWN0dHlwZT09KEhURGV2ZWxvcGVyRG9jdW1lbnRzQykpIE9SICgoQG9iamVjdHR5cGU9PShIZWxwRG9jcykpIChAc3lzc291cmNlPT1cIlNpdGVtYXAgLSBQcm9kLURvY3NDYWNoZVwiKSAoTk9UI
-      var url = details.url + ' ';
+      // or: https://help.salesforce.com/services/apexrest/coveo/analytics/rest/v15/analytics/searches?visitor=092861ef-30ee-4719-ae5d-2c6dcdcffbee&access_token=eyJhbGciOiJIUzI1NiJ9.eyJmaWx0ZXIiOiIoKChAb2JqZWN0dHlwZT09KExpc3RpbmdDKSkgKEBzZmxpc3RpbmdjcHVibGljYz09VHJ1ZSkpIE9SIChAb2JqZWN0dHlwZT09KEhURGV2ZWxvcGVyRG9jdW1lbnRzQykpIE9SICgoQG9iamVjdHR5cGU9PShIZWxwRG9jcykpIChAc3lzc291cmNlPT1cIlNpdGVtYXAgLSBQcm9kLURvY3NDYWNoZVwiKSAoTk9UI
+      let url = details.url + ' ';
       const regex = /visitor=(.*)[ &$]/g;
-      var matches = url.match(regex);
+      let matches = url.match(regex);
       if (matches) {
         console.log('Visitor: ' + matches[0] + ' found.');
         if (visitor == '') {
@@ -413,9 +350,9 @@ var responseAnalytics = function (details) {
       analyticsSent = true;
     }
     if (details.requestBody != undefined) {
-      var postedString = decodeURIComponent(String.fromCharCode.apply(null,
+      let postedString = decodeURIComponent(String.fromCharCode.apply(null,
         new Uint8Array(details.requestBody.raw[0].bytes)));
-      var json = JSON.parse(postedString);
+      let json = JSON.parse(postedString);
       try {
         if (json != undefined) {
           if (actionCause in json[0]) {
@@ -431,7 +368,7 @@ var responseAnalytics = function (details) {
   return { cancel: false };
 };
 
-var responseOthers = function (details) {
+let responseOthers = function (details) {
   if (myenabled) {
     console.log("CATCHED Others " + details.url);
     if (details.statusCode != 200) {
@@ -449,9 +386,9 @@ chrome.webRequest.onHeadersReceived.addListener(responseOthers, filterOthers, ['
 chrome.webRequest.onSendHeaders.addListener(
   function (details) {
     if (myenabled) {
-      for (var i = 0; i < details.requestHeaders.length; ++i) {
+      for (let i = 0; i < details.requestHeaders.length; ++i) {
         if (details.requestHeaders[i].name === 'Authorization') {
-          var mytoken = (details.requestHeaders[i].value);
+          let mytoken = (details.requestHeaders[i].value);
           if (mytoken.indexOf('.') == -1) {
             searchToken = mytoken;
           }
@@ -471,9 +408,9 @@ chrome.webRequest.onSendHeaders.addListener(
 chrome.webRequest.onSendHeaders.addListener(
   function (details) {
     if (myenabled) {
-      for (var i = 0; i < details.requestHeaders.length; ++i) {
+      for (let i = 0; i < details.requestHeaders.length; ++i) {
         if (details.requestHeaders[i].name === 'Authorization') {
-          var mytoken = (details.requestHeaders[i].value);
+          let mytoken = (details.requestHeaders[i].value);
           if (mytoken.indexOf('.') == -1) {
             analyticsToken = mytoken;
           }
