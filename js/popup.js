@@ -2,13 +2,15 @@
 // jshint -W110, -W003
 /*global chrome, createWheel*/
 
+let CLIPBOARD_DATA_HTML = {}, CLIPBOARD_DATA_PLAIN = {}, CLIPBOARD_VALID_FIELDS = {};
+
 //CopyToClipboard so we can copy/paste the part of the report
-function copyToClipboard(text) {
+function copyToClipboard(text, id) {
   if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
     try {
       let listener = (e) => {
-        e.clipboardData.setData("text/html", text);
-        e.clipboardData.setData("text/plain", text);
+        e.clipboardData.setData("text/html", CLIPBOARD_DATA_HTML[id] || text);
+        e.clipboardData.setData("text/plain", CLIPBOARD_DATA_PLAIN[id] || text);
         e.preventDefault();
       };
       document.addEventListener("copy", listener);
@@ -126,6 +128,9 @@ let processDetail = (section, data, tests) => {
         isValid = (value === attr.expected);
       }
 
+      // keep a cache of validity test results, re-used in Clipboard data.
+      CLIPBOARD_VALID_FIELDS[section.label + attr.key] = isValid;
+
       if (isValid) {
         //If it should not be calculated for the total score
         if (attr.notForTotal === undefined) {
@@ -175,6 +180,50 @@ let processDetail = (section, data, tests) => {
     </div>
   </li>
 </ul>`;
+};
+
+let renderClipboardHtml = (section, data) => {
+  let lines = section.attributes.map(attr => {
+
+    let value = data[attr.key],
+      validColor = '',
+      hint = '';
+
+    if (CLIPBOARD_VALID_FIELDS[section.label + attr.key] !== undefined) {
+      validColor = `color: ${CLIPBOARD_VALID_FIELDS[section.label + attr.key] ? 'green' : 'red'}`;
+      hint = `<div style="font-size: 11px;">${attr.hint}</div>`;
+    }
+
+    return `<tr><td style="padding: 9px 15px;">${attr.label}${hint}</td><td style="padding: 9px 15px;${validColor}">${value}</td></tr>`;
+  });
+
+  return `<table border="1" bordercolor="#bcc3ca" cellspacing="0" style="border-collapse: collapse; width:90%; font-size: 13px;box-sizing: border-box;font-family: Lato, Arial, Helvetica, sans-serif;"><tbody><tr>
+<td colspan="2" style="border-bottom: 1px solid #bcc3ca;padding: 9px 15px;text-transform: uppercase;font-size: 13px;color: #1d4f76; height: 34px; background: #e6ecf0;">
+<span style="background:#e6ecf0;">${section.title}</span></td></tr>
+${lines.join('\n')}</tbody></table>
+</div>
+`; // leave empty last line here, and don't re-indent the strings
+};
+
+let renderClipboardPlain = (section, data) => {
+  let lines = section.attributes.map(attr => {
+
+    let value = data[attr.key],
+      valid = '',
+      hint = '';
+
+    if (CLIPBOARD_VALID_FIELDS[section.label + attr.key] === false) {
+      valid = '[X] ';
+      hint = ` (${attr.hint})`;
+    }
+
+    return `${attr.label}${hint}: ${valid}${value}`;
+  });
+
+  return `${section.title}
+
+${lines.join('\n')}
+`; // leave empty last line here, and don't re-indent the strings
 };
 
 /**
@@ -277,12 +326,19 @@ let processReport = (data) => {
     },
   ];
 
+  // reset clipboard data
+  CLIPBOARD_DATA_HTML = {};
+  CLIPBOARD_DATA_PLAIN = {};
+  CLIPBOARD_VALID_FIELDS = {};
+
   let sectionCharts = [];
   let html = [];
   sections.forEach(section => {
     let tests = { passed: 0, total: 0 };
-    let htmlSection = processDetail(section, data, tests);
-    html.push(htmlSection);
+
+    html.push(processDetail(section, data, tests));
+    CLIPBOARD_DATA_HTML[section.label] = renderClipboardHtml(section, data);
+    CLIPBOARD_DATA_PLAIN[section.label] = renderClipboardPlain(section, data);
 
     sectionCharts.push({ title: section.label, value: tests.passed, max: tests.total });
   });
@@ -312,7 +368,11 @@ let processReport = (data) => {
   $('#details .copy-section').click((e) => {
     e.preventDefault();
     let target = $(e.currentTarget)[0], parent = $(target).closest('ul')[0];
-    copyToClipboard(parent.outerHTML);
+    copyToClipboard(parent.outerHTML, parent.id);
+    $('#clipboard-copied').removeClass('mod-hidden');
+    setTimeout(() => {
+      $('#clipboard-copied').addClass('mod-hidden');
+    }, 999);
     return true;
   });
 
