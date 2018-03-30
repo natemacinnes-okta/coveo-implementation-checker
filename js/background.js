@@ -246,8 +246,8 @@ let onSearchRequest = function (details) {
       if (postedString.includes('context=')) {
         thisState.usingContext = true;
       }
-      saveState(thisState, state.tabId);
     }
+    saveState(thisState, state.tabId);
   });
   return { cancel: false };
 };

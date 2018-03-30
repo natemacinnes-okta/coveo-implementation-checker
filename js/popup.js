@@ -186,20 +186,33 @@ let renderClipboardHtml = (section, data) => {
   let lines = section.attributes.map(attr => {
 
     let value = data[attr.key],
+      mandatoryIcon = '',
       validColor = '',
+      validIcon = '',
       hint = '';
 
-    if (CLIPBOARD_VALID_FIELDS[section.label + attr.key] !== undefined) {
-      validColor = `color: ${CLIPBOARD_VALID_FIELDS[section.label + attr.key] ? 'green' : 'red'}`;
+    let isValid = CLIPBOARD_VALID_FIELDS[section.label + attr.key];
+    if (isValid !== undefined) {
+      validColor = `color: ${isValid ? '#009830' : '#ce3f00'}`;
+      validIcon = `<span style="font-weight:bold;${validColor}">${isValid ? '&#x2713;' : '&#x2718;'}</span>`;
       hint = `<div style="font-size: 11px;">${attr.hint}</div>`;
     }
 
-    return `<tr><td style="padding: 9px 15px;">${attr.label}${hint}</td><td style="padding: 9px 15px;${validColor}">${value}</td></tr>`;
+    if (attr.mandatory) {
+      mandatoryIcon = `<span style="${isValid?'':'color:#ce3f00;'}">${isValid ? '&#x2606;' : '&#x26A0;'}</span>`;
+    }
+
+    return `<tr>
+    <td width=0 style="border-right: none">${mandatoryIcon}</td>
+    <td style="border-left: none">${attr.label}${hint}</td>
+    <td width=0 style="border-right: none">${validIcon}</td>
+    <td style="border-left: none;${validColor}">${value}</td></tr>`;
   });
 
   return `<table border="1" bordercolor="#bcc3ca" cellspacing="0" style="border-collapse: collapse; width:90%; font-size: 13px;box-sizing: border-box;font-family: Lato, Arial, Helvetica, sans-serif;"><tbody><tr>
-<td colspan="2" style="border-bottom: 1px solid #bcc3ca;padding: 9px 15px;text-transform: uppercase;font-size: 13px;color: #1d4f76; height: 34px; background: #e6ecf0;">
-<span style="background:#e6ecf0;">${section.title}</span></td></tr>
+<td colspan="4" style="border-bottom: 1px solid #bcc3ca;padding: 9px 15px;text-transform: uppercase;font-size: 13px;color: #1d4f76; height: 34px; background: #e6ecf0;">
+<span style="background:#e6ecf0;">${section.title} (&#x2606; mandatory, &#x26A0; mandatory failed)</span>
+</td></tr>
 ${lines.join('\n')}</tbody></table>
 </div>
 `; // leave empty last line here, and don't re-indent the strings
