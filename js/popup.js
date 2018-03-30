@@ -243,7 +243,7 @@ let processReport = (data) => {
     },
     {
       title: 'Behavior information', label: 'Behavior', attributes: [
-        { key: 'nrofsearches', label: 'Nr of searches executed', hint: 'Should be 1', expected: 1 },
+        { key: 'nrofsearches', label: 'Number of searches executed', hint: 'Should be 1. Is the Search Tracker enabled?', expected: 1 },
         { key: 'searchSent', mandatory: true, label: 'Search Events Sent', hint: 'Should be true, proper use of our Search API', expected: true },
         { key: 'analyticsSent', mandatory: true, label: 'Analytics Sent', hint: 'Should be true, proper use of Analytics and ML', expected: true },
         { key: 'usingVisitor', mandatory: true, label: 'Using Visitor', hint: 'Should be true, proper use of Analytics and ML', expected: true },
@@ -269,7 +269,7 @@ let processReport = (data) => {
           }
         },
         { key: 'usingState', label: 'Using state in code', hint: 'Retrieving state creates more complicated code logic', expected: false },
-        { key: 'usingPartialMatch', label: 'Using partial match', hint: 'Partial matching needs better tuning, match %, nr of words to match', expected: false },
+        { key: 'usingPartialMatch', label: 'Using partial match', hint: 'Partial matching needs better tuning, match %, how many words to match', expected: false },
         { key: 'usingLQ', label: 'Using Long Queries (ML)', hint: 'Long Queries need ML capabilities, more tuning', expected: false },
         { key: 'usingDQ', label: 'Using disjunction queries', hint: 'Disjunction (big OR query) could lead to false results, more tuning needed', expected: false },
         { key: 'usingQRE', label: 'Using QRE in code', hint: 'QRE needs more finetuning to have better relevance', expected: false },
@@ -415,8 +415,8 @@ let getState = () => {
 };
 
 function toggleTracker() {
-  let myenabledsearch = $('#setSearchTracker input').prop('checked') ? true : false;
-  SendMessage({ type: 'enablesearch', enable: myenabledsearch });
+  let enable = $('#setSearchTracker input').prop('checked') ? true : false;
+  SendMessage({ type: 'enablesearch', enable });
 }
 
 function reset() {

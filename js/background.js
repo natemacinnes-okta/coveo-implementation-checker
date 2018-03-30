@@ -50,16 +50,7 @@ let resetState = (tabId) => {
   }
 };
 
-function setEnabled(enabled) {
-  saveState({ enabled });
-  if (!enabled) {
-    resetState();
-  }
-}
-
 function setEnabledSearch(enabled) {
-  // TODO: why have 'enabled' and 'enabledSearch' in the state?
-  setEnabled(enabled);
   saveState({
     enabledSearch: enabled,
     nrofsearches: 0,
@@ -98,9 +89,6 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   }
   else if (msg.type === 'gotNumbers') {
     saveState({ json: msg.json });
-  }
-  else if (msg.type === 'enable') {
-    setEnabled(msg.enable);
   }
   else if (msg.type === 'reset') {
     getTabId_Then(tabId => {
@@ -171,62 +159,60 @@ let decodeRaw = function (raw) {
 
 let onSearchRequest = function (details) {
   getState_Then(state => {
-    if (state.enabled) {
-      let thisState = {};
+    let thisState = {};
 
-      if (details.url.includes('querySuggest')) {
-        if (state.enabledSearch) {
-          console.log("CATCHED querySuggest ", details.url);
-          thisState.suggestSent = true;
-        }
-        else {
-          console.log("CATCHED INIT querySuggest ", details.url);
-          thisState.initSuggestSent = true;
-        }
+    if (details.url.includes('querySuggest')) {
+      if (state.enabledSearch) {
+        console.log("CATCHED querySuggest ", details.url);
+        thisState.suggestSent = true;
       }
       else {
-        console.log("CATCHED Search ", details.url);
-        thisState.searchSent = true;
-        if (state.enabledSearch) {
-          thisState.nrofsearches = (state.nrofsearches || 0) + 1;
-        }
-
-        let raw = details.requestBody && details.requestBody.raw,
-          formData = (details.requestBody && details.requestBody.formData) || {};
-
-        let postedString = decodeRaw(raw);
-
-        'a,aq,dq,lq,filterField,partialMatch,context,pipeline'.split(',').forEach(attr => {
-          if (formData[attr] !== undefined) {
-            // add all formData.q and formData.aq as q=... and aq=... to postedString
-            postedString += ` ${attr}=${formData[attr]}`;
-          }
-        });
-
-        thisState.queryExecuted = postedString;
-        if (postedString.includes('dq=')) {
-          thisState.usingDQ = true;
-        }
-        if (postedString.includes('lq=')) {
-          thisState.usingLQ = true;
-        }
-        if (postedString.includes('filterField=')) {
-          thisState.usingFilterField = true;
-        }
-        if (postedString.includes('pipeline=')) {
-          thisState.usingPipeline = true;
-        }
-        if (postedString.includes('$qre') || postedString.includes('$correlate')) {
-          thisState.usingQREQuery = true;
-        }
-        if (postedString.includes('partialMatch=true') || postedString.includes('$some')) {
-          thisState.usingPartialMatch = true;
-        }
-        if (postedString.includes('context=')) {
-          thisState.usingContext = true;
-        }
-        saveState(thisState, state.tabId);
+        console.log("CATCHED INIT querySuggest ", details.url);
+        thisState.initSuggestSent = true;
       }
+    }
+    else {
+      console.log("CATCHED Search ", details.url);
+      thisState.searchSent = true;
+      if (state.enabledSearch) {
+        thisState.nrofsearches = (state.nrofsearches || 0) + 1;
+      }
+
+      let raw = details.requestBody && details.requestBody.raw,
+        formData = (details.requestBody && details.requestBody.formData) || {};
+
+      let postedString = decodeRaw(raw);
+
+      'a,aq,dq,lq,filterField,partialMatch,context,pipeline'.split(',').forEach(attr => {
+        if (formData[attr] !== undefined) {
+          // add all formData.q and formData.aq as q=... and aq=... to postedString
+          postedString += ` ${attr}=${formData[attr]}`;
+        }
+      });
+
+      thisState.queryExecuted = postedString;
+      if (postedString.includes('dq=')) {
+        thisState.usingDQ = true;
+      }
+      if (postedString.includes('lq=')) {
+        thisState.usingLQ = true;
+      }
+      if (postedString.includes('filterField=')) {
+        thisState.usingFilterField = true;
+      }
+      if (postedString.includes('pipeline=')) {
+        thisState.usingPipeline = true;
+      }
+      if (postedString.includes('$qre') || postedString.includes('$correlate')) {
+        thisState.usingQREQuery = true;
+      }
+      if (postedString.includes('partialMatch=true') || postedString.includes('$some')) {
+        thisState.usingPartialMatch = true;
+      }
+      if (postedString.includes('context=')) {
+        thisState.usingContext = true;
+      }
+      saveState(thisState, state.tabId);
     }
   });
   return { cancel: false };
@@ -234,72 +220,68 @@ let onSearchRequest = function (details) {
 
 let onAnalyticsRequest = function (details) {
   getState_Then(state => {
-    if (state.enabled) {
-      let thisState = {};
-      let url = details.url + ' ';
+    let thisState = {};
+    let url = details.url + ' ';
 
-      if (url.includes('/click') || url.includes('/open')) {
-        thisState.usingQuickview = true;
-      }
-      if (url.includes('topQueries')) {
-        if (state.enabledSearch) {
-          console.log("CATCHED topQueries ", url);
-          thisState.topQueriesSent = true;
-        }
-        else {
-          console.log("CATCHED init topQueries ", url);
-          thisState.initTopQueriesSent = true;
-        }
-      }
-      //Get the visitor
-      //url is like: https://usageanalytics.coveo.com/rest/v15/analytics/searches?visitor=baa899f0-0982-4ca4-b0b1-29ead6cce7e8
-      // or: https://help.salesforce.com/services/apexrest/coveo/analytics/rest/v15/analytics/searches?visitor=092861ef-30ee-4719-ae5d-2c6dcdcffbee&access_token=eyJhbGciOiJIUzI1NiJ9.eyJmaWx0ZXIiOiIoKChAb2JqZWN0dHlwZT09KExpc3RpbmdDKSkgKEBzZmxpc3RpbmdjcHVibGljYz09VHJ1ZSkpIE9SIChAb2JqZWN0dHlwZT09KEhURGV2ZWxvcGVyRG9jdW1lbnRzQykpIE9SICgoQG9iamVjdHR5cGU9PShIZWxwRG9jcykpIChAc3lzc291cmNlPT1cIlNpdGVtYXAgLSBQcm9kLURvY3NDYWNoZVwiKSAoTk9UI
-      const regex = /visitor=(.*)[ &$]/g;
-      let matches = url.match(regex);
-      if (matches) {
-        console.log(`Visitor: ${matches[0]} found.`);
-        let v = matches[0];
-        if (!state.visitor) {
-          thisState.visitor = v;
-          thisState.usingVisitor = true;
-        }
-        else if (state.visitor !== v) {
-          thisState.visitorChanged = true;
-          thisState.visitor = v;
-        }
-        console.log("CATCHED Analytics ", details.url);
-        thisState.analyticsSent = true;
-      }
-
-      if (details.requestBody) {
-        let postedString = decodeRaw(details.requestBody.raw);
-        console.log('postedString [A]:', postedString);
-
-        // TODO: need to do something with actionCause here ?
-        // try {
-        //   let json = JSON.parse(postedString);
-        //   if (json) {
-        //     if (actionCause in json[0]) {
-        //       console.log(json[0].actionCause);
-        //     }
-        //   }
-        // }
-        // catch (err) {}
-      }
-
-      saveState(thisState, state.tabId);
+    if (url.includes('/click') || url.includes('/open')) {
+      thisState.usingQuickview = true;
     }
+    if (url.includes('topQueries')) {
+      if (state.enabledSearch) {
+        console.log("CATCHED topQueries ", url);
+        thisState.topQueriesSent = true;
+      }
+      else {
+        console.log("CATCHED init topQueries ", url);
+        thisState.initTopQueriesSent = true;
+      }
+    }
+    //Get the visitor
+    //url is like: https://usageanalytics.coveo.com/rest/v15/analytics/searches?visitor=baa899f0-0982-4ca4-b0b1-29ead6cce7e8
+    // or: https://help.salesforce.com/services/apexrest/coveo/analytics/rest/v15/analytics/searches?visitor=092861ef-30ee-4719-ae5d-2c6dcdcffbee&access_token=eyJhbGciOiJIUzI1NiJ9.eyJmaWx0ZXIiOiIoKChAb2JqZWN0dHlwZT09KExpc3RpbmdDKSkgKEBzZmxpc3RpbmdjcHVibGljYz09VHJ1ZSkpIE9SIChAb2JqZWN0dHlwZT09KEhURGV2ZWxvcGVyRG9jdW1lbnRzQykpIE9SICgoQG9iamVjdHR5cGU9PShIZWxwRG9jcykpIChAc3lzc291cmNlPT1cIlNpdGVtYXAgLSBQcm9kLURvY3NDYWNoZVwiKSAoTk9UI
+    const regex = /visitor=(.*)[ &$]/g;
+    let matches = url.match(regex);
+    if (matches) {
+      console.log(`Visitor: ${matches[0]} found.`);
+      let v = matches[0];
+      if (!state.visitor) {
+        thisState.visitor = v;
+        thisState.usingVisitor = true;
+      }
+      else if (state.visitor !== v) {
+        thisState.visitorChanged = true;
+        thisState.visitor = v;
+      }
+      console.log("CATCHED Analytics ", details.url);
+      thisState.analyticsSent = true;
+    }
+
+    if (details.requestBody) {
+      let postedString = decodeRaw(details.requestBody.raw);
+      console.log('postedString [A]:', postedString);
+
+      // TODO: need to do something with actionCause here ?
+      // try {
+      //   let json = JSON.parse(postedString);
+      //   if (json) {
+      //     if (actionCause in json[0]) {
+      //       console.log(json[0].actionCause);
+      //     }
+      //   }
+      // }
+      // catch (err) {}
+    }
+
+    saveState(thisState, state.tabId);
   });
   return { cancel: false };
 };
 
 let onResponseHeaders = function (details) {
   getState_Then(state => {
-    if (state.enabled) {
-      console.log("CATCHED Others ", details.statusCode, details.url);
-      if (details.statusCode !== 200) {
-        saveState({ alertsError: details.url + " --> " + details.statusCode }, state.tabId);
-      }
+    console.log("CATCHED Others ", details.statusCode, details.url);
+    if (details.statusCode !== 200) {
+      saveState({ alertsError: details.url + " --> " + details.statusCode }, state.tabId);
     }
   });
   return { cancel: false };
@@ -323,13 +305,11 @@ let getAuthorizationToken = function (requestHeaders) {
 
 let saveToken = function (tokenName, details) {
   getState_Then(state => {
-    if (state.enabled) {
-      let token = getAuthorizationToken(details.requestHeaders);
-      if (token) {
-        let s = {};
-        s[tokenName] = token;
-        saveState(s, state.tabId);
-      }
+    let token = getAuthorizationToken(details.requestHeaders);
+    if (token) {
+      let s = {};
+      s[tokenName] = token;
+      saveState(s, state.tabId);
     }
   });
 };
