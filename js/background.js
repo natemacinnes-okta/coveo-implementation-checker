@@ -14,13 +14,48 @@ let getTabId_Then = (callback) => {
   });
 };
 
+
+let resetState = (tabId) => {
+  if (tabId) {
+    STATES[tabId] = {
+      tabId,
+      nrofsearches: 0,
+      suggestSent: false,
+      searchSent: false,
+      analyticsSent: false,
+      topQueriesSent: false,
+      initSuggestSent: false,
+      initTopQueriesSent: false,
+      usingDQ: false,
+      usingLQ: false,
+      alertsError: '',
+      usingFilterField: false,
+      usingPartialMatch: false,
+      usingContext: false,
+      visible: false,
+      enabledSearch: false,
+      analyticsToken: '',
+      searchToken: '',
+      visitor: '',
+      usingVisitor: false,
+      visitorChanged: false,
+      usingQuickview: false,
+      usingQREQuery: false,
+      usingPipeline: false,
+      queryExecuted: '',
+    };
+  }
+  else {
+    getTabId_Then(resetState);
+  }
+};
+
 let getState = (tabId) => {
   let state = STATES[tabId];
   if (!state) {
-    state = { tabId };
-    STATES[tabId] = state;
+    resetState(tabId);
   }
-  return state;
+  return STATES[tabId];
 };
 
 let getState_Then = (callback) => {
@@ -38,15 +73,6 @@ let saveState = (obj, tabId) => {
     getTabId_Then(tabId => {
       saveState(obj, tabId);
     });
-  }
-};
-
-let resetState = (tabId) => {
-  if (tabId) {
-    STATES[tabId] = { tabId };
-  }
-  else {
-    getTabId_Then(resetState);
   }
 };
 
@@ -72,7 +98,7 @@ let SendMessage = (parameters) => {
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (msg.type === 'getState') {
     getTabId_Then(tabId => {
-      sendResponse(STATES[tabId] || { tabId });
+      sendResponse(getState(tabId));
     });
     return true;
   }
@@ -126,7 +152,7 @@ function checkToken(token) {
 chrome.tabs.onUpdated.addListener(function (tabId, info) {
   if (info.status === 'loading') {
     let state = getState(tabId);
-    let document_url = (info.url || '').split('?')[0]; // ignore after ?, url is updated when using facets or doing searches.
+    let document_url = (info.url || '').replace(/(#|\?).+/g, ''); // ignore after ?, url is updated when using facets or doing searches.
     // if we change location, we want to reset this tab state.
     if (document_url && state.document_url !== document_url) {
       resetState(tabId);
@@ -140,17 +166,25 @@ chrome.tabs.onUpdated.addListener(function (tabId, info) {
 
 let decodeRaw = function (raw) {
   let rawString = '';
-  if (raw) {
-    if (raw.length >= 2) {
-      let a = new Uint8Array(raw[0].bytes);
-      let b = new Uint8Array(raw[1].bytes);
-      let c = new (a.constructor)(a.length + b.length);
-      c.set(a, 0);
-      c.set(b, a.length);
+  if (raw && raw.length) {
+    try {
+      let totalLen = 0;
+      let aUint8 = raw.map(r=>{
+        let a = new Uint8Array(r.bytes);
+        totalLen += a.length;
+        return a;
+      });
+
+      let c = new (aUint8[0].constructor)(totalLen);
+      let len = 0;
+      aUint8.forEach(a=>{
+        c.set(a, len);
+        len += a.length;
+      });
       rawString = decodeURIComponent(String.fromCharCode.apply(null, c));
     }
-    else {
-      rawString = decodeURIComponent(String.fromCharCode.apply(null, new Uint8Array(raw[0].bytes)));
+    catch(e) {
+      console.error('decodeRaw Error: ', e);
     }
   }
 
