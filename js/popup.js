@@ -243,7 +243,7 @@ let processReport = (data) => {
     },
     {
       title: 'Behavior information', label: 'Behavior', attributes: [
-        { key: 'nrofsearches', label: 'Number of searches executed', hint: 'Should be 1. Is the Search Tracker enabled?', expected: 1 },
+        { key: 'nrofsearches', label: 'Number of searches executed', hint: 'Should be 1.', expected: 1 },
         { key: 'searchSent', mandatory: true, label: 'Search Events Sent', hint: 'Should be true, proper use of our Search API', expected: true },
         { key: 'analyticsSent', mandatory: true, label: 'Analytics Sent', hint: 'Should be true, proper use of Analytics and ML', expected: true },
         { key: 'usingVisitor', mandatory: true, label: 'Using Visitor', hint: 'Should be true, proper use of Analytics and ML', expected: true },
