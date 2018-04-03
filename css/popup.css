@@ -124,6 +124,7 @@ h3 i {
   font-family: courier;
   font-variant: normal !important;
   font-weight: normal !important;
+  font-size: 11px;
   word-wrap: break-word;
   white-space: pre-wrap;
   word-break: break-all;
@@ -189,10 +190,17 @@ tr td.line-message small {
   /*padding-left:25px;*/
 }
 
+
+tr td.line-mandatory {
+  text-align: right;
+  width: 15px !important;
+  /*padding-left: 25px !important;*/
+}
+
 tr td.line-message {
   text-align: right;
   width: 350px;
-  padding-left: 25px !important;
+  padding-left: 1px !important;
 }
 
 tr td.line-result {
@@ -207,18 +215,11 @@ tr td.line-result {
 }
 
 .mandatory {
-  background-position: left 1px top 5px;
-  background-repeat: no-repeat;
-  background-size: 25px;
-  background-image: url(../images/mandatory.svg);
-  fill: grey;
+  color: #009830;
 }
 
 .mandatoryFAIL {
-  background-position: left 1px top 5px;
-  background-repeat: no-repeat;
-  background-size: 25px;
-  background-image: url(../images/mandatoryFail.svg);
+  color: #ce3f00;
 }
 
 #download-global,
@@ -254,6 +255,14 @@ tr td.line-result {
 .valid-false td.line-result {
   color: #ce3f00;
   background-image: url(../images/action-close.svg);
+}
+
+.valid-true td.line-mandatory {
+  color: #009830;
+}
+
+.valid-false td.line-mandatory {
+  color: #ce3f00;
 }
 
 /* Override of admin css */
