@@ -79,14 +79,16 @@ h3 i {font-style: italic;}
 .coveo-styleguide table:not(.datepicker-table) td.line-result {font-variant: small-caps; text-align: left; font-weight: bold; vertical-align: top;}
 .coveo-styleguide table:not(.datepicker-table) th:last-child, .coveo-styleguide table:not(.datepicker-table) td:last-child {padding-left: 25px;}
 tr td.line-message small {font-size: small; color: #1d4f76; display: block; /*padding-left:25px;*/}
-tr td.line-message {text-align: right; width: 350px; padding-left: 25px !important;}
+tr td.line-mandatory {text-align: right; width: 15px !important;}
+tr td.line-message {text-align: right; width: 350px; padding-left: 1px !important;}
 tr td.line-result {background-position: left 5px top 12px; background-repeat: no-repeat; background-size: 12px; text-align: left; word-wrap: break-word; white-space: pre-wrap; word-break: break-all; width: 450px;}
-.mandatory {background-position: left 1px top 5px; background-repeat: no-repeat; background-size: 25px; background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><g fill="#373737"><path d="M250.5,447.3L53.2,250L250.5,52.7L447.8,250L250.5,447.3z M91.9,250l158.6,158.6L409.1,250L250.5,91.4L91.9,250z"/><rect height="109.5" width="27.4" x="236.8" y="167.8"/><rect height="27.4" width="27.4" x="236.8" y="304.7"/></g></svg>');}
-.mandatoryFAIL {background-position: left 1px top 5px; background-repeat: no-repeat; background-size: 25px; background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><g fill="#ce3f00"><polygon points="250.5,447.3 53.2,250 250.5,52.7 447.8,250 z"/><rect fill="white" height="150" width="50" x="225" y="130"/><rect fill="white" height="50" width="50" x="225" y="320"/></g></svg>');}
+.mandatory {  color: #009830;}
+.mandatoryFAIL {  color: #ce3f00;}
 .download-global, .copy-section {display;none;}
 .valid-true td.line-result {color: #009830; background-image: url(../images/checkbox-checkmark.svg);}
 .valid-false td.line-result {color: #ce3f00; background-image: url(../images/action-close.svg);}
-
+.valid-true td.line-mandatory {  color: #009830;}
+.valid-false td.line-mandatory {  color: #ce3f00;}
 </style>
 </head>
 <body class="coveo-styleguide">
