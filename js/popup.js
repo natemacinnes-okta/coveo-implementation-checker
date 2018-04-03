@@ -112,6 +112,7 @@ let processDetail = (section, data, tests) => {
       value = data[attr.key],
       hint = '';
     let additionalClass = '';
+    let mandatoryIcon = '';
     let mandatory = false;
     if (attr.additionalClass !== undefined) {
       additionalClass = attr.additionalClass;
@@ -144,7 +145,7 @@ let processDetail = (section, data, tests) => {
 
       isValidCssClass = 'valid-' + isValid;
       if (mandatory) {
-        isValidCssClass += (isValid ? ' mandatory' : ' mandatoryFAIL');
+        mandatoryIcon = `<span class='${isValidCssClass}'>&#x2605;</span>`;
       }
     }
 
@@ -154,6 +155,9 @@ let processDetail = (section, data, tests) => {
     }
 
     return `<tr class="${isValidCssClass}">
+        <td class="line-mandatory">
+          ${mandatoryIcon}
+        </td>
         <td class="line-message">
           ${attr.label}
           <small>${hint}</small>
@@ -199,19 +203,20 @@ let renderClipboardHtml = (section, data) => {
     }
 
     if (attr.mandatory) {
-      mandatoryIcon = `<span style="${isValid?'':'color:#ce3f00;'}">${isValid ? '&#x2606;' : '&#x26A0;'}</span>`;
+      mandatoryIcon = `<span style="${validColor}">&#x2605;</span>`;
     }
 
     return `<tr>
-    <td width=0 style="border-right: none">${mandatoryIcon}</td>
-    <td style="border-left: none">${attr.label}${hint}</td>
+    <td width=0 style="border-right: none;font-weight:bold;">${mandatoryIcon}</td>
+    <td style="border-left: none" width="50%">${attr.label}${hint}</td>
     <td width=0 style="border-right: none">${validIcon}</td>
-    <td style="border-left: none;${validColor}">${value}</td></tr>`;
+    <td style="border-left: none;${validColor}" width="50%">${value}</td></tr>`;
   });
 
   return `<table border="1" bordercolor="#bcc3ca" cellspacing="0" style="border-collapse: collapse; width:90%; font-size: 13px;box-sizing: border-box;font-family: Lato, Arial, Helvetica, sans-serif;"><tbody><tr>
 <td colspan="4" style="border-bottom: 1px solid #bcc3ca;padding: 9px 15px;text-transform: uppercase;font-size: 13px;color: #1d4f76; height: 34px; background: #e6ecf0;">
-<span style="background:#e6ecf0;">${section.title} (&#x2606; mandatory, &#x26A0; mandatory failed)</span>
+<span style="background:#e6ecf0;">${section.title}</span><br>
+<span style="font-size:8px;background:#e6ecf0;">(<span style='font-weight:bold;color: #009830'>&#x2605;</span> mandatory, <span style='font-weight:bold;color: #ce3f00'>&#x2605;</span> mandatory failed)</span>
 </td></tr>
 ${lines.join('\n')}</tbody></table>
 </div>
@@ -247,6 +252,7 @@ let processReport = (data) => {
     {
       title: 'General information', label: 'General', attributes: [
         { key: 'theUrl', notForTotal: true, label: 'Url', hint: '' },
+        { key: 'theDate', notForTotal: true, label: 'Date', hint: '' },
         { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3679', expected: /^2\.3679/ },
         { key: 'fromSystem', notForTotal: true, label: 'Integrated in UI' },
         { key: 'hardcodedAccessTokens', label: 'Hard coded Access Tokens', hint: 'Should NOT be done!!', expected: false },
