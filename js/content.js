@@ -361,6 +361,7 @@ function initReport() {
 		customEvents: [],
 		difficulty: 0,
 		theUrl: '',
+		theDate: '',
 		pageSize: '',
 		fromSystem: 'Unknown',
 		hardcodedAccessTokens: false,
@@ -416,6 +417,10 @@ function getReport() {
 			}
 		});
 	});
+	//Set the date
+	var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+	var today  = new Date();
+	theReport.theDate = today.toLocaleDateString("en-US",options);
 	//Get the url
 	theReport.theUrl = window.location.protocol + '//' + window.location.hostname;
 	//Get from the page the number of result templates
