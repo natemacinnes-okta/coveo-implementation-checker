@@ -31,7 +31,7 @@ function downloadReport(id) {
     let text = document.getElementById(id).outerHTML;
     let html = `<!DOCTYPE html>
 <html>
-<head>
+<head><meta charset="UTF-8">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
 <link rel="stylesheet" href="http://coveo.github.io/vapor/dist/css/CoveoStyleGuide.css">
 <link rel="stylesheet" href="https://static.cloud.coveo.com/styleguide/v2.10.0/css/CoveoStyleGuide.css">
@@ -78,9 +78,10 @@ h3 i {font-style: italic;}
 .coveo-styleguide .collapsible .collapsible-body {padding: 0;}
 .coveo-styleguide table:not(.datepicker-table) td.line-result {font-variant: small-caps; text-align: left; font-weight: bold; vertical-align: top;}
 .coveo-styleguide table:not(.datepicker-table) th:last-child, .coveo-styleguide table:not(.datepicker-table) td:last-child {padding-left: 25px;}
-tr td.line-message small {font-size: small; color: #1d4f76; display: block; /*padding-left:25px;*/}
-tr td.line-mandatory {text-align: right; width: 15px !important;}
-tr td.line-message {text-align: right; width: 350px; padding-left: 1px !important;}
+tr td.line-message small {vertical-align: top !important;font-size: small; color: #1d4f76; display: block; /*padding-left:25px;*/}
+tr td.line-mandatory {vertical-align: top !important; text-align: right; width: 15px !important;padding-right: 1px !important;padding-left: 1px !important;}
+tr td.line-indicator {  border-right: none;  vertical-align: top !important;  padding-right: 1px !important;padding-left: 1px !important;}
+tr td.line-message {vertical-align: top !important; text-align: right; width: 350px; padding-left: 1px !important;}
 tr td.line-result {background-position: left 5px top 12px; background-repeat: no-repeat; background-size: 12px; text-align: left; word-wrap: break-word; white-space: pre-wrap; word-break: break-all; width: 450px;}
 .mandatory {  color: #009830;}
 .mandatoryFAIL {  color: #ce3f00;}
@@ -114,6 +115,8 @@ let processDetail = (section, data, tests) => {
       value = data[attr.key],
       hint = '';
     let additionalClass = '';
+    let validColor = '';
+    let validIcon = '';
     let mandatoryIcon = '';
     let mandatory = false;
     if (attr.additionalClass !== undefined) {
@@ -145,6 +148,9 @@ let processDetail = (section, data, tests) => {
         hint = attr.hint;
       }
 
+      validColor = `color: ${isValid ? '#009830' : '#ce3f00'}`;
+      validIcon = `<span style="font-weight:bold;${validColor}">${isValid ? '&#x2713;' : '&#x2718;'}</span>`;
+
       isValidCssClass = 'valid-' + isValid;
       if (mandatory) {
         mandatoryIcon = `<span class='${isValidCssClass}'>&#x2605;</span>`;
@@ -164,6 +170,7 @@ let processDetail = (section, data, tests) => {
           ${attr.label}
           <small>${hint}</small>
         </td>
+        <td class="line-indicator" width="1px">${validIcon}</td>
         <td class="line-result ${additionalClass}">${value}</td>
       </tr>`;
   });
@@ -195,24 +202,27 @@ let renderClipboardHtml = (section, data) => {
       mandatoryIcon = '',
       validColor = '',
       validIcon = '',
+      additionalClass = '',
       hint = '';
 
     let isValid = CLIPBOARD_VALID_FIELDS[section.label + attr.key];
     if (isValid !== undefined) {
       validColor = `color: ${isValid ? '#009830' : '#ce3f00'}`;
       validIcon = `<span style="font-weight:bold;${validColor}">${isValid ? '&#x2713;' : '&#x2718;'}</span>`;
-      hint = `<div style="font-size: 11px;">${attr.hint}</div>`;
+      hint = `<div style="font-size: 11px;color: #1d4f76;">${attr.hint}</div>`;
     }
-
+    if (attr.additionalClass !== undefined) {
+      additionalClass = `font-family: courier;font-variant: normal !important;font-weight: normal !important;font-size: 11px; word-wrap: break-word;white-space: pre-wrap;word-break: break-all;`;
+    }
     if (attr.mandatory) {
       mandatoryIcon = `<span style="${validColor}">&#x2605;</span>`;
     }
 
     return `<tr>
-    <td width=0 style="border-right: none;font-weight:bold;">${mandatoryIcon}</td>
-    <td style="border-left: none" width="50%">${attr.label}${hint}</td>
-    <td width=0 style="border-right: none">${validIcon}</td>
-    <td style="border-left: none;${validColor}" width="50%">${value}</td></tr>`;
+    <td width=0 style="border-right: none;font-weight:bold;vertical-align: top">${mandatoryIcon}</td>
+    <td style="padding-left:15px;vertical-align: top;border-left: none" width="50%">${attr.label}${hint}</td>
+    <td width=0 style="border-right: none;vertical-align: top">${validIcon}</td>
+    <td style="padding-left:15px;vertical-align: top;border-left: none;${validColor};${additionalClass}" width="50%">${value}</td></tr>`;
   });
 
   return `<table border="1" bordercolor="#bcc3ca" cellspacing="0" style="border-collapse: collapse; width:90%; font-size: 13px;box-sizing: border-box;font-family: Lato, Arial, Helvetica, sans-serif;"><tbody><tr>

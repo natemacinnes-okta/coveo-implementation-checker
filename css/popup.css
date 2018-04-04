@@ -194,8 +194,16 @@ tr td.line-message small {
 tr td.line-mandatory {
   text-align: right;
   width: 15px !important;
+  vertical-align: top !important;
   /*padding-left: 25px !important;*/
 }
+
+tr td.line-indicator {
+  border-right: none;
+  vertical-align: top !important;
+  /*padding-left: 25px !important;*/
+}
+
 
 tr td.line-message {
   text-align: right;
@@ -212,6 +220,7 @@ tr td.line-result {
   white-space: pre-wrap;
   word-break: break-all;
   width: 450px;
+  padding-left: 1px !important;
 }
 
 .mandatory {
@@ -249,12 +258,12 @@ tr td.line-result {
 
 .valid-true td.line-result {
   color: #009830;
-  background-image: url(../images/checkbox-checkmark.svg);
+/*  background-image: url(../images/checkbox-checkmark.svg);*/
 }
 
 .valid-false td.line-result {
   color: #ce3f00;
-  background-image: url(../images/action-close.svg);
+  /*background-image: url(../images/action-close.svg);*/
 }
 
 .valid-true td.line-mandatory {
