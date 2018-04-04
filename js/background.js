@@ -155,7 +155,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, info) {
     let document_url = (info.url || '').replace(/(#|\?).+/g, ''); // ignore after ?, url is updated when using facets or doing searches.
     // if we change location, we want to reset this tab state.
     if (document_url && state.document_url !== document_url) {
-      resetState(tabId);
+      //WIM This creates a conflict, overriding initSearchSuggest etc
+      //resetState(tabId);
       saveState({ document_url }, tabId);
     }
   }
@@ -217,13 +218,13 @@ let onSearchRequest = function (details) {
 
       let postedString = decodeRaw(raw);
 
-      'a,aq,dq,lq,filterField,partialMatch,context,pipeline'.split(',').forEach(attr => {
+      'q,aq,dq,lq,filterField,partialMatch,context,pipeline'.split(',').forEach(attr => {
         if (formData[attr] !== undefined) {
           // add all formData.q and formData.aq as q=... and aq=... to postedString
           postedString += ` ${attr}=${formData[attr]}`;
         }
       });
-
+      console.log(postedString);
       thisState.queryExecuted = postedString;
       if (postedString.includes('dq=')) {
         thisState.usingDQ = true;
