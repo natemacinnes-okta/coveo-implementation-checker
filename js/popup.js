@@ -455,10 +455,10 @@ function push(data) {
 function pushDocument(documentBody, documentId) {
   var _this = this;
 
-  var server = 'push.cloud.coveo.com'
-  var APIversion = 'v1'
-  var organizationId = 'sewimnijmeijer01'
-  var sourceId = 'riv7wb3mxim6ux5zh6m77wklxi-sewimnijmeijer01'
+  var server = 'push.cloud.coveo.com';
+  var APIversion = 'v1';
+  var organizationId = 'sewimnijmeijer01';
+  var sourceId = 'riv7wb3mxim6ux5zh6m77wklxi-sewimnijmeijer01';
   let apikey='xx261c0e9b-768e-4e27-9245-931377cb6978';
   // This sends a request to 
   // https://push.cloud.coveo.com/v1/organizations/{orgID}/sources/{sourceID}/documents?documentId={documentID}
