@@ -475,14 +475,16 @@ function pushDocument(documentBody, documentId) {
       data: documentBody,
       success: function(msg) {
         console.log("Pushed to Coveo");
+        window.close();
         //alert("Pushed to Coveo Cloud");
       },
       error: function (xhr, ajaxOptions, thrownError) {
         console.log("Error when pushing: "+xhr.status);
+        window.close();
         //alert("Pushed to Coveo Cloud FAILED: "+xhr.status);
       }
   });
-  window.close();
+  
  
 }
 
