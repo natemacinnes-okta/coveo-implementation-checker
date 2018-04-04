@@ -422,7 +422,7 @@ function getReport() {
 	var today  = new Date();
 	theReport.theDate = today.toLocaleDateString("en-US",options);
 	//Get the url
-	theReport.theUrl = window.location.protocol + '//' + window.location.hostname;
+	theReport.theUrl = window.location.protocol + '//' + window.location.hostname + "/" + window.location.pathname;
 	//Get from the page the number of result templates
 	theReport.nrOfResultTemplates = document.querySelectorAll('.result-template').length;
 
