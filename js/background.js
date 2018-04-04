@@ -244,7 +244,7 @@ let onSearchRequest = function (details) {
       if (postedString.includes('partialMatch=true') || postedString.includes('$some')) {
         thisState.usingPartialMatch = true;
       }
-      if (postedString.includes('context=')) {
+      if (postedString.includes('context=') && !postedString.includes('context={}')) {
         thisState.usingContext = true;
       }
     }
@@ -256,7 +256,7 @@ let onSearchRequest = function (details) {
 let onAnalyticsRequest = function (details) {
   getState_Then(state => {
     let thisState = {};
-    let url = details.url + ' ';
+    let url = details.url + '&';
 
     if (url.includes('/click') || url.includes('/open')) {
       thisState.usingQuickview = true;
@@ -274,7 +274,7 @@ let onAnalyticsRequest = function (details) {
     //Get the visitor
     //url is like: https://usageanalytics.coveo.com/rest/v15/analytics/searches?visitor=baa899f0-0982-4ca4-b0b1-29ead6cce7e8
     // or: https://help.salesforce.com/services/apexrest/coveo/analytics/rest/v15/analytics/searches?visitor=092861ef-30ee-4719-ae5d-2c6dcdcffbee&access_token=eyJhbGciOiJIUzI1NiJ9.eyJmaWx0ZXIiOiIoKChAb2JqZWN0dHlwZT09KExpc3RpbmdDKSkgKEBzZmxpc3RpbmdjcHVibGljYz09VHJ1ZSkpIE9SIChAb2JqZWN0dHlwZT09KEhURGV2ZWxvcGVyRG9jdW1lbnRzQykpIE9SICgoQG9iamVjdHR5cGU9PShIZWxwRG9jcykpIChAc3lzc291cmNlPT1cIlNpdGVtYXAgLSBQcm9kLURvY3NDYWNoZVwiKSAoTk9UI
-    const regex = /visitor=(.*)[ &$]/g;
+    const regex = /visitor=(.*?)[ ;&$]/g;
     let matches = url.match(regex);
     if (matches) {
       console.log(`Visitor: ${matches[0]} found.`);
@@ -285,6 +285,7 @@ let onAnalyticsRequest = function (details) {
       }
       else if (state.visitor !== v) {
         thisState.visitorChanged = true;
+        console.log("Visitor ID was "+ state.visitor +' and now: '+v);
         thisState.visitor = v;
       }
       console.log("CATCHED Analytics ", details.url);
