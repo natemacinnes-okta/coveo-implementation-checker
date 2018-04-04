@@ -225,7 +225,7 @@ let onSearchRequest = function (details) {
         }
       });
       console.log(postedString);
-      thisState.queryExecuted = postedString;
+     // thisState.queryExecuted = postedString;
       if (postedString.includes('dq=')) {
         thisState.usingDQ = true;
       }
