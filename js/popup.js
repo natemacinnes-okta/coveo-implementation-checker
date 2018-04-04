@@ -507,6 +507,7 @@ function buildMessageDocument(data) {
   data.json['date'] = date.toUTCString();
   //data.json['compressionType'] = 'Uncompressed';
   data.json['fileExtension'] = ".html";
+  data.json['myimage'] = data.image;
   let html = getReportHTML('globalReport');
   data.json['compressedBinaryData'] = u_btoa(html);
 
