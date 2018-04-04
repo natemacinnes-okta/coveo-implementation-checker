@@ -25,77 +25,82 @@ function copyToClipboard(text, id) {
   return false;
 }
 
+function getReportHTML(id){
+  let text = document.getElementById(id).outerHTML;
+  let html = `<!DOCTYPE html>
+  <html>
+  <head><meta charset="UTF-8">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+  <link rel="stylesheet" href="http://coveo.github.io/vapor/dist/css/CoveoStyleGuide.css">
+  <link rel="stylesheet" href="https://static.cloud.coveo.com/styleguide/v2.10.0/css/CoveoStyleGuide.css">
+  <style type="text/css">
+  body.coveo-styleguide {display:block; padding: 0 30px 30px;}
+  div.wheel {display: inline-block; text-align: center; margin: 5px 10px; cursor: default; width: 160px;}
+  div.wheel svg {cursor: default; width: 80px; height: 80px; transform: rotate(-90deg);}
+  div.wheel .wheel-title {margin-top: 5px; font-size: 1.4em;}
+  div.wheel svg .back-ring {stroke: #E4EAED; fill: none;}
+  div.wheel svg text {font-weight: bold;}
+  div.wheel.good svg text {fill: #00983;}
+  div.wheel.warn svg text {fill: #ecad00;}
+  div.wheel.bad svg text {fill: #ce3f00;}
+  div.wheel.good svg circle.value {stroke: #009830;}
+  div.wheel.warn svg circle.value {stroke: #ecad00;}
+  div.wheel.bad svg circle.value {stroke: #ce3f00;}
+  header.header {min-height: 48px;}
+  .header-section {font-size: 1.2em; font-weight: bold;}
+  a {outline: none;}
+  a img {outline: none;}
+  img {border: 0;}
+  a:focus {outline: none;}
+  h3 {margin: 10px;}
+  h3 i {font-style: italic;}
+  .popup-content {padding-left: 8px; padding-right: 8px; padding-top: 0px; overflow: auto;}
+  #myscreenimage {height: 200px; background-size: contain; background-repeat: no-repeat; background-position: top center; margin: 10px 20px; /*border: 1px solid silver;*/}
+  #scores {text-align: center;}
+  #scores div.wheel a svg {cursor: pointer;}
+
+  .coveo-styleguide .collapsible .collapsible-header {background-position: left 20px center; display: flex; line-height: 50px;}
+  .coveo-styleguide .collapsible .collapsible-header .msg {flex: 1;}
+  .coveo-styleguide table:not(.datepicker-table) tr:hover td {background-color: transparent;}
+
+  #details b {font-weight: bold;}
+  #details i {font-style: italic;}
+  .mycode {font-family: courier; font-variant: normal !important; font-weight: normal !important; word-wrap: break-word; white-space: pre-wrap; word-break: break-all;}
+  .coveo-styleguide .collapsible .collapsible-header .details {color: #ce3f00; font-size: 8px;}
+  .coveo-styleguide .collapsible .collapsible-header .result {color: #ce3f00; margin: auto;}
+  .coveo-styleguide .collapsible .collapsible-header .result .wheel {position: relative; width: auto;}
+  .coveo-styleguide .collapsible .collapsible-header .result .wheel svg {width: 40px; position: absolute; margin-top: -40px; margin-left: -10px;}
+  .coveo-styleguide .collapsible .collapsible-header .result div.wheel svg .back-ring {stroke: #fff; fill: none;}
+  .coveo-styleguide .collapsible .collapsible-header .result .wheel-title {display: none;}
+  .coveo-styleguide .collapsible .collapsible-header.active {background-image: none;}
+  .coveo-styleguide .collapsible .collapsible-body {padding: 0;}
+  .coveo-styleguide table:not(.datepicker-table) td.line-result {font-variant: small-caps; text-align: left; font-weight: bold; vertical-align: top;}
+  .coveo-styleguide table:not(.datepicker-table) th:last-child, .coveo-styleguide table:not(.datepicker-table) td:last-child {padding-left: 25px;}
+  tr td.line-message small {vertical-align: top !important;font-size: small; color: #1d4f76; display: block; /*padding-left:25px;*/}
+  tr td.line-mandatory {vertical-align: top !important; text-align: right; width: 15px !important;padding-right: 1px !important;padding-left: 1px !important;}
+  tr td.line-indicator {  border-right: none;  vertical-align: top !important;  padding-right: 1px !important;padding-left: 1px !important;}
+  tr td.line-message {vertical-align: top !important; text-align: right; width: 350px; padding-left: 1px !important;}
+  tr td.line-result {background-position: left 5px top 12px; background-repeat: no-repeat; background-size: 12px; text-align: left; word-wrap: break-word; white-space: pre-wrap; word-break: break-all; width: 450px;}
+  .mandatory {  color: #009830;}
+  .mandatoryFAIL {  color: #ce3f00;}
+  .download-global, .copy-section {display;none;}
+  .valid-true td.line-result {color: #009830; background-image: url(../images/checkbox-checkmark.svg);}
+  .valid-false td.line-result {color: #ce3f00; background-image: url(../images/action-close.svg);}
+  .valid-true td.line-mandatory {  color: #009830;}
+  .valid-false td.line-mandatory {  color: #ce3f00;}
+  </style>
+  </head>
+  <body class="coveo-styleguide">
+  ${text}
+  </body>
+  </html>`;
+  return html;
+}
+
 //Download the report
 function downloadReport(id) {
   try {
-    let text = document.getElementById(id).outerHTML;
-    let html = `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
-<link rel="stylesheet" href="http://coveo.github.io/vapor/dist/css/CoveoStyleGuide.css">
-<link rel="stylesheet" href="https://static.cloud.coveo.com/styleguide/v2.10.0/css/CoveoStyleGuide.css">
-<style type="text/css">
-body.coveo-styleguide {display:block; padding: 0 30px 30px;}
-div.wheel {display: inline-block; text-align: center; margin: 5px 10px; cursor: default; width: 160px;}
-div.wheel svg {cursor: default; width: 80px; height: 80px; transform: rotate(-90deg);}
-div.wheel .wheel-title {margin-top: 5px; font-size: 1.4em;}
-div.wheel svg .back-ring {stroke: #E4EAED; fill: none;}
-div.wheel svg text {font-weight: bold;}
-div.wheel.good svg text {fill: #00983;}
-div.wheel.warn svg text {fill: #ecad00;}
-div.wheel.bad svg text {fill: #ce3f00;}
-div.wheel.good svg circle.value {stroke: #009830;}
-div.wheel.warn svg circle.value {stroke: #ecad00;}
-div.wheel.bad svg circle.value {stroke: #ce3f00;}
-header.header {min-height: 48px;}
-.header-section {font-size: 1.2em; font-weight: bold;}
-a {outline: none;}
-a img {outline: none;}
-img {border: 0;}
-a:focus {outline: none;}
-h3 {margin: 10px;}
-h3 i {font-style: italic;}
-.popup-content {padding-left: 8px; padding-right: 8px; padding-top: 0px; overflow: auto;}
-#myscreenimage {height: 200px; background-size: contain; background-repeat: no-repeat; background-position: top center; margin: 10px 20px; /*border: 1px solid silver;*/}
-#scores {text-align: center;}
-#scores div.wheel a svg {cursor: pointer;}
-
-.coveo-styleguide .collapsible .collapsible-header {background-position: left 20px center; display: flex; line-height: 50px;}
-.coveo-styleguide .collapsible .collapsible-header .msg {flex: 1;}
-.coveo-styleguide table:not(.datepicker-table) tr:hover td {background-color: transparent;}
-
-#details b {font-weight: bold;}
-#details i {font-style: italic;}
-.mycode {font-family: courier; font-variant: normal !important; font-weight: normal !important; word-wrap: break-word; white-space: pre-wrap; word-break: break-all;}
-.coveo-styleguide .collapsible .collapsible-header .details {color: #ce3f00; font-size: 8px;}
-.coveo-styleguide .collapsible .collapsible-header .result {color: #ce3f00; margin: auto;}
-.coveo-styleguide .collapsible .collapsible-header .result .wheel {position: relative; width: auto;}
-.coveo-styleguide .collapsible .collapsible-header .result .wheel svg {width: 40px; position: absolute; margin-top: -40px; margin-left: -10px;}
-.coveo-styleguide .collapsible .collapsible-header .result div.wheel svg .back-ring {stroke: #fff; fill: none;}
-.coveo-styleguide .collapsible .collapsible-header .result .wheel-title {display: none;}
-.coveo-styleguide .collapsible .collapsible-header.active {background-image: none;}
-.coveo-styleguide .collapsible .collapsible-body {padding: 0;}
-.coveo-styleguide table:not(.datepicker-table) td.line-result {font-variant: small-caps; text-align: left; font-weight: bold; vertical-align: top;}
-.coveo-styleguide table:not(.datepicker-table) th:last-child, .coveo-styleguide table:not(.datepicker-table) td:last-child {padding-left: 25px;}
-tr td.line-message small {vertical-align: top !important;font-size: small; color: #1d4f76; display: block; /*padding-left:25px;*/}
-tr td.line-mandatory {vertical-align: top !important; text-align: right; width: 15px !important;padding-right: 1px !important;padding-left: 1px !important;}
-tr td.line-indicator {  border-right: none;  vertical-align: top !important;  padding-right: 1px !important;padding-left: 1px !important;}
-tr td.line-message {vertical-align: top !important; text-align: right; width: 350px; padding-left: 1px !important;}
-tr td.line-result {background-position: left 5px top 12px; background-repeat: no-repeat; background-size: 12px; text-align: left; word-wrap: break-word; white-space: pre-wrap; word-break: break-all; width: 450px;}
-.mandatory {  color: #009830;}
-.mandatoryFAIL {  color: #ce3f00;}
-.download-global, .copy-section {display;none;}
-.valid-true td.line-result {color: #009830; background-image: url(../images/checkbox-checkmark.svg);}
-.valid-false td.line-result {color: #ce3f00; background-image: url(../images/action-close.svg);}
-.valid-true td.line-mandatory {  color: #009830;}
-.valid-false td.line-mandatory {  color: #ce3f00;}
-</style>
-</head>
-<body class="coveo-styleguide">
-${text}
-</body>
-</html>`;
+    let html = getReportHTML(id);
 
     SendMessage({
       type: 'download',
@@ -419,6 +424,7 @@ let processState = (data) => {
     setScreenShot(data.image);
   }
   if (data.json) {
+    $('#push').removeAttr('disabled');
     processReport(data.json);
   }
 
@@ -429,7 +435,87 @@ let processState = (data) => {
   $('#setSearchTracker input').prop('checked', data.enableSearchTracker);
 };
 
+let processStateForPush = (data) => {
+  if (!data) {
+    return;
+  }
+  push(data);
+};
 
+function push(data) {
+  var _this = this;
+
+  // Build the body of the message containing all the metadata fields necessary
+  var document = buildMessageDocument(data);
+
+  // Push the message as a document to the pushAPI
+  pushDocument(JSON.stringify(document), document.documentId);
+}
+
+function pushDocument(documentBody, documentId) {
+  var _this = this;
+
+  var server = 'push.cloud.coveo.com'
+  var APIversion = 'v1'
+  var organizationId = 'sewimnijmeijer01'
+  var sourceId = 'riv7wb3mxim6ux5zh6m77wklxi-sewimnijmeijer01'
+  let apikey='xx261c0e9b-768e-4e27-9245-931377cb6978';
+  // This sends a request to 
+  // https://push.cloud.coveo.com/v1/organizations/{orgID}/sources/{sourceID}/documents?documentId={documentID}
+  // With the body containing the document metadata we constructed from the message
+  $.ajax({
+      url: `https://${server}/${APIversion}/organizations/${organizationId}/sources/${sourceId}/documents?documentId=${documentId}&compressionType=Uncompressed`,
+      method: 'PUT',
+      beforeSend: function(request) {
+        request.setRequestHeader("content-type", 'application/json');
+        request.setRequestHeader("Authorization", 'Bearer ' + apikey);
+      },
+      dataType: 'json',
+      contentType: "application/json",
+      data: documentBody,
+      success: function(msg) {
+        console.log("Pushed to Coveo");
+        //alert("Pushed to Coveo Cloud");
+      },
+      error: function (xhr, ajaxOptions, thrownError) {
+        console.log("Error when pushing: "+xhr.status);
+        //alert("Pushed to Coveo Cloud FAILED: "+xhr.status);
+      }
+  });
+  window.close();
+ 
+}
+
+
+function u_btoa(buffer) {
+  var binary = [];
+  var enc = new TextEncoder().encode(buffer);
+
+  var bytes = new Uint8Array(enc);
+  for (var i = 0, il = bytes.byteLength; i < il; i++) {
+      binary.push(String.fromCharCode(bytes[i]));
+  }
+  return btoa(binary.join(''));
+}
+
+function buildMessageDocument(data) {
+  var _this = this;
+
+  var documentId = data.json['theUrl'];
+  data.json['documentId'] = documentId;
+  var date = new Date();
+  data.json['date'] = date.toUTCString();
+  //data.json['compressionType'] = 'Uncompressed';
+  data.json['fileExtension'] = ".html";
+  let html = getReportHTML('globalReport');
+  data.json['compressedBinaryData'] = u_btoa(html);
+
+  return data.json;
+}
+
+function pushToCoveo(){
+  getStateForPush();
+}
 
 function getReport() {
   $('#loading').show();
@@ -437,12 +523,17 @@ function getReport() {
   $('#myscreenimage').css('background-image', 'none').hide();
   document.getElementById('scores').innerHTML = '';
   document.getElementById('details').innerHTML = '';
-
+  $('#push').removeAttr('disabled');
+  
   SendMessage('getScreen');
 }
 
 let getState = () => {
   SendMessage('getState', processState);
+};
+
+let getStateForPush = () => {
+  SendMessage('getState', processStateForPush);
 };
 
 function toggleTracker() {
@@ -455,6 +546,7 @@ function reset() {
   $('#instructions').show();
   $('#myscreenimage').css('background-image', 'none').hide();
   $('#setSearchTracker input').prop('checked', false);
+  $('#push').attr("disabled", true);
   document.getElementById('scores').innerHTML = '';
   document.getElementById('details').innerHTML = '';
 
@@ -523,11 +615,13 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   $('#myscreenimage').css('background-image', 'none').hide();
   $('#legend').hide();
+  $('#push').attr("disabled", true);
   $('#download-global').hide().click(downloadReport.bind(null, 'globalReport'));
   $('#showInstructions').click(() => {
     $('#instructions').show();
   });
   $('#getReport').click(getReport);
+  $('#push').click(pushToCoveo);
   $('#setSearchTracker').on('change', toggleTracker);
   $('#reset').click(reset);
 
