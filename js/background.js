@@ -19,6 +19,9 @@ let resetState = (tabId) => {
   if (tabId) {
     STATES[tabId] = {
       tabId,
+      SFDCID: '',
+      Customer: '',
+      Partner: '',
       nrofsearches: 0,
       suggestSent: false,
       searchSent: false,
@@ -126,6 +129,16 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   else if (msg.type === 'enablesearch') {
     setEnabledSearch(msg.enable);
     saveState({ enableSearchTracker: msg.enable });
+  }
+  else if (msg.type === 'saveScore') {
+    let score=msg.score;
+    let vals={};
+    vals[score] = msg.value;
+    saveState(vals);
+  }
+  else if (msg.type === 'saveSFDC') {
+    //sfdcid: $('#SFDCID').val(), customer: $('#Customer').val(), partner: $('#Partner').val() });
+    saveState({ SFDCID: msg.sfdcid, Customer: msg.customer, Partner: msg.partner });
   }
   else if (msg.type === 'getNumbersBackground') {
     getState_Then(state => {

@@ -20,6 +20,6 @@ let createWheel = (data) => {
         transform="rotate(90 50,50)"
         lengthAdjust="spacingAndGlyphs" x="50" y="62">${perc}%</text>
     </svg>
-    <div class="wheel-title">${data.title || ''}<br>${data.value}/${data.max}</div></a>
+    <div class="wheel-title"><span class="wheel-main">${data.title || ''}</span><br>${data.value}/${data.max}<span class="wheel-sub">${data.subtitle}</span></div></a>
     </div>`;
 };

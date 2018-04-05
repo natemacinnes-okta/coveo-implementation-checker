@@ -30,29 +30,40 @@
   <div class="popup-content">
     <div style="padding-top:5px;padding-bottom:5px;border-bottom:1px solid #bcc3ca">
       <button id="download-global" class="btn" title="Download Report"></button>
-      <button id="showInstructions" class="btn">Show Instructions</button>
+      <button id="showInstructions" class="btn">Instructions</button>
       <label id="setSearchTracker" class="btn coveo-slide-toggle-label boxed" style="padding: 8.5px 16px; line-height: 16px;">
         <span class="toggle-label" style="font-size: 12px;">Search Tracker</span>
         <input type="checkbox" class="coveo-slide-toggle">
         <button type="button" style="margin-top: -3px;"></button>
       </label>
-      <button id="getReport" class="btn">Get Report</button>
-      <button id="push" class="btn">Push To Coveo</button>
+      <button id="getReport" class="btn">Report</button>
+      <button id="push" class="btn">Push</button>
+      <button id="showSFDC" class="btn">Export SFDC</button>
       <button id="reset" class="btn">Reset</button>
     </div>
-    <div id="instructions">
+    <div id="SFDCInfo" style="margin-left: 10px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #bcc3ca">
+      <table class="noborder">
+        <tr><td>Salesforce Customer Project Id: </td><td><input type="text" size=50 id="SFDCID" value="a6M0d000000HGpt"></td></tr>
+        <tr><td>Or Customer Name: </td><td><input type="text" size=50 id="Customer"></td></tr>
+        <tr><td>Partner: </td><td><input type="text" size=50 id="Partner"></td></tr>
+        <tr><td></td><td><button id="toSFDC" class="btn" style='padding-top:10px'>Save</button></td></tr>
+      </table>
+    </div>
+      <div id="instructions">
       How to use this tool:
       <ul>
         <li>BEFORE YOUR START HIT RESET (if you have changed your URL)</li>
-        <li>Step 1. Start with reloading the page</li>
-        <li>Step 2. Execute a search in the standalone searchbox.</li>
-        <li>Step 3. When results are displayed. Start typing a query. Hit submit.</li>
-        <li>Step 4. Open or Quickview one of the results.</li>
-        <li>Step 5. Go back to your search page.</li>
-        <li>Step 6. Now, activate <b>Search Tracker</b>.</li>
-        <li>Step 7. Execute a <i>single</i> search.</li>
-        <li>Step 8.<b>Get Report</b></li>
-        <li>Step 9. If you want to push it to the Coveo Index: <b>Push To Coveo</b></li>
+        <!--<li>Step  1. Enter the SFDC Info</li>-->
+        <li>Step  1. Start with reloading the page</li>
+        <li>Step  2. Execute a search in the standalone searchbox.</li>
+        <li>Step  3. When results are displayed. Start typing a query. Hit submit.</li>
+        <li>Step  4. Open or Quickview one of the results.</li>
+        <li>Step  5. Go back to your search page.</li>
+        <li>Step  6. Now, activate <b>Search Tracker</b>.</li>
+        <li>Step  7. Execute a <i>single</i> search.</li>
+        <li>Step  8.<b>Report</b></li>
+        <li>Step  9. If you want to export the report for importing in SFDC: <b>Export SFDC</b></li>
+        <li>Step 10. If you want to push it to the Coveo Index: <b>Push</b></li>
       </ul>
     </div>
     <div id="loading" class="loading-prompt">
@@ -82,6 +93,9 @@
     <div id="clipboard-copied" class="toast mod-success mod-hidden mod-animated">
       <div class="toast-title">Copied</div>
     </div>
+    <div id="clipboard-copiedsfdc" class="toast mod-success mod-hidden mod-animated">
+        <div class="toast-title">Copied, Hit <b>IMPORT JSON</b> in SFDC</div>
+      </div>
   </div>
 
 

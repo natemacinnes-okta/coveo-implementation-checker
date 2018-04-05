@@ -204,6 +204,9 @@ tr td.line-indicator {
   /*padding-left: 25px !important;*/
 }
 
+.noborder tr td {
+  border-bottom: 1px solid transparent !important;
+}
 
 tr td.line-message {
   text-align: right;
