@@ -27,6 +27,7 @@ function copyToClipboard(text, id) {
 
 function getReportHTML(id){
   let text = document.getElementById(id).outerHTML;
+  let title = $('#xProjectname').val();
   let html = `<!DOCTYPE html>
   <html>
   <head><meta charset="UTF-8">
@@ -89,6 +90,7 @@ function getReportHTML(id){
   .valid-true td.line-mandatory {  color: #009830;}
   .valid-false td.line-mandatory {  color: #ce3f00;}
   </style>
+  <title>${title}</title>
   </head>
   <body class="coveo-styleguide">
   ${text}
@@ -273,6 +275,10 @@ let processReport = (data) => {
   let sections = [
     {
       title: 'General information', label: 'General', attributes: [
+        { key: 'xProjectname', notForTotal: true, label: 'Project Name', hint: '' },
+        { key: 'xCustomer', notForTotal: true, label: 'Customer', hint: '' },
+        { key: 'xPartner', notForTotal: true, label: 'Partner', hint: '' },
+        { key: 'xOwner', notForTotal: true, label: 'Owner', hint: '' },
         { key: 'theUrl', notForTotal: true, label: 'Url', hint: '' },
         { key: 'theDate', notForTotal: true, label: 'Date', hint: '' },
         { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3679', expected: /^2\.3679/ },
@@ -436,13 +442,20 @@ let processState = (data) => {
   }
   if (data.json) {
     $('#push').removeAttr('disabled');
-    $('#showSFDC').removeAttr('disabled');
+    //$('#showSFDC').removeAttr('disabled');
     processReport(data.json);
   }
-  if (data.SFDCID){
-    $('#SFDCID').val(data.SFDCID);
-    $('#Customer').val(data.Customer);
-    $('#Partner').val(data.Partner);
+  if (data.xSFDCUrl){
+    $('#xProjectname').val(data.xProjectname);
+    $('#xMilestone').val(data.xMilestone);
+    $('#xRecordtype').val(data.xRecordtype);
+    $('#xKickoff_date').val(data.xKickoff_date);
+    $('#xGolive_date').val(data.xGolive_date);
+    $('#xSearchpage').val(data.xSearchpage);
+    $('#xCustomer').val(data.xCustomer);
+    $('#xPartner').val(data.xPartner);
+    $('#xOwner').val(data.xOwner);
+    $('#xSFDCUrl').val(data.xSFDCUrl);
   }
   if (data.json || data.image) {
     $('#instructions').hide();
@@ -537,6 +550,18 @@ function buildMessageDocument(data, complete) {
   /*data.json['SFDCID'] = data.SFDCID;
   data.json['Customer'] = data.Customer;
   data.json['Partner'] = data.Partner;*/
+  data.json['Projectname'] = data.xProjectname;
+  data.json['Milestone'] = data.xMilestone;
+  data.json['Recordtype'] = data.xRecordtype;
+  var kick = new Date(Date.parse(data.xKickoff_date));
+  data.json['Kickoff_date'] = kick.toUTCString();
+  var live = new Date(Date.parse(data.xGolive_date));
+  data.json['Golive_date'] = live.toUTCString();
+ //s data.json['Searchpage'] = data.xSearchpage;
+  data.json['Customer'] = data.xCustomer;
+  data.json['Partner'] = data.xPartner;
+  data.json['Owner'] = data.xOwner;
+  data.json['SFDCUrl'] = data.xSFDCUrl;
   data.json['Score_General'] = data.Score_General;
   data.json['Score_Behavior'] = data.Score_Behavior;
   data.json['Score_Implementation'] = data.Score_Implementation;
@@ -571,7 +596,7 @@ function getReport() {
   document.getElementById('scores').innerHTML = '';
   document.getElementById('details').innerHTML = '';
   $('#push').removeAttr('disabled');
-  $('#showSFDC').removeAttr('disabled');
+  //$('#showSFDC').removeAttr('disabled');
   SendMessage('getScreen');
 }
 
@@ -598,7 +623,7 @@ function reset() {
   $('#myscreenimage').css('background-image', 'none').hide();
   $('#setSearchTracker input').prop('checked', false);
   $('#push').attr("disabled", true);
-  $('#showSFDC').attr("disabled", true);
+  //$('#showSFDC').attr("disabled", true);
   document.getElementById('scores').innerHTML = '';
   document.getElementById('details').innerHTML = '';
 
@@ -623,6 +648,14 @@ function setScreenShot(dataurl) {
   $('#myscreenimage').css('background-image', 'url(' + dataurl + ')').show();
 }
 
+function setSFDC(values){
+  for (let [curkey, curvalue] of Object.entries(values)) 
+	{
+    SendMessage({type: 'saveitemSFDC',item: curkey, value: curvalue} );
+    $('#'+curkey).val(curvalue);
+	}
+}
+
 if (chrome && chrome.runtime && chrome.runtime.onMessage) {
   chrome.runtime.onMessage.addListener(
     function (reportData/*, sender, sendResponse*/) {
@@ -630,6 +663,9 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
       if (reportData.type === 'gotScreen') {
         setScreenShot(reportData.src);
         SendMessage('getNumbersBackground');
+      }
+      if (reportData.type === 'gotSFDC') {
+        setSFDC(reportData.values);
       }
       else if (reportData.type === 'gotNumbersBackground') {
         SendMessage({ type: 'getNumbers', global: reportData.global });
@@ -669,47 +705,66 @@ document.addEventListener('DOMContentLoaded', function () {
   $('#legend').hide();
   $('#SFDCInfo').hide();
   $('#push').attr("disabled", true);
-  $('#showSFDC').attr("disabled", true);
   $('#download-global').hide().click(downloadReport.bind(null, 'globalReport'));
   $('#showInstructions').click(() => {
     $('#instructions').show();
   });
   $('#showSFDC').click(() => {
-    //$('#SFDCInfo').toggle();
-    copyForSFDC();
+    $('#SFDCInfo').toggle();
   });
- /* $('#toSFDC').click(() => {
-    //Save SFDC state
-    SendMessage({ type: 'saveSFDC', sfdcid: $('#SFDCID').val(), customer: $('#Customer').val(), partner: $('#Partner').val() });
-    //Now for a test update SFDC
-    //SFDC url is: https://na61.salesforce.com/a6M0d000000HFxYEAW
-    //SFDCID is a6M0d000000HFxYEAW
-    //https://na61.salesforce.com/services/data/v20.0/sobjects/Project_Non_Billable__c/001D000000INjVe -H "Authorization: Bearer token" -H "Content-Type: application/json" -d @patchaccount.json -X PATCH
-    let sfdcurl=`https://na61.salesforce.com/services/data/v20.0/sobjects/Project_Non_Billable__c/${$('#SFDCID').val()}`;
-    let update={ 'Details__c':'Detailed by Wim'};
-    $.ajax({
-      url: sfdcurl,
-      method: 'PATCH',
-      beforeSend: function(request) {
-        request.setRequestHeader("content-type", 'application/json');
-        //request.setRequestHeader("Authorization", 'Bearer ' + apikey);
-      },
-      dataType: 'json',
-      contentType: "application/json",
-      data: JSON.stringify(update),
-      success: function(msg) {
-        console.log("Pushed to SFDC");
-        //window.close();
-        //alert("Pushed to Coveo Cloud");
-      },
-      error: function (xhr, ajaxOptions, thrownError) {
-        console.log("Error when pushing: "+xhr.status);
-        //window.close();
-        //alert("Pushed to Coveo Cloud FAILED: "+xhr.status);
-      }
-    });
+  $('#getSFDC').click(() => {
+    //Save the contents
+    SendMessage({type: 'getSFDC'});
+  });
+  $('#openSearch').click(() => {
+    //Save the contents
+    if ($('#xSearchpage').val()!="")
+    {
+      SendMessage({type: 'navigate', to: $('#xSearchpage').val()});
+    }
+  });
+  $('#toSFDC').click(() => {
+    //Save the contents
+    let values={};
+    values['xProjectname']=$('#xProjectname').val();
+    values['xMilestone']=$('#xMilestone').val();
+    values['xRecordtype']=$('#xRecordtype').val();
+    values['xKickoff_date']=$('#xKickoff_date').val();
+    values['xGolive_date']=$('#xGolive_date').val();
+    values['xSearchpage']=$('#xSearchpage').val();
+    values['xCustomer']=$('#xCustomer').val();
+    values['xPartner']=$('#xPartner').val();
+    values['xOwner']=$('#xOwner').val();
+    values['xSFDCUrl']=$('#xSFDCUrl').val();
+    setSFDC(values);
+    $('#SFDCInfo').hide();
+  });
+  $('#clearSFDC').click(() => {
+    //Save the contents
+    let values={};
+    values['xProjectname']='';
+    $('#xProjectname').val('');
+    values['xMilestone']='';
+    $('#xMilestone').val('');
+    values['xRecordtype']='';
+    $('#xRecordtype').val('');
+    values['xKickoff_date']='';
+    $('#xKickoff_date').val('');
+    values['xGolive_date']='';
+    $('#xGolive_date').val('');
+    values['xSearchpage']='';
+    $('#xSearchpage').val('');
+    values['xCustomer']='';
+    $('#xCustomer').val('');
+    values['xPartner']='';
+    $('#xPartner').val('');
+    values['xOwner']='';
+    $('#xOwner').val('');
+    values['xSFDCUrl']='';
+    $('#xSFDCUrl').val('');
+    setSFDC(values);
     //$('#SFDCInfo').hide();
-  });*/
+  });
   $('#getReport').click(getReport);
   $('#push').click(pushToCoveo);
   $('#setSearchTracker').on('change', toggleTracker);

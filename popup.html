@@ -31,6 +31,7 @@
     <div style="padding-top:5px;padding-bottom:5px;border-bottom:1px solid #bcc3ca">
       <button id="download-global" class="btn" title="Download Report"></button>
       <button id="showInstructions" class="btn">Instructions</button>
+      <button id="showSFDC" class="btn">SFDC</button>
       <label id="setSearchTracker" class="btn coveo-slide-toggle-label boxed" style="padding: 8.5px 16px; line-height: 16px;">
         <span class="toggle-label" style="font-size: 12px;">Search Tracker</span>
         <input type="checkbox" class="coveo-slide-toggle">
@@ -38,14 +39,23 @@
       </label>
       <button id="getReport" class="btn">Report</button>
       <button id="push" class="btn">Push</button>
-      <button id="showSFDC" class="btn">Export SFDC</button>
       <button id="reset" class="btn">Reset</button>
     </div>
     <div id="SFDCInfo" style="margin-left: 10px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #bcc3ca">
       <table class="noborder">
-        <tr><td>Salesforce Customer Project Id: </td><td><input type="text" size=50 id="SFDCID" value="a6M0d000000HGpt"></td></tr>
-        <tr><td>Or Customer Name: </td><td><input type="text" size=50 id="Customer"></td></tr>
-        <tr><td>Partner: </td><td><input type="text" size=50 id="Partner"></td></tr>
+        <tr><td>Open Customer Project in SFDC, then:</td><td><button id="getSFDC" class="btn" style='padding-top:10px'>Get SFDC info</button></td></tr>
+        <tr><td></td><td><button id="clearSFDC" class="btn" style='padding-top:10px'>CLEAR</button></td></tr>
+        <tr><td>Salesforce Customer Project Id: </td><td><input type="text" size=50 id="xSFDCUrl" value=""></td></tr>
+        <tr><td>Project Name: </td><td><input type="text" size=50 id="xProjectname"></td></tr>
+        <tr><td>Customer Name: </td><td><input type="text" size=50 id="xCustomer"></td></tr>
+        <tr><td>Partner: </td><td><input type="text" size=50 id="xPartner"></td></tr>
+        <tr><td>Owner: </td><td><input type="text" size=50 id="xOwner"></td></tr>
+        <tr><td>Milestone: </td><td><input type="text" size=50 id="xMilestone"></td></tr>
+        <tr><td>RecordType: </td><td><input type="text" size=50 id="xRecordtype"></td></tr>
+        <tr><td>Kickoff date: </td><td><input type="text" size=50 id="xKickoff_date"></td></tr>
+        <tr><td>Golive date: </td><td><input type="text" size=50 id="xGolive_date"></td></tr>
+        <tr><td>Searchpage: </td><td><input type="text" size=50 id="xSearchpage"></td></tr>
+        <tr><td></td><td><button id="openSearch" class="btn" style='padding-top:10px'>Open Searchpage</button></td></tr>
         <tr><td></td><td><button id="toSFDC" class="btn" style='padding-top:10px'>Save</button></td></tr>
       </table>
     </div>
@@ -53,17 +63,18 @@
       How to use this tool:
       <ul>
         <li>BEFORE YOUR START HIT RESET (if you have changed your URL)</li>
-        <!--<li>Step  1. Enter the SFDC Info</li>-->
-        <li>Step  1. Start with reloading the page</li>
-        <li>Step  2. Execute a search in the standalone searchbox.</li>
-        <li>Step  3. When results are displayed. Start typing a query. Hit submit.</li>
-        <li>Step  4. Open or Quickview one of the results.</li>
-        <li>Step  5. Go back to your search page.</li>
-        <li>Step  6. Now, activate <b>Search Tracker</b>.</li>
-        <li>Step  7. Execute a <i>single</i> search.</li>
-        <li>Step  8.<b>Report</b></li>
-        <li>Step  9. If you want to export the report for importing in SFDC: <b>Export SFDC</b></li>
-        <li>Step 10. If you want to push it to the Coveo Index: <b>Push</b></li>
+        <li>The Sfdc information will be kept after RESET!</li>
+        <li>Step  1. Navigate to the Customer Project in SFDC.</li>
+        <li>Step  2. Hit <b>Sfdc</b> and <b>Get Sfdc Info</b>. Or manually enter the below info.</li>
+        <li>Step  3. Hit <b>Open search page</b>. A new tab will be opened.</li>
+        <li>Step  4. Execute a search in the standalone searchbox.</li>
+        <li>Step  5. When results are displayed. Start typing a query. Hit submit.</li>
+        <li>Step  6. Open or Quickview one of the results.</li>
+        <li>Step  7. Go back to your search page.</li>
+        <li>Step  8. Now, activate <b>Search Tracker</b>.</li>
+        <li>Step  9. Execute a <i>single</i> search.</li>
+        <li>Step 10.<b>Report</b></li>
+        <li>Step 11. If you want to push it to the Coveo Index: <b>Push</b></li>
       </ul>
     </div>
     <div id="loading" class="loading-prompt">

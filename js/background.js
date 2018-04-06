@@ -1,7 +1,8 @@
 'use strict';
 
 const STATES = {};
-
+//For SFDC retrieved from SFDC
+const GLOBAL = {};
 /* globals chrome */
 const FILTER_SEARCH = { urls: ["*://*/rest/search/*", "*://*/?errorsAsSuccess=1", "https://*/rest/search/v2/*", "https://*/coveo/rest/v2/*", "https://cloudplatform.coveo.com/rest/search/*", "*://platform.cloud.coveo.com/rest/search/v2/*", "https://search.cloud.coveo.com/rest/search/v2/*", "*://*/*/coveo/platform/rest/*", "*://*/coveo/rest/*"] };
 const FILTER_ANALYTICS = { urls: ["*://usageanalytics.coveo.com/rest/*", "*://*/*/coveo/analytics/rest/*", "*://*/*/coveoanalytics/rest/*"] };
@@ -47,6 +48,10 @@ let resetState = (tabId) => {
       usingPipeline: false,
       queryExecuted: '',
     };
+    let state = STATES[tabId];
+    //Add global state
+    state = Object.assign(state, GLOBAL);
+    STATES[tabId] = state;
   }
   else {
     getTabId_Then(resetState);
@@ -65,6 +70,11 @@ let getState_Then = (callback) => {
   getTabId_Then(tabId => {
     callback(getState(tabId));
   });
+};
+
+let saveGlobal = (obj) => {
+    let state = Object.assign(GLOBAL, obj);
+    GLOBAL = state;
 };
 
 let saveState = (obj, tabId) => {
@@ -97,6 +107,10 @@ let SendMessage = (parameters) => {
   });
 };
 
+function navigateto(url){
+  var newURL = "https:"+url;
+  chrome.tabs.create({ url: newURL });
+}
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (msg.type === 'getState') {
@@ -119,6 +133,9 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   else if (msg.type === 'gotNumbers') {
     saveState({ json: msg.json });
   }
+  else if (msg.type === 'navigate') {
+    navigateto(msg.to);
+  }
   else if (msg.type === 'reset') {
     getTabId_Then(tabId => {
       resetState(tabId);
@@ -139,6 +156,14 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   else if (msg.type === 'saveSFDC') {
     //sfdcid: $('#SFDCID').val(), customer: $('#Customer').val(), partner: $('#Partner').val() });
     saveState({ SFDCID: msg.sfdcid, Customer: msg.customer, Partner: msg.partner });
+  }
+  else if (msg.type === 'saveitemSFDC') {
+    //sfdcid: $('#SFDCID').val(), customer: $('#Customer').val(), partner: $('#Partner').val() });
+    let item=msg.item;
+    let vals={};
+    vals[item] = msg.value;
+    saveState(vals);
+    saveGlobal(vals);
   }
   else if (msg.type === 'getNumbersBackground') {
     getState_Then(state => {

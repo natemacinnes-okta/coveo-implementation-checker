@@ -206,6 +206,12 @@ tr td.line-indicator {
 
 .noborder tr td {
   border-bottom: 1px solid transparent !important;
+  padding: 1px !important;
+}
+
+.noborder tr{
+  line-height: 12px !important;
+  height: 12px !important;
 }
 
 tr td.line-message {

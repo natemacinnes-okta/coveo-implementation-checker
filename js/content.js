@@ -2,6 +2,39 @@
 // jshint -W003
 /*global chrome*/
 
+//For Salesforce
+function getSFDC()
+{
+	//use this: document.querySelector("[id='00N320000030M2p_ileinner']")
+	let toGet={xProjectname:"Name_ileinner",
+			   xMilestone:"00N0d000002y7Cm_ileinner",
+			   xRecordtype:"RecordType_ileinner",
+			   xKickoff_date: "00N320000030M2p_ileinner",
+			   xGolive_date: "00N320000030M2u_ileinner",
+			   xSearchpage: "00N320000030M34_ileinner",
+			   xCustomer: "CF00N320000030Lx1_ileinner",
+			   xPartner: "CF00N320000030Lx6_ileinner",
+			   xOwner: "CF00N0d000002y7Cl_ileinner"
+	};
+	let got={};
+	for (let [curkey, curvalue] of Object.entries(toGet)) 
+	{
+		let value=document.querySelector("[id='"+curvalue+"']").innerText.replace('[Change]','');
+		if (curkey=="xSearchpage"){
+			//trim so that we have the host only https://www.beckman.com/coveosearch --> www.beckman.com only
+			value = value.split('/')[2];
+		}
+		if (curkey=="xPartner"){
+			//trim so that we have the host only https://www.beckman.com/coveosearch --> www.beckman.com only
+			value = "Unknown";
+		}
+		got[curkey]=value;
+	}
+	//Get URL
+	got["xSFDCUrl"]= window.location.protocol + '//' + window.location.hostname + "" + window.location.pathname;
+	SendMessage( {type: 'gotSFDC', values: got});
+}
+
 let THIS_PAGE_COVEO_REPORT = {};
 
 function addConsoleTracker() {
@@ -79,6 +112,9 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
 			}
 			if (request.type === 'getReport') {
 				getReport();
+			}
+			if (request.type === 'getSFDC') {
+				getSFDC();
 			}
 			else if (request.type === 'getNumbers') {
 				let reportJson = getReport();
