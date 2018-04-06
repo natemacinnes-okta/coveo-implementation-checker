@@ -360,7 +360,10 @@ let processReport = (data) => {
             test: value => (value >= 2 && value <= 5)
           }
         },
-        { key: 'underscoretemplates', label: 'No of Underscore Templates (<5)', hint: 'Try to use Result Templates as much as possible', expected: 0 },
+        { key: 'underscoretemplates', label: 'No of Underscore Templates (<5)', hint: 'Try to use Result Templates as much as possible', expected: {
+          test: value => (value < 5)
+        }
+       },
         {
           key: 'nrofraw', label: 'No raw field access in code', hint: 'More raw, more complicated implementations', expected: {
             test: value => (value < 5)

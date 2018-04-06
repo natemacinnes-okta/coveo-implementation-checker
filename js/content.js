@@ -36,7 +36,7 @@ function getSFDC()
 }
 
 
-let THIS_PAGE_COVEO_REPORT = {};
+//let THIS_PAGE_COVEO_REPORT = {};
 
 function addConsoleTracker() {
 	let tracker_script = `(function () {
@@ -393,7 +393,7 @@ function parseScript(name, content, all, external, __report__) {
 }
 
 function initReport() {
-	THIS_PAGE_COVEO_REPORT = {
+	let THIS_PAGE_COVEO_REPORT = {
 		cultures: [],
 		customEvents: [],
 		difficulty: 0,
@@ -466,7 +466,7 @@ function getReport() {
 	theReport.underscoretemplates = document.querySelectorAll('.result-template[type="text/underscore"]').length + document.querySelectorAll('.result-template[type="text/x-underscore-template"]').length;
 
 	theReport.nroffacets = document.querySelectorAll('.coveo-facet-header').length;
-	theReport.nrofsorts = document.querySelectorAll('.coveo-sort-icon-descending').length;
+	theReport.nrofsorts = document.querySelectorAll('.CoveoSort').length;//document.querySelectorAll('.coveo-sort-icon-descending').length;
 
 	// TODO - count FAILURES
 	let analyticsFailures = document.querySelectorAll('#myanalyticsfailure').length;
