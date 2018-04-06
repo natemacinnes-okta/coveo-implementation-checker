@@ -24,12 +24,13 @@
 			"<all_urls>"
 		],
 		"js": [
-			"/js/content-loader.js"
+			"/js/content-loader.js",
+			"/js/content.js"
 		],
 		"css": [
 			"/css/inject.css"
 		],
-		"all_frames": true
+		"all_frames": false
 	}],
 	"permissions": [
 		"activeTab",

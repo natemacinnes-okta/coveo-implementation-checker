@@ -695,6 +695,22 @@ else {
   });
 }
 
+function save(){
+  //Save the contents
+  let values={};
+  values['xProjectname']=$('#xProjectname').val();
+  values['xMilestone']=$('#xMilestone').val();
+  values['xRecordtype']=$('#xRecordtype').val();
+  values['xKickoff_date']=$('#xKickoff_date').val();
+  values['xGolive_date']=$('#xGolive_date').val();
+  values['xSearchpage']=$('#xSearchpage').val();
+  values['xCustomer']=$('#xCustomer').val();
+  values['xPartner']=$('#xPartner').val();
+  values['xOwner']=$('#xOwner').val();
+  values['xSFDCUrl']=$('#xSFDCUrl').val();
+  setSFDC(values);
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   // Handle clicks on slide-toggle buttons
   $('.coveo-slide-toggle + button').click(function (jQueryEventObject) {
@@ -718,6 +734,8 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   $('#openSearch').click(() => {
     //Save the contents
+    save();
+    
     if ($('#xSearchpage').val()!="")
     {
       SendMessage({type: 'navigate', to: $('#xSearchpage').val()});
@@ -725,18 +743,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   $('#toSFDC').click(() => {
     //Save the contents
-    let values={};
-    values['xProjectname']=$('#xProjectname').val();
-    values['xMilestone']=$('#xMilestone').val();
-    values['xRecordtype']=$('#xRecordtype').val();
-    values['xKickoff_date']=$('#xKickoff_date').val();
-    values['xGolive_date']=$('#xGolive_date').val();
-    values['xSearchpage']=$('#xSearchpage').val();
-    values['xCustomer']=$('#xCustomer').val();
-    values['xPartner']=$('#xPartner').val();
-    values['xOwner']=$('#xOwner').val();
-    values['xSFDCUrl']=$('#xSFDCUrl').val();
-    setSFDC(values);
+    save();
     $('#SFDCInfo').hide();
   });
   $('#clearSFDC').click(() => {

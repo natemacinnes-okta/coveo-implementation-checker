@@ -200,6 +200,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, info) {
   }
   else if (info.status === 'complete') {
     saveState({ ready: true }, tabId);
+   // chrome.tabs.executeScript(tabId, { file: "/js/content.js" });
+    //Now inject content.js
   }
 });
 
@@ -412,7 +414,7 @@ chrome.runtime.onMessage.addListener(
       chrome.browserAction[enable ? 'enable' : 'disable'](sender.tab.id);
 
       if (enable) {
-        chrome.tabs.executeScript(sender.tab.id, { file: "/js/content.js" });
+       // chrome.tabs.executeScript(sender.tab.id, { file: "/js/content.js" });
       }
     }
   }

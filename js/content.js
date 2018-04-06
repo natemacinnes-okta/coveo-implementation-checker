@@ -35,6 +35,7 @@ function getSFDC()
 	SendMessage( {type: 'gotSFDC', values: got});
 }
 
+
 let THIS_PAGE_COVEO_REPORT = {};
 
 function addConsoleTracker() {
