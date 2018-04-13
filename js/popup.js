@@ -487,49 +487,35 @@ let processStateForSFDC = (data) => {
 };
 
 function push(data) {
-  var _this = this;
-
   // Build the body of the message containing all the metadata fields necessary
   var document = buildMessageDocument(data, true);
 
   // Push the message as a document to the pushAPI
-  pushDocument(JSON.stringify(document), document.documentId);
+  pushDocument(JSON.stringify(document));
 }
 
-function pushDocument(documentBody, documentId) {
-  var _this = this;
-
-  var server = 'push.cloud.coveo.com';
-  var APIversion = 'v1';
-  var organizationId = 'sewimnijmeijer01';
-  var sourceId = 'riv7wb3mxim6ux5zh6m77wklxi-sewimnijmeijer01';
-  let apikey='xx261c0e9b-768e-4e27-9245-931377cb6978';
-  // This sends a request to 
-  // https://push.cloud.coveo.com/v1/organizations/{orgID}/sources/{sourceID}/documents?documentId={documentID}
+function pushDocument(documentBody) {
+  // This sends a request to a proxy for validation and push to our reports repository.
   // With the body containing the document metadata we constructed from the message
   $.ajax({
-      url: `https://${server}/${APIversion}/organizations/${organizationId}/sources/${sourceId}/documents?documentId=${documentId}&compressionType=Uncompressed`,
+      url: `https://dzqyna30rf.execute-api.us-east-1.amazonaws.com/prod`,
       method: 'PUT',
-      beforeSend: function(request) {
-        request.setRequestHeader("content-type", 'application/json');
-        request.setRequestHeader("Authorization", 'Bearer ' + apikey);
+      headers: {
+        'Content-Type': 'application/json',
+        'x-extension-id': chrome.runtime.id
       },
       dataType: 'json',
       contentType: "application/json",
       data: documentBody,
-      success: function(msg) {
+      success: function() {
         console.log("Pushed to Coveo");
         window.close();
-        //alert("Pushed to Coveo Cloud");
       },
-      error: function (xhr, ajaxOptions, thrownError) {
-        console.log("Error when pushing: "+xhr.status);
+      error: function (xhr) {
+        console.error("Error when pushing: ", xhr.status);
         window.close();
-        //alert("Pushed to Coveo Cloud FAILED: "+xhr.status);
       }
   });
-  
- 
 }
 
 
@@ -545,8 +531,6 @@ function u_btoa(buffer) {
 }
 
 function buildMessageDocument(data, complete) {
-  var _this = this;
-
   var documentId = data.json['theUrl'];
   data.json['documentId'] = documentId;
   var date = new Date();
@@ -576,8 +560,7 @@ function buildMessageDocument(data, complete) {
     let html = getReportHTML('globalReport');
     data.json['compressedBinaryData'] = u_btoa(html);
   }
-  else
-  {
+  else {
     data.json['details']="";
     data.json['image']="";
   }
@@ -652,7 +635,7 @@ function setScreenShot(dataurl) {
 }
 
 function setSFDC(values){
-  for (let [curkey, curvalue] of Object.entries(values)) 
+  for (let [curkey, curvalue] of Object.entries(values))
 	{
     SendMessage({type: 'saveitemSFDC',item: curkey, value: curvalue} );
     $('#'+curkey).val(curvalue);
@@ -701,16 +684,9 @@ else {
 function save(){
   //Save the contents
   let values={};
-  values['xProjectname']=$('#xProjectname').val();
-  values['xMilestone']=$('#xMilestone').val();
-  values['xRecordtype']=$('#xRecordtype').val();
-  values['xKickoff_date']=$('#xKickoff_date').val();
-  values['xGolive_date']=$('#xGolive_date').val();
-  values['xSearchpage']=$('#xSearchpage').val();
-  values['xCustomer']=$('#xCustomer').val();
-  values['xPartner']=$('#xPartner').val();
-  values['xOwner']=$('#xOwner').val();
-  values['xSFDCUrl']=$('#xSFDCUrl').val();
+  'xProjectname,xMilestone,xRecordtype,xKickoff_date,xGolive_date,xSearchpage,xCustomer,xPartner,xOwner,xSFDCUrl'.split(',').forEach(k => {
+    values[k] = $('#' + k).val().trim();
+  });
   setSFDC(values);
 }
 
@@ -738,10 +714,10 @@ document.addEventListener('DOMContentLoaded', function () {
   $('#openSearch').click(() => {
     //Save the contents
     save();
-    
-    if ($('#xSearchpage').val()!="")
-    {
-      SendMessage({type: 'navigate', to: $('#xSearchpage').val()});
+
+    let xSP = ($('#xSearchpage').val() || '').trim();
+    if (xSP) {
+      SendMessage({type: 'navigate', to: xSP});
     }
   });
   $('#toSFDC').click(() => {
@@ -749,31 +725,24 @@ document.addEventListener('DOMContentLoaded', function () {
     save();
     $('#SFDCInfo').hide();
   });
+
   $('#clearSFDC').click(() => {
-    //Save the contents
-    let values={};
-    values['xProjectname']='';
-    $('#xProjectname').val('');
-    values['xMilestone']='';
-    $('#xMilestone').val('');
-    values['xRecordtype']='';
-    $('#xRecordtype').val('');
-    values['xKickoff_date']='';
-    $('#xKickoff_date').val('');
-    values['xGolive_date']='';
-    $('#xGolive_date').val('');
-    values['xSearchpage']='';
-    $('#xSearchpage').val('');
-    values['xCustomer']='';
-    $('#xCustomer').val('');
-    values['xPartner']='';
-    $('#xPartner').val('');
-    values['xOwner']='';
-    $('#xOwner').val('');
-    values['xSFDCUrl']='';
-    $('#xSFDCUrl').val('');
+    let values = {
+      xProjectname: '',
+      xMilestone: '',
+      xRecordtype: '',
+      xKickoff_date: '',
+      xGolive_date: '',
+      xSearchpage: '',
+      xCustomer: '',
+      xPartner: '',
+      xOwner: '',
+      xSFDCUrl: '',
+    };
+    // clear values in the UI; for example $('#xProjectname').val('');
+    Object.keys(values).map(k => $('#'+k).val('') );
+
     setSFDC(values);
-    //$('#SFDCInfo').hide();
   });
   $('#getReport').click(getReport);
   $('#push').click(pushToCoveo);
