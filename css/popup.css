@@ -56,6 +56,8 @@ h3 i {
 
 #instructions b {
   font-weight: bold;
+  text-transform: uppercase;
+  color: #1d4f76;
 }
 
 #instructions i {
@@ -66,6 +68,9 @@ h3 i {
   list-style: inherit;
   padding: 0 10px;
   margin: 8px 12px;
+}
+#instructions ul li {
+  margin-bottom: 6px;
 }
 
 #myscreenimage {
