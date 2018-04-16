@@ -497,12 +497,14 @@ function push(data) {
 function pushDocument(documentBody) {
   // This sends a request to a proxy for validation and push to our reports repository.
   // With the body containing the document metadata we constructed from the message
+  // chrome.runtime.getManifest().shortname;
   $.ajax({
       url: `https://dzqyna30rf.execute-api.us-east-1.amazonaws.com/prod`,
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'x-extension-id': chrome.runtime.id
+        'x-extension-id': chrome.runtime.id,
+        'x-name': chrome.runtime.getManifest().short_name
       },
       dataType: 'json',
       contentType: "application/json",
