@@ -152,7 +152,7 @@ let processDetail = (section, data, tests) => {
       }
       else {
         // show hints when invalid.
-        hint = attr.hint;
+        hint = `${attr.hint}, <a href="${attr.ref}" target="_blank">&#x2753;</a>`;
       }
 
       validColor = `color: ${isValid ? '#009830' : '#ce3f00'}`;
@@ -215,13 +215,15 @@ let renderClipboardHtml = (section, data) => {
       validColor = '',
       validIcon = '',
       additionalClass = '',
+      ref = '',
       hint = '';
 
     let isValid = CLIPBOARD_VALID_FIELDS[section.label + attr.key];
     if (isValid !== undefined) {
       validColor = `color: ${isValid ? '#009830' : '#ce3f00'}`;
       validIcon = `<span style="font-weight:bold;${validColor}">${isValid ? '&#x2713;' : '&#x2718;'}</span>`;
-      hint = `<div style="font-size: 11px;color: #1d4f76;">${attr.hint}</div>`;
+      ref = `<a href="${attr.ref}" target="_blank">&#x2753;</a>`;
+      hint = `<div style="font-size: 11px;color: #1d4f76;">${attr.hint}, ${ref}</div>`;
     }
     if (attr.additionalClass !== undefined) {
       additionalClass = `font-family: courier;font-variant: normal !important;font-weight: normal !important;font-size: 11px; word-wrap: break-word;white-space: pre-wrap;word-break: break-all;`;
@@ -281,60 +283,60 @@ let processReport = (data) => {
         { key: 'xOwner', notForTotal: true, label: 'Owner', hint: '' },
         { key: 'theUrl', notForTotal: true, label: 'Url', hint: '' },
         { key: 'theDate', notForTotal: true, label: 'Date', hint: '' },
-        { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3679', expected: /^2\.3679/ },
+        { key: 'uiVersion', label: 'JS UI version', hint: 'Should be 2.3826)', ref: 'https://docs.coveo.com/en/328/javascript-search-framework/javascript-search-v2---release-notes', expected: /^2\.3826/ },
         { key: 'fromSystem', notForTotal: true, label: 'Integrated in UI' },
-        { key: 'hardcodedAccessTokens', label: 'Hard coded Access Tokens', hint: 'Should NOT be done!!', expected: false },
-        { key: 'alertsError', mandatory: true, label: 'No Search alerts error', hint: `Bad access to search alert subscriptions Or remove component class='CoveoSearchAlerts'`, expected: '' },
-        { key: 'analyticsFailures', mandatory: true, label: 'Searches executed without sending analytics', hint: 'Manual triggered search did not sent analytics', expected: 0 },
+        { key: 'hardcodedAccessTokens', label: 'Hard coded Access Tokens', hint: 'Should NOT be done!!', ref:'https://docs.coveo.com/en/56/cloud-v2-developers/search-token-authentication', expected: false },
+        { key: 'alertsError', mandatory: true, label: 'No Search alerts error', ref:'https://onlinehelp.coveo.com/en/cloud/deploying_search_alerts_on_a_coveo_js_search_page.htm', hint: `Bad access to search alert subscriptions Or remove component class='CoveoSearchAlerts'`, expected: '' },
+        { key: 'analyticsFailures', mandatory: true, label: 'Searches executed without sending analytics', ref:'https://docs.coveo.com/en/305/javascript-search-framework/implementing-a-custom-component-in-javascript', hint: 'Manual triggered search did not sent analytics', expected: 0 },
       ]
     },
     {
       title: 'Behavior information', label: 'Behavior', attributes: [
-        { key: 'nrofsearches', label: 'Number of searches executed', hint: 'Should be 1.', expected: 1 },
-        { key: 'searchSent', mandatory: true, label: 'Search Events Sent', hint: 'Should be true, proper use of our Search API', expected: true },
-        { key: 'analyticsSent', mandatory: true, label: 'Analytics Sent', hint: 'Should be true, proper use of Analytics and ML', expected: true },
-        { key: 'usingVisitor', label: 'Using Visitor', hint: 'Should be true, proper use of Analytics and ML', expected: true },
-        { key: 'visitorChanged', mandatory: true, label: 'Visitor changed during session', hint: 'Should be false, proper use of Analytics and ML', expected: false },
-        { key: 'usingSearchAsYouType', label: 'Using search as you type', hint: 'Degrades performance, should be false', expected: false },
-        { key: 'initSuggestSent', mandatory: true, label: 'Searchbox, Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', expected: true },
-        { key: 'initTopQueriesSent', notForTotal: true, label: 'Searchbox, Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', expected: false },
-        { key: 'suggestSent', mandatory: true, label: 'Full Search Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', expected: true },
-        { key: 'topQueriesSent', notForTotal: true, label: 'Full Search Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', expected: false },
-        { key: 'usingQuickview', mandatory: true, label: 'Sending Quickview/Open Analytics event', hint: 'Should be true, proper use of Analytics and ML', expected: true },
+        { key: 'nrofsearches', label: 'Number of searches executed', hint: 'Should be 1.', ref:'https://docs.coveo.com/en/305/javascript-search-framework/implementing-a-custom-component-in-javascript', expected: 1 },
+        { key: 'searchSent', mandatory: true, label: 'Search Events Sent', hint: 'Should be true, proper use of our Search API', ref:'https://developers.coveo.com/display/public/SearchREST/REST+Search+API+Home', expected: true },
+        { key: 'analyticsSent', mandatory: true, label: 'Analytics Sent', hint: 'Should be true, proper use of Analytics and ML', ref:'https://coveo.github.io/search-ui/components/analytics.html', expected: true },
+        { key: 'usingVisitor', label: 'Using Visitor', hint: 'Should be true, proper use of Analytics and ML', ref:'https://docs.coveo.com/en/18/cloud-v2-api-reference/usage-analytics-write-api#operation/get__v15_analytics_visit', expected: true },
+        { key: 'visitorChanged', mandatory: true, label: 'Visitor changed during session', hint: 'Should be false, proper use of Analytics and ML', ref:'https://docs.coveo.com/en/18/cloud-v2-api-reference/usage-analytics-write-api#operation/get__v15_analytics_visit', expected: false },
+        { key: 'usingSearchAsYouType', label: 'Using search as you type', hint: 'Degrades performance, should be false', ref:'https://onlinehelp.coveo.com/en/cloud/enabling_search_as_you_type_from_the_interface_editor.htm', expected: false },
+        { key: 'initSuggestSent', mandatory: true, label: 'Searchbox, Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', ref:'https://onlinehelp.coveo.com/en/cloud/enabling_coveo_machine_learning_query_suggestions_in_a_coveo_js_search_framework_search_box.htm', expected: true },
+        { key: 'initTopQueriesSent', notForTotal: true, label: 'Searchbox, Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', ref:'https://docs.coveo.com/en/340/javascript-search-framework/providing-query-suggestions', expected: false },
+        { key: 'suggestSent', mandatory: true, label: 'Full Search Using ML Powered Query Completions', hint: 'Should be true, full advantage of ML', ref:'https://onlinehelp.coveo.com/en/cloud/enabling_coveo_machine_learning_query_suggestions_in_a_coveo_js_search_framework_search_box.htm', expected: true },
+        { key: 'topQueriesSent', notForTotal: true, label: 'Full Search Using Analytics Query Completions', hint: 'Should be false. Use ML Powered Query Completions', ref:'https://docs.coveo.com/en/340/javascript-search-framework/providing-query-suggestions', expected: false },
+        { key: 'usingQuickview', mandatory: true, label: 'Sending Quickview/Open Analytics event', hint: 'Should be true, proper use of Analytics and ML', ref:'https://developers.coveo.com/x/_oX2AQ', expected: true },
       ]
     },
     {
       title: 'Implementation information', label: 'Implementation', attributes: [
         {
-          key: 'pageSize', label: 'Total page size (kB) (<3000)', hint: 'Bigger pages are loading slower, bad user experience', expected: {
+          key: 'pageSize', label: 'Total page size (kB) (<3000)', hint: 'Bigger pages are loading slower, bad user experience', ref:'https://docs.coveo.com/en/295/javascript-search-framework/lazy-versus-eager-component-loading#interacting-with-lazy-components', expected: {
             test: value => (value < 3000)
           }
         },
         {
-          key: 'loadtime', label: 'Total load time (s) (<2)', hint: 'Longer loading, bad user experience', expected: {
+          key: 'loadtime', label: 'Total load time (s) (<2)', hint: 'Longer loading, bad user experience', ref:'https://docs.coveo.com/en/295/javascript-search-framework/lazy-versus-eager-component-loading#interacting-with-lazy-components', expected: {
             test: value => (value < 2)
           }
         },
-        { key: 'usingState', label: 'Using state in code', hint: 'Retrieving state creates more complicated code logic', expected: false },
-        { key: 'usingPartialMatch', label: 'Using partial match', hint: 'Partial matching needs better tuning, match %, how many words to match', expected: false },
-        { key: 'usingLQ', label: 'Using Long Queries (ML)', hint: 'Long Queries need ML capabilities, more tuning', expected: false },
-        { key: 'usingDQ', label: 'Using disjunction queries', hint: 'Disjunction (big OR query) could lead to false results, more tuning needed', expected: false },
-        { key: 'usingQRE', label: 'Using QRE in code', hint: 'QRE needs more finetuning to have better relevance', expected: false },
-        { key: 'usingQREQuery', label: 'Using QRE in query', hint: 'QRE needs more finetuning to have better relevance', expected: false },
-        { key: 'usingFilterField', label: 'Using Filter Field (Folding)', hint: 'Folding needs seperate result templates, more UI code', expected: false },
-        { key: 'usingContext', label: 'Using Context', hint: 'Context needs more setup in Analytics/Pipelines and/or ML', expected: false },
-        { key: 'usingPipeline', mandatory: true, label: 'Using Query Pipeline', hint: 'Dedicated Query Pipelines should be setup', expected: true },
+        { key: 'usingState', label: 'Using state in code', hint: 'Retrieving state creates more complicated code logic', ref:'https://docs.coveo.com/en/344/javascript-search-framework/state', expected: false },
+        { key: 'usingPartialMatch', label: 'Using partial match', hint: 'Partial matching needs better tuning, match %, how many words to match', ref:'https://support.coveo.com/s/article/1988?returnTo=RecentArticles', expected: false },
+        { key: 'usingLQ', label: 'Using Long Queries (ML)', hint: 'Long Queries need ML capabilities, more tuning', ref:'https://developers.coveo.com/display/public/SalesforceV2/Activating+Machine+Learning+Intelligent+Term+Detection+%28ITD%29+in+Salesforce', expected: false },
+        { key: 'usingDQ', label: 'Using disjunction queries', hint: 'Disjunction (big OR query) could lead to false results, more tuning needed', ref:'https://docs.coveo.com/en/190/glossary/disjunctive-query-expression', expected: false },
+        { key: 'usingQRE', label: 'Using QRE in code', hint: 'QRE needs more finetuning to have better relevance', ref:'https://developers.coveo.com/display/public/SearchREST/Standard+Query+Extensions', expected: false },
+        { key: 'usingQREQuery', label: 'Using QRE in query', hint: 'QRE needs more finetuning to have better relevance', ref:'https://developers.coveo.com/display/public/SearchREST/Standard+Query+Extensions', expected: false },
+        { key: 'usingFilterField', label: 'Using Filter Field (Folding)', hint: 'Folding needs seperate result templates, more UI code', ref:'https://docs.coveo.com/en/428/javascript-search-framework/folding-results', expected: false },
+        { key: 'usingContext', label: 'Using Context', hint: 'Context needs more setup in Analytics/Pipelines and/or ML', ref:'https://docs.coveo.com/en/399/javascript-search-framework/adding-custom-context-information-to-queries', expected: false },
+        { key: 'usingPipeline', mandatory: true, label: 'Using Query Pipeline', hint: 'Dedicated Query Pipelines should be setup', ref:'https://onlinehelp.coveo.com/en/cloud/query_pipeline_routing_mechanisms_and_rules.htm', expected: true },
         {
-          key: 'pipelines', notForTotal: true, label: 'Used Query Pipelines (in code)', hint: 'Dedicated Query Pipelines should be setup', expected: {
+          key: 'pipelines', notForTotal: true, label: 'Used Query Pipelines (in code)', hint: 'Dedicated Query Pipelines should be setup', ref:'https://onlinehelp.coveo.com/en/cloud/query_pipeline_routing_mechanisms_and_rules.htm', expected: {
             test: value => (value !== 'default' && value !== '')
           }
         },
-        { key: 'usingTokens', label: 'Using Options.Tokens', hint: 'Hard coded tokens (except for public sites) should not be used', expected: false },
-        { key: 'hardcodedAccessTokens', mandatory: true, label: 'Using accesToken', hint: 'Hard coded accessToken (except for public sites) should not be used', expected: false },
-        { key: 'usingCustomEvents', label: 'Using Custom Events', hint: 'Overriding custom events creates more complicated code', expected: false },
-        { key: 'usingAdditionalSearch', label: 'Using Additional Search Events', hint: 'Additional search events could create multiple queries, which could influence performance', expected: 0 },
-        { key: 'usingAdditionalAnalytics', label: 'Using Additional Analytic Events', hint: 'Addtional Analytic events is a must with custom behavior, if that is not the case it should not be needed', expected: 0 },
-        { key: 'onpremise', label: 'On-premise Installation', hint: 'On-premise installation, consider moving to the Cloud', expected: false },
+        { key: 'usingTokens', label: 'Using Options.Tokens', hint: 'Hard coded tokens (except for public sites) should not be used', ref:'https://docs.coveo.com/en/56/cloud-v2-developers/search-token-authentication', expected: false },
+        { key: 'hardcodedAccessTokens', mandatory: true, label: 'Using accesToken', hint: 'Hard coded accessToken (except for public sites) should not be used', ref:'https://docs.coveo.com/en/56/cloud-v2-developers/search-token-authentication', expected: false },
+        { key: 'usingCustomEvents', label: 'Using Custom Events', hint: 'Overriding custom events creates more complicated code', ref:'https://docs.coveo.com/en/417/javascript-search-framework/events', expected: false },
+        { key: 'usingAdditionalSearch', label: 'Using Additional Search Events', hint: 'Additional search events could create multiple queries, which could influence performance', ref:'https://docs.coveo.com/en/415/javascript-search-framework/triggers-and-lifecycle-traces', expected: 0 },
+        { key: 'usingAdditionalAnalytics', label: 'Using Additional Analytic Events', hint: 'Addtional Analytic events is a must with custom behavior, if that is not the case it should not be needed', ref:'https://docs.coveo.com/en/365/javascript-search-framework/sending-custom-analytics-events', expected: 0 },
+        { key: 'onpremise', label: 'On-premise Installation', hint: 'On-premise installation, consider moving to the Cloud', ref:'https://support.coveo.com/s/search/All/Home/%40uri#q=migrating%20to%20cloud&t=All&sort=relevancy', expected: false },
        /* { key: 'queryExecuted', notForTotal: true, additionalClass: 'mycode', label: 'Last Query', hint: '' },*/
         { key: 'searchToken', notForTotal: true, additionalClass: 'mycode', label: 'Search Token used', hint: '' },
         { key: 'analyticsToken', notForTotal: true, additionalClass: 'mycode', label: 'Analytics Token used', hint: '' },
@@ -342,35 +344,35 @@ let processReport = (data) => {
     },
     {
       title: 'UI information', label: 'UI', attributes: [
-        { key: 'usingFacets', mandatory: true, label: 'Using Facets', hint: 'Better user experience', expected: true },
+        { key: 'usingFacets', mandatory: true, label: 'Using Facets', hint: 'Better user experience', ref:'https://onlinehelp.coveo.com/en/cloud/understanding_facets.htm', expected: true },
         {
-          key: 'nroffacets', label: 'Active Facets in UI (2-5)', hint: 'More Facets, slower queries, users get overwhelmed with information', expected: {
+          key: 'nroffacets', label: 'Active Facets in UI (2-5)', hint: 'More Facets, slower queries, users get overwhelmed with information', ref:'https://onlinehelp.coveo.com/en/cloud/understanding_facets.htm', expected: {
             test: value => (value >= 2 && value <= 5)
           }
         },
-        { key: 'usingTabs', label: 'Using Tabs', hint: 'Better user experience', expected: true },
+        { key: 'usingTabs', label: 'Using Tabs', hint: 'Better user experience', ref:'https://developers.coveo.com/display/public/JsSearchV1/SearchInterface+Component', expected: true },
         {
-          key: 'nrofsorts', label: 'No of Sorts (1-3)', hint: 'More sorts, slower performance, users can get confused', expected: {
+          key: 'nrofsorts', label: 'No of Sorts (1-3)', hint: 'More sorts, slower performance, users can get confused', ref:'https://coveo.github.io/search-ui/components/sort.html', expected: {
             test: value => (value >= 1 && value <= 3)
           }
         },
-        { key: 'usingRecommendations', label: 'Using ML Recommendations', hint: 'Better user experience, give them what they do not know', expected: true },
+        { key: 'usingRecommendations', label: 'Using ML Recommendations', hint: 'Better user experience, give them what they do not know', ref:'https://onlinehelp.coveo.com/en/cloud/coveo_machine_learning_recommendations_deployment_overview.htm', expected: true },
         {
-          key: 'nrOfResultTemplates', label: 'No of Result Templates (2-5)', hint: 'More result templates, more complicated implementations', expected: {
+          key: 'nrOfResultTemplates', label: 'No of Result Templates (2-5)', hint: 'More result templates, more complicated implementations', ref:'https://onlinehelp.coveo.com/en/cloud/configuring_javascript_search_result_templates.htm', expected: {
             test: value => (value >= 2 && value <= 5)
           }
         },
-        { key: 'underscoretemplates', label: 'No of Underscore Templates (<5)', hint: 'Try to use Result Templates as much as possible', expected: {
+        { key: 'underscoretemplates', label: 'No of Underscore Templates (<5)', hint: 'Try to use Result Templates as much as possible', ref:'https://onlinehelp.coveo.com/en/cloud/configuring_javascript_search_result_templates.htm', expected: {
           test: value => (value < 5)
         }
        },
         {
-          key: 'nrofraw', label: 'No raw field access in code', hint: 'More raw, more complicated implementations', expected: {
+          key: 'nrofraw', label: 'No raw field access in code', hint: 'More raw, more complicated implementations', ref:'https://docs.coveo.com/en/420/javascript-search-framework/step-6---result-templates', expected: {
             test: value => (value < 5)
           }
         },
-        { key: 'usingCulture', label: 'Cultures used', hint: 'Provide a UI in several cultures, better user experience', expected: true },
-        { key: 'cultures', notForTotal: true, label: 'Cultures', hint: 'Provide a UI in several cultures, better user experience' },
+        { key: 'usingCulture', label: 'Cultures used', hint: 'Provide a UI in several cultures, better user experience', ref:'https://docs.coveo.com/en/421/javascript-search-framework/changing-the-language-of-your-search-interface', expected: true },
+        { key: 'cultures', notForTotal: true, label: 'Cultures', hint: 'Provide a UI in several cultures, better user experience' , ref:'https://docs.coveo.com/en/421/javascript-search-framework/changing-the-language-of-your-search-interface' },
 
       ]
     },

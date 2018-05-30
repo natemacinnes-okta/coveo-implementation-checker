@@ -13,7 +13,7 @@ function getSFDC()
 			   xGolive_date: "00N320000030M2u_ileinner",
 			   xSearchpage: "00N320000030M34_ileinner",
 			   xCustomer: "CF00N320000030Lx1_ileinner",
-			   xPartner: "CF00N320000030Lx6_ileinner",
+         xPartner: "CF00N320000030Lx6_ileinner",
 			   xOwner: "CF00N0d000002y7Cl_ileinner"
 	};
 	let got={};
@@ -25,8 +25,9 @@ function getSFDC()
 			value = value.split('/')[2];
 		}
 		if (curkey=="xPartner"){
-			//trim so that we have the host only https://www.beckman.com/coveosearch --> www.beckman.com only
-			value = "Unknown";
+        if (value=="") {
+            value = "Unknown";
+        }
 		}
 		got[curkey]=value;
 	}
