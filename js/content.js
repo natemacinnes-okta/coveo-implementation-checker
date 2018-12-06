@@ -82,7 +82,7 @@ let analyzePage = () => {
 		title: "General",
 		value: 21, max: 60,
 		lines: [
-			{ label: "JS UI version (should be 2.3679)", value: "2.3679.4", expected: /^2\.3679/ },
+			{ label: "JS UI version (should be 2.4382)", value: "2.4382", expected: /^2\.4382/ },
 			{ label: "Integrated in UI", value: "Unknown" },
 			{ label: "Pagesize in kB:", value: 3154 },
 		]
