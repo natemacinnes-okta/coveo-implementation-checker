@@ -3,11 +3,28 @@ let createWheel = (data) => {
   let v = (data.value / (data.max || 100));
   let perc = Math.round(v*100);
   let cssClass = 'bad';
-  if (v >= 0.75) {
+  if (data.smallerIsBetter)
+  {
     cssClass = 'good';
+    if (v >= 0.75) {
+      cssClass = 'bad';
+    }
+    else if (v >= 0.5) {
+      cssClass = 'warn';
+    }
+    if (data.value >=1){
+      cssClass = 'bad';
+    }
   }
-  else if (v >= 0.5) {
-    cssClass = 'warn';
+  else
+  {
+    cssClass = 'bad';
+    if (v >= 0.75) {
+      cssClass = 'good';
+    }
+    else if (v >= 0.5) {
+      cssClass = 'warn';
+    }
   }
   v = C * v;
 

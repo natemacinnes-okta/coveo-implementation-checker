@@ -82,6 +82,69 @@ function getReportHTML(id){
   tr td.line-indicator {  border-right: none;  vertical-align: top !important;  padding-right: 1px !important;padding-left: 1px !important;}
   tr td.line-message {vertical-align: top !important; text-align: right; width: 350px; padding-left: 1px !important;}
   tr td.line-result {background-position: left 5px top 12px; background-repeat: no-repeat; background-size: 12px; text-align: left; word-wrap: break-word; white-space: pre-wrap; word-break: break-all; width: 450px;}
+  tr td.line-performance, tr th.line-performance {
+  text-align: left !important;
+  width: 350px;
+  word-wrap: break-word;
+  word-break: break-all;
+  padding-left: 1px !important;
+}
+
+
+tr td.line-type, tr th.line-type {
+  text-align: left !important;
+  width: 150px;
+  padding-left: 1px !important;
+}
+
+tr td.line-duration, tr th.line-duration {
+  background-position: left 5px top 12px;
+  text-align: right  !important;
+  width: 45px;
+  padding-left: 1px !important;
+}
+
+tr td.line-ttfb, tr th.line-ttfb {
+  background-position: left 5px top 12px;
+  text-align: right  !important;
+  width: 45px;
+  padding-left: 1px !important;
+}
+
+.progress {
+  position: relative;
+  height: 13px;
+  background: rgb(255, 0, 0);
+  background: -moz-linear-gradient(left, rgba(0, 255, 0, 1) 0%, rgba(255, 0, 0, 1) 100%);
+  background: -webkit-gradient(linear, left top, right top, color-stop(0%, rgba(0, 255, 0, 1)), color-stop(100%, rgba(255, 0, 0, 1)));
+  background: -webkit-linear-gradient(left, rgba(0, 255, 0, 1) 0%, rgba(255, 0, 0, 1) 100%);
+  background: -o-linear-gradient(left, rgba(0, 255, 0, 1) 0%, rgba(255, 0, 0, 1) 100%);
+  background: -ms-linear-gradient(left, rgba(0, 255, 0, 1) 0%, rgba(255, 0, 0, 1) 100%);
+  background: linear-gradient(to right, rgba(0, 255, 0, 1) 0%, rgba(255, 0, 0, 1) 100%);
+  filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#00ff00', endColorstr='#ff0000', GradientType=1);
+}
+.amount {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  transition: all 0.8s;
+  background: lightgray;
+  /*width: 0;*/
+}
+.progress:before {
+  content: attr(data-amount)" %";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  text-align: center;
+  line-height: 13px;
+  font-size: 0.8em;
+}
+
   .mandatory {  color: #009830;}
   .mandatoryFAIL {  color: #ce3f00;}
   .download-global, .copy-section {display;none;}
@@ -207,6 +270,56 @@ let processDetail = (section, data, tests) => {
 </ul>`;
 };
 
+
+let processDetailPerformanceReport = (section, data, tests, smallerIsBetter, total) => {
+  let lines = data.map(attr => {
+
+    let isValidCssClass = '';
+    let additionalClass = '';
+    let validColor = '';
+    let validIcon = '';
+    let mandatoryIcon = '';
+    let mandatory = false;
+    let url = '';
+        // show hints when invalid.
+    if (attr.url != '')
+    {
+        url = `<a href="${attr.url}" title="${attr.url}" target="_blank">&#x025F9;</a>`;
+    }
+    let perc= Math.round((attr.duration/(total/100)),0);
+ 
+    return `<tr class="${isValidCssClass}">
+        <td class="line-performance">
+          ${attr.name}
+          <small>${url}</small>
+          <br><div class="progress" data-amount="${perc}"> <div class="amount" style="width:${100-perc}%"></div></div>
+        </td>
+        <td class="line-type">${attr.type}</td>
+        <td class="line-duration">${attr.duration}</td>
+        <td class="line-ttfb">${attr.TTFB}</td>
+      </tr>`;
+  });
+
+  let score = createWheel({ title: section.title, value: tests.passed, max: tests.total, smallerIsBetter: smallerIsBetter });
+
+  return `<ul id="${section.label}" class="collapsible" data-collapsible="expandable">
+  <li>
+    <div class="copy-section" style=""></div>
+    <button type="button" class="collapsible-header active btn with-icon">
+      <div class="msg">
+        ${section.title}
+      </div>
+      <div class="result" style="">${score}</div>
+    </button>
+    <div class="collapsible-body">
+      <table><tbody><tr><th class="line-performance">Url</th><th class="line-type">Type</th><th class="line-duration">Duration (ms)</th><th class="line-ttfb">Wait (ms)</th></tr>
+        ${lines.join('\n')}
+      </tbody></table>
+    </div>
+  </li>
+</ul>`;
+};
+
 let renderClipboardHtml = (section, data) => {
   let lines = section.attributes.map(attr => {
 
@@ -248,6 +361,43 @@ ${lines.join('\n')}</tbody></table>
 </div>
 `; // leave empty last line here, and don't re-indent the strings
 };
+
+let renderClipboardPerformanceHtml = (section, data) => {
+  let lines = data.map(attr => {
+
+    /*
+         <td class="line-performance">
+          ${attr.name}
+          <small>${url}</small>
+          <br><div class="progress" data-amount="${perc}"> <div class="amount" style="width:${100-perc}%"></div></div>
+        </td>
+        <td class="line-type">${attr.type}</td>
+        <td class="line-duration">${attr.duration}</td>
+        <td class="line-ttfb">${attr.TTFB}</td>*/
+        let url = '';
+        // show hints when invalid.
+    if (attr.url != '')
+    {
+        url = `<a href="${attr.url}" target="_blank">Open</a>`;
+    }
+    return `<tr>
+
+    <td width="50%">${attr.name}<br>${url}</td>
+    <td width="20%">${attr.type}</td>
+    <td width="10%">${attr.duration}</td>
+    <td width="10%">${attr.TTFB}</td></tr>`;
+  });
+
+  return `<table border="1" bordercolor="#bcc3ca" cellspacing="0" style="border-collapse: collapse; width:90%; font-size: 13px;box-sizing: border-box;font-family: Lato, Arial, Helvetica, sans-serif;"><tbody><tr>
+<td colspan="4" style="border-bottom: 1px solid #bcc3ca;padding: 9px 15px;text-transform: uppercase;font-size: 13px;color: #1d4f76; height: 34px; background: #e6ecf0;">
+<span style="background:#e6ecf0;">${section.title}</span><br>
+</td></tr>
+<tr><td>Name</td><td>Type</td><td>Duration (ms)</td><td>Wait (ms)</td></tr>
+${lines.join('\n')}</tbody></table>
+</div>
+`; // leave empty last line here, and don't re-indent the strings
+};
+
 
 let renderClipboardPlain = (section, data) => {
   let lines = section.attributes.map(attr => {
@@ -437,6 +587,97 @@ let processReport = (data) => {
   $('#loading').hide();
 };
 
+let processPerformanceReport = (data) => {
+  let sections = [
+    {
+      title: 'Very slow resources (>2s)', label: 'Very Slow' },
+    {
+      title: 'Slow resources (1s-2s)', label: 'Slow' },
+    {
+      title: 'Normal resources (100ms-1s)', label: 'Normal'  },
+    {
+      title: 'Fast resources (<100ms)', label: 'Fast' },
+  ];
+
+  // reset clipboard data
+  CLIPBOARD_DATA_HTML = {};
+  CLIPBOARD_DATA_PLAIN = {};
+  CLIPBOARD_VALID_FIELDS = {};
+
+  let sectionCharts = [];
+  let html = [];
+  let smallerIsBetter = true;
+  //Very slow
+  let tests = { passed: 0, total: 0, mandatoryfail: false };
+  tests.total = data.T2s + data.T12s + data.T2001s + data.T0200;
+  tests.passed = data.T2s;
+  html.push(processDetailPerformanceReport(sections[0], data.bad, tests, smallerIsBetter, data.total));
+  CLIPBOARD_DATA_HTML[sections[0].label] = renderClipboardPerformanceHtml(sections[0], data.bad);
+  sectionCharts.push({ title: sections[0].label, subtitle: '', value: tests.passed, max: tests.total,smallerIsBetter });
+
+  //Slow
+  tests.passed = data.T12s;
+  html.push(processDetailPerformanceReport(sections[1], data.slow, tests, smallerIsBetter, data.total));
+  CLIPBOARD_DATA_HTML[sections[1].label] = renderClipboardPerformanceHtml(sections[1], data.slow);
+  sectionCharts.push({ title: sections[1].label, subtitle: '', value: tests.passed, max: tests.total, smallerIsBetter });
+  //Normal
+  smallerIsBetter = false;
+  tests.passed = data.T2001s;
+  html.push(processDetailPerformanceReport(sections[2], data.medium, tests, smallerIsBetter, data.total));
+  CLIPBOARD_DATA_HTML[sections[2].label] = renderClipboardPerformanceHtml(sections[2], data.medium);
+  sectionCharts.push({ title: sections[2].label, subtitle: '', value: tests.passed, max: tests.total, smallerIsBetter });
+  //Fast
+  smallerIsBetter = false;
+  tests.passed = data.T0200;
+  html.push(processDetailPerformanceReport(sections[3], data.fast, tests,smallerIsBetter, data.total));
+  CLIPBOARD_DATA_HTML[sections[3].label] = renderClipboardPerformanceHtml(sections[3], data.fast);
+  sectionCharts.push({ title: sections[3].label, subtitle: '', value: tests.passed, max: tests.total,smallerIsBetter });
+
+  let scores = sectionCharts.map(createWheel);
+  document.getElementById('scores').innerHTML = scores.join('\n');
+  //$('#legend').show();
+  $('#download-global').show();
+  let details='';
+  details += `<tr>
+  <td class="line-type"  width="50%">Total Load time</td>
+  <td class="line-duration" width="50%">${Math.round(data.total,0)}</td></tr>`;
+  for (var key in data.totalbytype) {
+    details +=`<tr>
+    <td class="line-type"  width="50%">${key}</td>
+    <td class="line-duration" width="50%">${Math.round(data.totalbytype[key],0)}</td></tr>`;
+  }
+  let detail = `<ul id="Details" class="collapsible" data-collapsible="expandable">
+  <li>
+      <button type="button" class="collapsible-header active btn with-icon">
+          <div class="msg">
+            Details by type
+          </div>
+      </button>
+      <div class="collapsible-body">
+        <table><tbody><tr><th class="line-type">Type</th><th class="line-duration">Duration (ms)</th></tr>
+          ${details}
+        </tbody></table>
+      </div>
+  </li>
+  </ul>`;
+  document.getElementById('details').innerHTML = html.join('\n') + detail;
+  
+
+  $('#details .collapsible').collapsible();
+  $('#details .copy-section').click((e) => {
+    e.preventDefault();
+    let target = $(e.currentTarget)[0], parent = $(target).closest('ul')[0];
+    copyToClipboard(parent.outerHTML, parent.id);
+    $('#clipboard-copied').removeClass('mod-hidden');
+    setTimeout(() => {
+      $('#clipboard-copied').addClass('mod-hidden');
+    }, 999);
+    return true;
+  });
+
+  $('#loading').hide();
+};
+
 let processState = (data) => {
   $('#loading').hide();
   if (!data) {
@@ -590,6 +831,19 @@ function getReport() {
   SendMessage('getScreen');
 }
 
+
+function getPerformanceReport() {
+  $('#loading').show();
+  $('#instructions').hide();
+  $('#legend').hide();
+  $('#myscreenimage').css('background-image', 'none').hide();
+  document.getElementById('scores').innerHTML = '';
+  document.getElementById('details').innerHTML = '';
+  //$('#push').removeAttr('disabled');
+  //$('#showSFDC').removeAttr('disabled');
+  SendMessage('getPerformanceReport');
+}
+
 let getState = () => {
   SendMessage('getState', processState);
 };
@@ -663,6 +917,9 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
       else if (reportData.type === 'gotNumbers') {
         processReport(reportData.json);
       }
+      else if (reportData.type === 'gotPerformanceReport') {
+        processPerformanceReport(reportData.json);
+      }
       if (reportData && reportData.length && reportData[0].value && reportData[0].max && reportData[0].title) {
         processReport(reportData);
       }
@@ -714,6 +971,13 @@ document.addEventListener('DOMContentLoaded', function () {
   $('#getSFDC').click(() => {
     //Save the contents
     SendMessage({type: 'getSFDC'});
+  });
+  $('#getPerformanceReport').click(() => {
+    //Save the contents
+    SendMessage({type: 'clearCache'});
+    setTimeout(() => {
+      getPerformanceReport();
+      }, 3000);
   });
   $('#openSearch').click(() => {
     //Save the contents
