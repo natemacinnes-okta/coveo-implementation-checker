@@ -1,6 +1,12 @@
 # Chrome Extension
 The coveo-implementation-checker extension allows you validate your Coveo implementation.
 
+## Organization
+Check your Coveo Organization. Is it properly configured, Sources, Fields, Extensions, Query Pipelines.
+
+## Implementation
+Check your Implementation. Are you using the proper libraries, are you sending the proper events?
+
 
 ## Installation
 You can load it manually in your browser from the extension page. (chrome://extensions/)

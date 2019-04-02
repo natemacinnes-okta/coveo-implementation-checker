@@ -5,6 +5,7 @@ html {
 
 body {
   width: 800px;
+  max-width: 800px;
   height: 600px;
 }
 
@@ -70,6 +71,12 @@ img {
 
 a:focus {
   outline: none;
+}
+
+h4 {
+  font-size: 17px;
+  background-color: lightyellow;
+  font-weight: bold;
 }
 
 h3 {
@@ -164,6 +171,27 @@ h3 i {
   font-style: italic;
 }
 
+
+.mytable {
+  border: none;
+  padding: 5px;
+}
+
+.myexpr {
+  width: 200px;
+}
+
+.myexprval{
+  width: 500px;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.myexprcomm{
+  font-style: italic;
+  padding-left: 15px !important;
+}
+
 .mycode {
   font-family: courier;
   font-variant: normal !important;
@@ -216,7 +244,7 @@ h3 i {
 }
 
 .coveo-styleguide table:not(.datepicker-table) td.line-result {
-  font-variant: small-caps;
+  /*font-variant: small-caps;*/
   text-align: left;
   font-weight: bold;
   vertical-align: top;
@@ -237,7 +265,7 @@ tr td.line-message small {
 
 tr td.line-mandatory {
   text-align: right;
-  width: 15px !important;
+  width: 48px !important;
   vertical-align: top !important;
   /*padding-left: 25px !important;*/
 }
@@ -262,6 +290,7 @@ tr td.line-message {
   text-align: right;
   width: 350px;
   padding-left: 1px !important;
+  vertical-align: top !important;
 }
 
 tr td.line-result {
@@ -296,6 +325,7 @@ tr td.line-duration, tr th.line-duration {
   background-position: left 5px top 12px;
   text-align: right  !important;
   width: 45px;
+  font-weight: bold;
   padding-left: 1px !important;
 }
 

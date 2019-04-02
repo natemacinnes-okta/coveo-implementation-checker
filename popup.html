@@ -25,22 +25,24 @@
       </a>
     </div>
     <div class="flex-auto"></div>
-    <div class="header-section mod-padded flex flex-center">Implementation Checker </div>
+    <div class="header-section mod-padded flex flex-center">Coveo's Checkups </div>
   </header>
   <div class="popup-content">
     <div style="padding-top:5px;padding-bottom:5px;border-bottom:1px solid #bcc3ca">
       <button id="download-global" class="btn" title="Download Report"></button>
       <button id="showInstructions" class="btn">Instructions</button>
-      <button id="showSFDC" class="btn">SFDC</button>
       <label id="setSearchTracker" class="btn coveo-slide-toggle-label boxed" style="padding: 8.5px 16px; line-height: 16px;">
         <span class="toggle-label" style="font-size: 12px;">Search Tracker</span>
         <input type="checkbox" class="coveo-slide-toggle">
         <button type="button" style="margin-top: -3px;"></button>
       </label>
-      <button id="getReport" class="btn">Report</button>
+      <button id="getOrgReport" class="btn">Organization</button>
+      <button id="getReport" class="btn">Implementation</button>
       <button id="getPerformanceReport" class="btn">Performance</button>
+      <button id="showSFDC" class="btn">SFDC</button>
+      <button id="clear" class="btn">NEW ORG</button>
       <button id="push" class="btn">Push</button>
-      <button id="reset" class="btn">Reset</button>
+      <button id="reset" class="btn">Reset Report</button>
     </div>
     <div id="SFDCInfo" style="margin-left: 10px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #bcc3ca">
       <table class="noborder">
@@ -61,26 +63,48 @@
       </table>
     </div>
       <div id="instructions">
-      How to use this tool:
+      How to use this tool:<br>
+      BEFORE YOUR START WITH A NEW ORGANIZATION HIT <b>NEW ORG</b><br>
+      <br>
+      When you DO NOT have a Customer Project in SFDC:<br>
       <ul>
-        <li>BEFORE YOUR START HIT RESET (if you have changed your URL)</li>
-        <li>The Sfdc information will be kept after RESET!</li>
-        <li>Step  1. Navigate to the Customer Project in SFDC.</li>
-        <li>Step  2. Hit <b>Sfdc</b> and <b>Get Sfdc Info</b>. Or manually enter the below info.</li>
-        <li>Step  3. Hit <b>Open search page</b>. A new tab will be opened.</li>
+        <li>Step  1. Login/navigate to your Coveo Cloud Organization</li>
+        <li>Step  2. Click on <b>Organization</b></li>
+        <li>Step  3. Navigate to your Public search page.</li>
         <li>Step  4. Execute a search in the standalone searchbox.</li>
         <li>Step  5. When results are displayed. Start typing a query. Hit submit.</li>
         <li>Step  6. Open or Quickview one of the results.</li>
         <li>Step  7. Go back to your search page.</li>
         <li>Step  8. Now, activate <b>Search Tracker</b>.</li>
         <li>Step  9. Execute a <i>single</i> search.</li>
-        <li>Step 10.<b>Report</b></li>
-        <li>Step 11. If you want to push it to the Coveo Index: <b>Push</b></li>
-        <li>Performance: If you want to know which resources are causing load issues (will first reload the page).</li>
+        <li>         The search query will also be checked when you enable the Search Tracker</li>
+        <li>Step 10. Click on <b>Implementation</b></li>
       </ul>
+      <br>
+      When you have a Customer Project in SFDC:<br>
+      <ul>
+        <li>The Sfdc information will be kept after RESET!</li>
+        <li>Step  1. Navigate to the Customer Project in SFDC.</li>
+        <li>Step  2. Click on <b>Sfdc</b> and <b>Get Sfdc Info</b>. Or manually enter the below info.</li>
+        <li>Step  3. Login/navigate to your Coveo Cloud Organization</li>
+        <li>Step  4. Click on <b>Organization</b></li>
+        <li>Step  5. Click on <b>Sfdc</b>.</li>
+        <li>Step  6. Click on <b>Open search page</b>. A new tab will be opened.</li>
+        <li>Step  7 Execute a search in the standalone searchbox.</li>
+        <li>Step  8. When results are displayed. Start typing a query. Hit submit.</li>
+        <li>Step  9. Open or Quickview one of the results.</li>
+        <li>Step 10. Go back to your search page.</li>
+        <li>Step 11. Now, activate <b>Search Tracker</b>.</li>
+        <li>Step 12. Execute a <i>single</i> search.</li>
+        <li>         The search query will also be checked when you enable the Search Tracker</li>
+        <li>Step 13. Click on <b>Implementation</b></li>
+        <li>Step 14. If you want to push it to the Coveo Index: <b>Push</b></li>
+      </ul>
+        <br><b>Performance</b>: If you want to know which resources are causing load issues<br>(First reload manually the page without caching enabled).
     </div>
     <div id="loading" class="loading-prompt">
-      <div>Currently loading. Please wait.</div>
+      <div id="loadTitle">Currently loading. Please wait.</div>
+      <div id="loadSubTitle"></div>
       <div class="spinner">
         <div class="bounce1"></div>
         <div class="bounce2"></div>

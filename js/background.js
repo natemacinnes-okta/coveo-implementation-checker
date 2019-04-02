@@ -2,10 +2,10 @@
 
 const STATES = {};
 //For SFDC retrieved from SFDC
-const GLOBAL = {};
+let GLOBAL = {};
 /* globals chrome */
-const FILTER_SEARCH = { urls: ["*://*/rest/search/*", "*://*/?errorsAsSuccess=1", "https://*/rest/search/v2/*", "https://*/coveo/rest/v2/*", "https://cloudplatform.coveo.com/rest/search/*", "*://platform.cloud.coveo.com/rest/search/v2/*", "https://search.cloud.coveo.com/rest/search/v2/*", "*://*/*/coveo/platform/rest/*", "*://*/coveo/rest/*"] };
-const FILTER_ANALYTICS = { urls: ["*://usageanalytics.coveo.com/rest/*", "*://*/*/coveo/analytics/rest/*", "*://*/*/coveoanalytics/rest/*"] };
+const FILTER_SEARCH = { urls: ["*://*/rest/search/*", "*://*/search/*", "*://*/*/search/*", "*://*/*/CoveoSearch/*", "*://*/?errorsAsSuccess=1", "*://*/*&errorsAsSuccess=1*", "https://*/rest/search/v2/*", "https://*/rest/search/v2*", "https://*/coveo-search/v2*","https://*/*/rest/search/v2*", "https://*/*/*/rest/search/v2*", "https://*/coveo/rest/v2/*", "https://cloudplatform.coveo.com/rest/search/*", "*://platform.cloud.coveo.com/rest/search/v2/*", "https://search.cloud.coveo.com/rest/search/v2/*", "*://*/*/coveo/platform/rest/*", "*://*/coveo/rest/*"] };
+const FILTER_ANALYTICS = { urls: ["*://*/v1/analytics/search*", "*://usageanalytics.coveo.com/rest/*", "*://*/*/coveo/analytics/rest/*", "*://*/*/rest/ua/*", "*://*/*/coveoanalytics/rest/*"] };
 const FILTER_OTHERS = { urls: ["*://*/rest/search/alerts*"] };
 
 
@@ -32,9 +32,15 @@ let resetState = (tabId) => {
       initTopQueriesSent: false,
       usingDQ: false,
       usingLQ: false,
+      query: [],
+      allfields: [],
+      dimensions: [],
       alertsError: '',
+      searchURL: '',
+      searchAuth: '',
       usingFilterField: false,
       usingPartialMatch: false,
+      usingWildcards: false,
       usingContext: false,
       visible: false,
       enabledSearch: false,
@@ -44,6 +50,8 @@ let resetState = (tabId) => {
       usingVisitor: false,
       visitorChanged: false,
       usingQuickview: false,
+      usingCustomEvents: false,
+      customData: [],
       usingQREQuery: false,
       usingPipeline: false,
       queryExecuted: '',
@@ -73,8 +81,8 @@ let getState_Then = (callback) => {
 };
 
 let saveGlobal = (obj) => {
-    let state = Object.assign(GLOBAL, obj);
-    GLOBAL = state;
+  let state = Object.assign(GLOBAL, obj);
+  GLOBAL = state;
 };
 
 let saveState = (obj, tabId) => {
@@ -93,6 +101,7 @@ function setEnabledSearch(enabled) {
   saveState({
     enabledSearch: enabled,
     nrofsearches: 0,
+    query: [],
     suggestSent: false,
     topQueriesSent: false,
   });
@@ -107,8 +116,8 @@ let SendMessage = (parameters) => {
   });
 };
 
-function navigateto(url){
-  var newURL = "https:"+url;
+function navigateto(url) {
+  var newURL = "https:" + url;
   chrome.tabs.create({ url: newURL });
 }
 
@@ -133,6 +142,15 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   else if (msg.type === 'gotNumbers') {
     saveState({ json: msg.json });
   }
+  else if (msg.type === 'saveOrg') {
+    saveState({ json: msg.json });
+    if (msg.json.allfields) {
+      var vals = {};
+      vals['allfields'] = msg.json.allfields.map(x => ({ ...x }));
+      vals['dimensions'] = msg.json.dimensions;
+      saveGlobal(vals);
+    }
+  }
   else if (msg.type === 'navigate') {
     navigateto(msg.to);
   }
@@ -148,8 +166,8 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     saveState({ enableSearchTracker: msg.enable });
   }
   else if (msg.type === 'saveScore') {
-    let score=msg.score;
-    let vals={};
+    let score = msg.score;
+    let vals = {};
     vals[score] = msg.value;
     saveState(vals);
   }
@@ -159,8 +177,8 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   }
   else if (msg.type === 'saveitemSFDC') {
     //sfdcid: $('#SFDCID').val(), customer: $('#Customer').val(), partner: $('#Partner').val() });
-    let item=msg.item;
-    let vals={};
+    let item = msg.item;
+    let vals = {};
     vals[item] = msg.value;
     saveState(vals);
     saveGlobal(vals);
@@ -200,7 +218,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, info) {
   }
   else if (info.status === 'complete') {
     saveState({ ready: true }, tabId);
-   // chrome.tabs.executeScript(tabId, { file: "/js/content.js" });
+    // chrome.tabs.executeScript(tabId, { file: "/js/content.js" });
     //Now inject content.js
   }
 });
@@ -210,7 +228,7 @@ let decodeRaw = function (raw) {
   if (raw && raw.length) {
     try {
       let totalLen = 0;
-      let aUint8 = raw.map(r=>{
+      let aUint8 = raw.map(r => {
         let a = new Uint8Array(r.bytes);
         totalLen += a.length;
         return a;
@@ -218,19 +236,20 @@ let decodeRaw = function (raw) {
 
       let c = new (aUint8[0].constructor)(totalLen);
       let len = 0;
-      aUint8.forEach(a=>{
+      aUint8.forEach(a => {
         c.set(a, len);
         len += a.length;
       });
       rawString = decodeURIComponent(String.fromCharCode.apply(null, c));
     }
-    catch(e) {
+    catch (e) {
       console.error('decodeRaw Error: ', e);
     }
   }
 
   return (rawString || '');
 };
+
 
 let onSearchRequest = function (details) {
   getState_Then(state => {
@@ -247,45 +266,95 @@ let onSearchRequest = function (details) {
       }
     }
     else {
-      console.log("CATCHED Search ", details.url);
-      thisState.searchSent = true;
-      if (state.enabledSearch) {
-        thisState.nrofsearches = (state.nrofsearches || 0) + 1;
-      }
 
       let raw = details.requestBody && details.requestBody.raw,
         formData = (details.requestBody && details.requestBody.formData) || {};
 
-      let postedString = decodeRaw(raw);
-
-      'q,aq,dq,lq,filterField,partialMatch,context,pipeline'.split(',').forEach(attr => {
+      let postedString = {};
+      if (raw) {
+        postedString = JSON.parse(decodeRaw(raw));
+      }
+      //We want everything
+      //var myquery = {};
+      //'q,aq,dq,lq,filterField,partialMatch,context,pipeline'.split(',').forEach(attr => {
+      Object.keys(formData).map(attr => {
         if (formData[attr] !== undefined) {
           // add all formData.q and formData.aq as q=... and aq=... to postedString
-          postedString += ` ${attr}=${formData[attr]}`;
+          //postedString += ` ${attr}=${formData[attr]}`;
+          //postedString[attr]=formData[attr];
+          //if (formData[attr][0].indexOf('[')==0){
+          try {
+            //myquery[attr] = JSON.parse(formData[attr][0]);
+            postedString[attr] = JSON.parse(formData[attr][0]);
+          }
+          catch{
+            //myquery[attr] = formData[attr][0];
+            postedString[attr] = formData[attr][0];
+          }
         }
       });
-      console.log(postedString);
-     // thisState.queryExecuted = postedString;
-      if (postedString.includes('dq=')) {
+      //console.log(postedString);
+      // thisState.queryExecuted = postedString;
+      var fullstring = JSON.stringify(postedString);
+      if ('q' in postedString) {//.includes('q=')) {
+        console.log("CATCHED Search ", details.url);
+        thisState.searchSent = true;
+        if (state.enabledSearch) {
+          thisState.nrofsearches = (state.nrofsearches || 0) + 1;
+        }
+
+          thisState.searchURL = details.url;
+        //Add debug = true for later execution
+        if (state.enabledSearch) {
+          postedString['debug'] = true;
+          //Checking for search as you type, same query all over again...
+          if (state.query.length==0){
+            state.query.push(postedString);
+            state.query = [...new Set(state.query)];
+          }
+          else
+          {
+            if (postedString['q'].startsWith(state.query[0].q)){
+                state.query[0].q=postedString['q'];
+            }
+            else{
+              state.query.push(postedString);
+              state.query = [...new Set(state.query)];
+              }
+          }
+        }
+      }
+      if ('dq' in postedString) {//}.includes('dq=')) {
         thisState.usingDQ = true;
       }
-      if (postedString.includes('lq=')) {
+      if ('lq' in postedString) {//}.includes('lq=')) {
         thisState.usingLQ = true;
       }
-      if (postedString.includes('filterField=')) {
+      if ('filterField' in postedString) {//}.includes('filterField=')) {
         thisState.usingFilterField = true;
       }
-      if (postedString.includes('pipeline=')) {
+      if ('pipeline' in postedString) {//}.includes('pipeline=')) {
         thisState.usingPipeline = true;
       }
-      if (postedString.includes('$qre') || postedString.includes('$correlate')) {
+      if (fullstring.includes('$qre') || fullstring.includes('$correlate')) {
         thisState.usingQREQuery = true;
       }
-      if (postedString.includes('partialMatch=true') || postedString.includes('$some')) {
+      if ('enableWildcards' in postedString) {
+        thisState.usingWildcards = postedString['enableWildcards'];
+      }
+      if ('wildcards' in postedString) {
+        thisState.usingWildcards = postedString['wildcards'];
+      }
+      if ('partialMatch' in postedString) {
+        thisState.usingPartialMatch = postedString['partialMatch'];
+      }
+      if (fullstring.includes('$some')) {
         thisState.usingPartialMatch = true;
       }
-      if (postedString.includes('context=') && !postedString.includes('context={}')) {
-        thisState.usingContext = true;
+      if ('context' in postedString) {//fullstring.includes('context=') && !fullstring.includes('context={}')) {
+        if (postedString['context']) {
+          thisState.usingContext = true;
+        }
       }
     }
     saveState(thisState, state.tabId);
@@ -300,6 +369,9 @@ let onAnalyticsRequest = function (details) {
 
     if (url.includes('/click') || url.includes('/open')) {
       thisState.usingQuickview = true;
+    }
+    if (url.includes('/custom')) {
+      thisState.usingCustomEvents = true;
     }
     if (url.includes('topQueries')) {
       if (state.enabledSearch) {
@@ -325,27 +397,45 @@ let onAnalyticsRequest = function (details) {
       }
       else if (state.visitor !== v) {
         thisState.visitorChanged = true;
-        console.log("Visitor ID was "+ state.visitor +' and now: '+v);
+        console.log("Visitor ID was " + state.visitor + ' and now: ' + v);
         thisState.visitor = v;
       }
-      console.log("CATCHED Analytics ", details.url);
-      thisState.analyticsSent = true;
     }
+    console.log("CATCHED Analytics ", details.url);
+    thisState.analyticsSent = true;
 
     if (details.requestBody) {
       let postedString = decodeRaw(details.requestBody.raw);
       console.log('postedString [A]:', postedString);
 
       // TODO: need to do something with actionCause here ?
-      // try {
-      //   let json = JSON.parse(postedString);
-      //   if (json) {
-      //     if (actionCause in json[0]) {
-      //       console.log(json[0].actionCause);
-      //     }
-      //   }
-      // }
-      // catch (err) {}
+      try {
+        let json = JSON.parse(postedString);
+        if (json) {
+          if ('customData' in json || 'customData' in json[0]) {
+            if ('customData' in json) {
+              console.log(json.customData);
+              Object.keys(json.customData).map((field) => {
+                if (field.toUpperCase().startsWith('C_')) {
+                  state.customData.push(field);
+                }
+              });
+            }
+            else {
+              console.log(json[0].customData);
+              Object.keys(json[0].customData).map((field) => {
+                if (field.toUpperCase().startsWith('C_')) {
+                  state.customData.push(field);
+                }
+              });
+
+            }
+            state.customData = [...new Set(state.customData)].sort();
+            console.log(state.customData);
+          }
+        }
+      }
+      catch (err) { }
     }
 
     saveState(thisState, state.tabId);
@@ -370,22 +460,41 @@ let getAuthorizationToken = function (requestHeaders) {
     let header = headers[i];
     if (header.name === 'Authorization') {
       token = header.value;
-      if (token.includes('.')) {
-        token = checkToken(token);
-      }
       break;
     }
   }
   return token;
 };
 
+
 let saveToken = function (tokenName, details) {
   getState_Then(state => {
-    let token = getAuthorizationToken(details.requestHeaders);
+    //First check URL
+    let token = '';
+    let url = details.url + "& ";
+    var reg = RegExp(/token=(.*?)[ ;&$]/, 'ig');
+    let matches = reg.exec(url);
+    if (matches) {
+      console.log(`Token: ${matches[0]} found.`);
+      token = matches[1];
+    }
+    else {
+      token = getAuthorizationToken(details.requestHeaders);
+    }
     if (token) {
-      let s = {};
-      s[tokenName] = token;
-      saveState(s, state.tabId);
+      if (tokenName == 'searchToken') {
+        let s = {};
+        s['searchAuth'] = token;
+        saveState(s, state.tabId);
+      }
+      if (token) {
+        let s = {};
+        if (token.includes('.')) {
+          token = checkToken(token);
+        }
+        s[tokenName] = token;
+        saveState(s, state.tabId);
+      }
     }
   });
 };
@@ -414,7 +523,7 @@ chrome.runtime.onMessage.addListener(
       chrome.browserAction[enable ? 'enable' : 'disable'](sender.tab.id);
 
       if (enable) {
-       // chrome.tabs.executeScript(sender.tab.id, { file: "/js/content.js" });
+        // chrome.tabs.executeScript(sender.tab.id, { file: "/js/content.js" });
       }
     }
   }

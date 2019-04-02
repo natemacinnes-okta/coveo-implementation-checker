@@ -70,6 +70,22 @@ let SendMessage = (parameters) => {
   });
 };
 
+function getCookie(cname) {
+  var name = cname + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var ca = decodedCookie.split(';');
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
 /**
  * Analyze the Page and creates a Report spec for the Popup
  */
@@ -114,8 +130,33 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
       if (request.type === 'getReport') {
         getReport();
       }
+      if (request.type === 'getOrgReport') {
+        let report = {};
+        report.token = getCookie('access_token');
+        report.org = getCookie('organization');
+        if (report.org == '') {
+          report.org = getCookie('workgroup').replace("workgroup_", '');
+        }
+        report.location = window.location.origin;
+        SendMessage({
+          type: "gotOrgReport",
+          json: report
+        });
+      }
+      if (request.type === 'getLoc') {
+        let report = {};
+        report.token = getCookie('access_token');
+        report.org = getCookie('organization');
+        if (report.org == '') {
+          report.org = getCookie('workgroup').replace("workgroup_", '');
+        }
+        SendMessage({
+          type: "getLoc",
+          json: report
+        });
+      }
       if (request.type === 'clearCache') {
-        location.reload(true);
+        //location.reload(true);
       }
       if (request.type === 'getPerformanceReport') {
         let reportJson = getPerformanceReport();
@@ -168,13 +209,15 @@ function parseScript(name, content, all, external, __report__) {
     __report__.usingLazy = true;
   }
   //Version?
-  var reg = /[\"']?lib[\"']? ?: ?[\"']\d[^m](.*?)[\"'],/g;///"?lib"? ?: ?['"](.*)['"].*\n?.*"?product"?: ?['"](.*)['"],/g;
+  var reg = /[\"']?lib[\"']? ?: ?[\"'](.*?)[\"'],/g;///"?lib"? ?: ?['"](.*)['"].*\n?.*"?product"?: ?['"](.*)['"],/g;
   let matches = content.match(reg);
   if (matches) {
-    __report__.uiVersion = matches[0].replace(/lib\w*/g, '').replace(/[:',"]/g, '');
-    reg = /[.\S\s ]{19}[\"']?lib[\"']? ?: ?[\"']\d[^m](.*?)[\"'],[.\S\s ]{40}/g;
-    matches = content.match(reg);
-    report += '<BR><b>UI Version found:</b><BR><span class="mycode">' + matches[0].replace('\n', ' ').replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</span><BR>";
+    if (matches[0].match(/(\d.\d{4})(.\d+)/g)) {
+      __report__.uiVersion = matches[0].match(/(\d.\d{4})(.\d+)/g)[0];
+      reg = /[.\S\s ]{19}[\"']?lib[\"']? ?: ?[\"'](.*?)[\"'],[.\S\s ]{40}/g;
+      matches = content.match(reg);
+      report += '<BR><b>UI Version found:</b><BR><span class="mycode">' + matches[0].replace('\n', ' ').replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</span><BR>";
+    }
   }
   //Seems the below token is in the sample endpoint, we do not want to match that
   //We need to remove the sampleTokens from the content
@@ -387,6 +430,15 @@ function parseScript(name, content, all, external, __report__) {
       matches = content.match(reg);
       report += addMatches(matches);
     }
+    reg = /OmniboxResultList/g;
+    matches = content.match(reg);
+    if (matches) {
+      report += '<BR><b>Search As You Type found:</b><br><span class="mycode" >';
+      __report__.usingSearchAsYouType = true;
+      reg = /[.\S\s ]{10}OmniboxResultList[.\S\s ]{40}/g;
+      matches = content.match(reg);
+      report += addMatches(matches);
+    }
 
   }
   if (report !== '') {
@@ -410,6 +462,7 @@ function initReport() {
     theUrl: '',
     theDate: '',
     pageSize: '',
+    forOrgReport: false,
     fromSystem: 'Unknown',
     hardcodedAccessTokens: false,
     indicator: 0,
@@ -433,14 +486,29 @@ function initReport() {
 		/*usingLQ: false,
 		usingPartialMatch: false,*/
     usingQRE: false,
+    searchURL: '',
     usingRecommendations: false,
     usingSearchAsYouType: false,
-
+    details_facettolong: "",
+    details_alwaysthesame: "",
+    details_pipelines: "",
+    cq: [],
+    filterfields: [],
+    singlewordfields: [],
+    singlewordfieldsmatch: [],
+    singlewordfieldscontains: [],
+    badfields_filtered: [],
+    badfields_query: [],
     usingState: false,
     usingTabs: false,
     usingContext: false,
     usingTokens: false,
+    querycheck: false,
+    badquery: '',
+    baddimension: '',
     details: '',
+    allfields: [],
+    errors: ''
 		/*usingFilterField: false,
 		usingDQ: false,*/
   };
@@ -482,6 +550,7 @@ function getPerformanceReport() {
   var e = window.performance.getEntries();
   var report = {};
   //Totals for charts
+  report.location = window.location.href;
   report.T2s = 0;
   report.T12s = 0;
   report.T2001s = 0;
@@ -509,7 +578,14 @@ function getPerformanceReport() {
         perf.name = e[i].name;
         perf.url = '';
       }
-
+      perf.sent = Math.round(e[i].requestStart - e[i].connectStart, 0);
+      perf.backend = Math.round(e[i].responseStart - e[i].requestStart, 0);
+      if (e[i].responseStart > 0) {
+        perf.receive = Math.round(e[i].responseEnd - e[i].responseStart, 0);
+      }
+      else {
+        perf.receive = Math.round(e[i].duration, 0);
+      }
       perf.type = e[i].initiatorType;
       perf.duration = Math.round(e[i].duration, 0);
       perf.TTFB = Math.round(e[i].responseStart - e[i].requestStart, 0);
