@@ -2295,15 +2295,17 @@ function checkQueryUse(title, id, query, report, basic, constant, checkbadwords,
         //Automatic ranges
         if ('generateAutomaticRanges' in group) {
           if (group.generateAutomaticRanges) {
-            remarks = "<table class=mytable><tr><td class=myexpr>Parameter:</td><td class=myexprval>generateAutomaticRanges</td></tr>";
-            remarks += "<tr><td class=myexpr>Facet Field:</td><td class=myexprval>" + group.field + "</td></tr>";
-            remarks += "<tr><td colspan=2 class=myexprcomm>" + inValidIcon;
-            remarks += "Is requested with generateAutomaticRanges.<br>Slower in performance, do you really need that?";
-            remarks += "</td></tr></table>"
-            problems.add(remarks);
+            let fieldinfo = report.allfields.filter(fieldi => { if (fieldi.name == group.field.replace('@', '') && (fieldi.useCacheForNumericQuery)) return fieldi.name; }).length;
+            if (fieldinfo == 0) {
+              remarks = "<table class=mytable><tr><td class=myexpr>Parameter:</td><td class=myexprval>generateAutomaticRanges</td></tr>";
+              remarks += "<tr><td class=myexpr>Facet Field:</td><td class=myexprval>" + group.field + "</td></tr>";
+              remarks += "<tr><td colspan=2 class=myexprcomm>" + inValidIcon;
+              remarks += "Is requested with generateAutomaticRanges and useCacheForNumericQuery is disabled.<br>Slower in performance, enable useCacheForNumericQuery on the field.";
+              remarks += "</td></tr></table>"
+              problems.add(remarks);
 
-            valid = false;
-
+              valid = false;
+            }
           }
         }
         //maximumNumberOfValues
@@ -2667,7 +2669,7 @@ function checkQueryUse(title, id, query, report, basic, constant, checkbadwords,
       if (!alreadyInProblems(field + "</td></tr><tr><td colspan=2 class=myexprcomm>" + inValidIcon + "Query with <>", problems)) {
         remarks = "<table class=mytable><tr><td class=myexpr>Expression:</td><td class=myexprval><></td></tr>";
         remarks += "<tr><td class=myexpr>Field:</td><td class=myexprval>" + field + "</td></tr>";
-        remarks += "<tr><td colspan=2 class=myexprcomm>" + inValidIcon + "Query with <>: better would be to use: " + field + " NOT " + field + "==\"VALUE\".<br>";
+        remarks += "<tr><td colspan=2 class=myexprcomm>" + inValidIcon + "Query with <><br>Do you want to exclude an exact match?<br>Then you should use: " + field + " NOT " + field + "==\"VALUE\".<br>";
         valid = false;
         //Is a Facet?
         let fieldinfo = report.allfields.filter(fieldi => { if (fieldi.name == field.replace('@', '') && (fieldi.facet || fieldi.multiValueFacet)) return fieldi.name; }).length;
