@@ -2375,8 +2375,8 @@ function checkQueryUse(title, id, query, report, basic, constant, checkbadwords,
   }
 
   // For Field =='ABC'
-  //  (@?\w+) ?([<>*~%\/:=]+) ?(['](.*?)['])
-  reg = RegExp(/(@?\w+) ?([!<>*~%\/:=]+) ?(['](.*?)['])/, 'g');
+  //  (@?\w+) ?([<>*~%\/=]+) ?(['](.*?)['])
+  reg = RegExp(/(@?\w+) ?([!<>*~%\/=]+) ?(['](.*?)['])/, 'g');
   while ((result = reg.exec(query)) !== null) {
     //Warn if field does not start with @
     if (!result[1].startsWith('@')) {
@@ -3435,6 +3435,7 @@ function processOrgReport(report) {
                                       requestsQ = requestsQ.concat(requestsSQ);
                                       executeSequentially(requestsQ).then(
                                         function () {
+                                          json.qpl_with_filters = [...new Set(json.qpl_with_filters)];
                                           json.badfields_filtered = [...new Set(json.badfields_filtered)];
                                           json.badfields_query = [...new Set(json.badfields_query)];
                                           SendMessage({ type: 'saveOrg', json: json });
