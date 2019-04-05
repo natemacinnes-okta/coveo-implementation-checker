@@ -2136,6 +2136,9 @@ function checkQueryUse(title, id, query, report, basic, constant, checkbadwords,
   let valid = true;
   //Remove all double spaces, translate \n to " ", ,space to , and add a space in the end
   query = query.replace(/[\n\r]+/g, '').replace(/\s{2,10}/g, ' ').replace(/, /g, ',') + ' ';
+  //We also want to replace the {{ }}
+  query = query.replace(/{{.*?}}/g, '@queryextension');
+  
   let remarks = "";
   let problems = new Set();
   let validIcon = "";//`<span style="font-weight:bold;color: #009830;padding:5px;">&#x2713;</span>`;
