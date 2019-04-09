@@ -2138,7 +2138,7 @@ function checkQueryUse(title, id, query, report, basic, constant, checkbadwords,
   query = query.replace(/[\n\r]+/g, '').replace(/\s{2,10}/g, ' ').replace(/, /g, ',') + ' ';
   //We also want to replace the {{ }}
   query = query.replace(/{{.*?}}/g, '@queryextension');
-  
+
   let remarks = "";
   let problems = new Set();
   let validIcon = "";//`<span style="font-weight:bold;color: #009830;padding:5px;">&#x2713;</span>`;
@@ -3540,12 +3540,17 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
               $('#getOrgReport').attr("disabled", true);
             }*/
       if (reportData.type === 'getLoc') {
-        if (reportData.json.org == '') {
-          $('#getOrgReport').attr("disabled", true);
-        }
-        else {
-          $('#getReport').attr("disabled", true);
-          $('#getPerformanceReport').attr("disabled", true);
+        try {
+          if (reportData.json.org == '') {
+            $('#getOrgReport').attr("disabled", true);
+          }
+          else {
+            $('#getReport').attr("disabled", true);
+            $('#getPerformanceReport').attr("disabled", true);
+
+          }
+        } catch
+        {
 
         }
       }
