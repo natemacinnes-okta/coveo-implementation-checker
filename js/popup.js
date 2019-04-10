@@ -3539,7 +3539,8 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
               console.log("disabling org button");
               $('#getOrgReport').attr("disabled", true);
             }*/
-      if (reportData.type === 'getLoc') {
+      if (reportData.type === 'gotLocation') {
+        //console.log("gotLocation");
         try {
           if (reportData.json.org == '') {
             $('#getOrgReport').attr("disabled", true);
@@ -4039,6 +4040,6 @@ document.addEventListener('DOMContentLoaded', function () {
     SendMessage('reset', getState);
     window.close();
   });
-  SendMessage('getLoc');
+  SendMessage('getLocation');
   getState();
 });

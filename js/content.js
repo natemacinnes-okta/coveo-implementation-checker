@@ -143,7 +143,8 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
           json: report
         });
       }
-      if (request.type === 'getLoc') {
+      if (request.type === 'getLocation') {
+        //console.log("gettingLoc");
         let report = {};
         report.token = getCookie('access_token');
         report.org = getCookie('organization');
@@ -151,7 +152,7 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
           report.org = getCookie('workgroup').replace("workgroup_", '');
         }
         SendMessage({
-          type: "getLoc",
+          type: "gotLocation",
           json: report
         });
       }
