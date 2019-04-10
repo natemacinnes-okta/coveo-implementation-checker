@@ -112,7 +112,9 @@ let SendMessage = (parameters) => {
     try {
       chrome.runtime.sendMessage(parameters);
     }
-    catch (e) { }
+    catch (e) {
+      console.log("EXCEPT: "+e);
+     }
   });
 };
 
@@ -197,6 +199,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       chrome.tabs.sendMessage(tabId || null, msg);
     });
   }
+  return true; 
 });
 
 function checkToken(token) {
@@ -221,6 +224,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, info) {
     // chrome.tabs.executeScript(tabId, { file: "/js/content.js" });
     //Now inject content.js
   }
+  return true; 
 });
 
 let decodeRaw = function (raw) {
@@ -526,5 +530,6 @@ chrome.runtime.onMessage.addListener(
         // chrome.tabs.executeScript(sender.tab.id, { file: "/js/content.js" });
       }
     }
+    return true;
   }
 );

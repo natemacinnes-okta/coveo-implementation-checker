@@ -144,13 +144,14 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
         });
       }
       if (request.type === 'getLocation') {
-        //console.log("gettingLoc");
+        console.log("In gettingLoc");
         let report = {};
         report.token = getCookie('access_token');
         report.org = getCookie('organization');
         if (report.org == '') {
           report.org = getCookie('workgroup').replace("workgroup_", '');
         }
+        console.log("Sending GotLoc");
         SendMessage({
           type: "gotLocation",
           json: report
@@ -182,6 +183,8 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
       else if (request.type === 'download') {
         downloadReport(request.name, request.text);
       }
+       
+      return true; 
     }
   );
 }

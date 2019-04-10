@@ -3514,6 +3514,7 @@ function SendMessage(typeOrMessage, callback) {
     chrome.runtime.sendMessage(typeOrMessage, null, callback);
   }
   else {
+    //console.log("SEnding message");
     chrome.runtime.sendMessage(typeOrMessage);
   }
 }
@@ -3913,6 +3914,7 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
       if (reportData && reportData.length && reportData[0].value && reportData[0].max && reportData[0].title) {
         processReport(reportData);
       }
+      return true;
     }
   );
 }
@@ -4040,6 +4042,7 @@ document.addEventListener('DOMContentLoaded', function () {
     SendMessage('reset', getState);
     window.close();
   });
+  console.log("gettingLocation");
   SendMessage('getLocation');
   getState();
 });
