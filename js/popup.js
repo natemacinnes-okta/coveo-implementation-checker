@@ -3982,9 +3982,9 @@ document.addEventListener('DOMContentLoaded', function () {
       getPerformanceReport();
     }, 3000);*/
   });
-  $('#test').click(() => {
+  /*$('#test').click(() => {
     SendMessage('getLocationBackground');
-  });
+  });*/
   $('#getOrgReport').click(() => {
     //Save the contents
     SendMessage({ type: 'getOrgReport' });
