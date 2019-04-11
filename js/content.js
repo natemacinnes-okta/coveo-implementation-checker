@@ -121,9 +121,13 @@ let analyzePage = () => {
   }]);
 };
 
+//console.log("Before In OnMessage");
+
 if (chrome && chrome.runtime && chrome.runtime.onMessage) {
+  //console.log("In runtime OnMessage");
   chrome.runtime.onMessage.addListener(
     function (request/*, sender, sendResponse*/) {
+      //console.log("In OnMessage");
       if (request.analyzePage === true) {
         analyzePage();
       }
@@ -144,17 +148,18 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
         });
       }
       if (request.type === 'getLocation') {
-        console.log("In gettingLoc");
+        //console.log("In gettingLoc");
         let report = {};
         report.token = getCookie('access_token');
         report.org = getCookie('organization');
         if (report.org == '') {
           report.org = getCookie('workgroup').replace("workgroup_", '');
         }
-        console.log("Sending GotLoc");
+        //console.log("Sending GotLoc");
         SendMessage({
           type: "gotLocation",
-          json: report
+          json: report,
+          tabid: request.tabid, 
         });
       }
       if (request.type === 'clearCache') {

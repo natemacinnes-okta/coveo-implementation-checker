@@ -10,7 +10,7 @@ const FILTER_OTHERS = { urls: ["*://*/rest/search/alerts*"] };
 
 
 let getTabId_Then = (callback) => {
-  chrome.tabs.query({ active: true }, (tabs) => {
+  chrome.tabs.query({ active: true, lastFocusedWindow: true}, (tabs) => {
     callback(tabs[0].id);
   });
 };
@@ -193,13 +193,32 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       });
     });
   }
+  else if (msg.type === 'getLocationBackground') {
+    getTabId_Then(tabId => {
+      chrome.tabs.sendMessage(tabId || null, { type: 'getLocation', tabid:tabId});
+    });/*
+    getState_Then(state => {
+      SendMessage({
+        type: "gotLocationBackground",
+        global: state
+      });
+    });*/
+  }
+ /* else if (msg.type === 'setLocationBackground') {
+    getState_Then(state => {
+      SendMessage({
+        type: "gotLocation",
+        json: msg.json
+      });
+    });
+  }*/
   else {
     // proxy to content (tabs)
     getTabId_Then(tabId => {
       chrome.tabs.sendMessage(tabId || null, msg);
     });
   }
-  return true; 
+  //return true; 
 });
 
 function checkToken(token) {
@@ -221,7 +240,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, info) {
   }
   else if (info.status === 'complete') {
     saveState({ ready: true }, tabId);
-    // chrome.tabs.executeScript(tabId, { file: "/js/content.js" });
+    //chrome.tabs.executeScript(tabId, { file: "/js/content.js" });
     //Now inject content.js
   }
   return true; 
@@ -520,9 +539,9 @@ chrome.webRequest.onSendHeaders.addListener(
   ["requestHeaders"]);
 
 chrome.runtime.onMessage.addListener(
-  function (reportData, sender/*, sendResponse*/) {
+  /*function (reportData, sender/*, sendResponse*///) {
     // Toggle popup button, disabling it when we don't find a Coveo Search Interface in the page.
-    if (reportData.disabled !== undefined) {
+    /*if (reportData.disabled !== undefined) {
       let enable = (reportData.disabled !== true);
       chrome.browserAction[enable ? 'enable' : 'disable'](sender.tab.id);
 
@@ -530,6 +549,8 @@ chrome.runtime.onMessage.addListener(
         // chrome.tabs.executeScript(sender.tab.id, { file: "/js/content.js" });
       }
     }
+    chrome.tabs.executeScript(sender.tab.id, { file: "/js/content.js" });
     return true;
-  }
+  }*/
 );
+

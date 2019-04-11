@@ -3540,21 +3540,31 @@ if (chrome && chrome.runtime && chrome.runtime.onMessage) {
               console.log("disabling org button");
               $('#getOrgReport').attr("disabled", true);
             }*/
+      /* if (reportData.type=='gotLocationBackground'){
+         SendMessage({ type: 'getLocation', global: reportData.global });
+       }*/
       if (reportData.type === 'gotLocation') {
-        //console.log("gotLocation");
-        try {
-          if (reportData.json.org == '') {
-            $('#getOrgReport').attr("disabled", true);
-          }
-          else {
-            $('#getReport').attr("disabled", true);
-            $('#getPerformanceReport').attr("disabled", true);
+        let activeTab = '';
+        chrome.tabs.query({ active: true,lastFocusedWindow: true }, (tabs) => {
+          activeTab = tabs[0].id;
 
-          }
-        } catch
-        {
+          if (activeTab == reportData.tabid) {
+            //console.log("gotLocation");
+            try {
+              if (reportData.json.org == '') {
+                $('#getOrgReport').attr("disabled", true);
+              }
+              else {
+                $('#getReport').attr("disabled", true);
+                $('#getPerformanceReport').attr("disabled", true);
 
-        }
+              }
+            } catch
+            {
+
+            }
+          }
+        });
       }
       if (reportData.type === 'gotScreen') {
         setScreenShot(reportData.src);
@@ -3972,6 +3982,9 @@ document.addEventListener('DOMContentLoaded', function () {
       getPerformanceReport();
     }, 3000);*/
   });
+  $('#test').click(() => {
+    SendMessage('getLocationBackground');
+  });
   $('#getOrgReport').click(() => {
     //Save the contents
     SendMessage({ type: 'getOrgReport' });
@@ -4042,7 +4055,7 @@ document.addEventListener('DOMContentLoaded', function () {
     SendMessage('reset', getState);
     window.close();
   });
-  console.log("gettingLocation");
-  SendMessage('getLocation');
+  //console.log("gettingLocation");
+  SendMessage('getLocationBackground');
   getState();
 });
