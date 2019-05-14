@@ -4,7 +4,7 @@ const STATES = {};
 //For SFDC retrieved from SFDC
 let GLOBAL = {};
 /* globals chrome */
-const FILTER_SEARCH = { urls: ["*://*/rest/search/*", "*://*/search/*", "*://*/*/search/*", "*://*/*/CoveoSearch/*", "*://*/?errorsAsSuccess=1", "*://*/*&errorsAsSuccess=1*", "https://*/rest/search/v2/*", "https://*/rest/search/v2*", "https://*/coveo-search/v2*","https://*/*/rest/search/v2*", "https://*/*/*/rest/search/v2*", "https://*/coveo/rest/v2/*","https://*/coveo/rest/v2*", "https://cloudplatform.coveo.com/rest/search/*", "*://platform.cloud.coveo.com/rest/search/v2/*", "https://search.cloud.coveo.com/rest/search/v2/*", "*://*/*/coveo/platform/rest/*", "*://*/coveo/rest/*"] };
+const FILTER_SEARCH = { urls: ["*://*/rest/search/*", "*://*/search/*", "*://*/*/search/*", "*://*/*/CoveoSearch/*", "*://*/?errorsAsSuccess=1", "*://*/*&errorsAsSuccess=1*", "https://*/rest/search/v2/*", "https://*/rest/search/v2*", "https://*/coveo-search/v2*","https://*/*/rest/search/v2*", "https://*/*/*/rest/search/v2*", "https://*/coveo/rest/v2*", "https://cloudplatform.coveo.com/rest/search/*", "*://platform.cloud.coveo.com/rest/search/v2/*", "https://search.cloud.coveo.com/rest/search/v2/*", "*://*/*/coveo/platform/rest/*", "*://*/coveo/rest/*"] };
 const FILTER_ANALYTICS = { urls: ["*://*/v1/analytics/search*", "*://usageanalytics.coveo.com/rest/*", "*://*/*/coveo/analytics/rest/*", "*://*/*/rest/ua/*", "*://*/*/coveoanalytics/rest/*"] };
 const FILTER_OTHERS = { urls: ["*://*/rest/search/alerts*"] };
 
@@ -277,7 +277,7 @@ let decodeRaw = function (raw) {
 let onSearchRequest = function (details) {
   getState_Then(state => {
     let thisState = {};
-
+    console.log("CATCHED Search ", details.url);
     if (details.url.includes('querySuggest')) {
       if (state.enabledSearch) {
         console.log("CATCHED querySuggest ", details.url);
@@ -319,8 +319,8 @@ let onSearchRequest = function (details) {
       //console.log(postedString);
       // thisState.queryExecuted = postedString;
       var fullstring = JSON.stringify(postedString);
-      if ('q' in postedString) {//.includes('q=')) {
-        console.log("CATCHED Search ", details.url);
+      if ('q' in postedString || 'aq' in postedString) {//.includes('q=')) {
+        console.log("CATCHED Search with query ", details.url);
         thisState.searchSent = true;
         if (state.enabledSearch) {
           thisState.nrofsearches = (state.nrofsearches || 0) + 1;
