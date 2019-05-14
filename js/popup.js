@@ -1593,6 +1593,17 @@ function getSecurityInfo(report) {
                   getSecProvSchedules(report, sec.id).then(function (datas) {
                     if (!datas) {
                       report.noscheduledsecprov.push(sec.name);
+                    } else
+                    {
+                      if (data.map){
+                        let enabled = false;
+                        data.map((sec) => {
+                          if (sec.enabled) enabled=true;
+                        });
+                        if (!enabled){
+                          report.noscheduledsecprov.push(sec.name);
+                        }
+                      }
                     }
                     resolve();
                   });
