@@ -2408,8 +2408,8 @@ function checkQueryUse(title, id, query, report, basic, constant, checkbadwords,
   }
 
   // For Field =="ABC"
-  //  (@?\w+) ?([<>*~%\/:=]+) ?(["](.*?)["])
-  reg = RegExp(/(@?\w+) ?([!<>*~%\/:=]+) ?(["](.*?)["])/, 'g');
+  //  (@?\w+) ?([!<>*~%\/:=]+) ?(["]([^,].*?)["])
+  reg = RegExp(/(@?\w+) ?([!<>*~%\/:=]+) ?(["]([^,].*?)["])/, 'g');
   while ((result = reg.exec(query)) !== null) {
     //Warn if field does not start with @
     if (!result[1].startsWith('@')) {
