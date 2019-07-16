@@ -16,6 +16,7 @@ header.header {
 .btn {
   margin-left: 2px !important;
   margin-top: 2px !important;
+ padding: 8.5px 10px;
 }
 
 .progress {

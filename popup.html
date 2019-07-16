@@ -30,7 +30,8 @@
   <div class="popup-content">
     <div style="padding-top:5px;padding-bottom:5px;border-bottom:1px solid #bcc3ca">
       <button id="download-global" class="btn" title="Download Report"></button>
-      <button id="showInstructions" class="btn">Instructions</button>
+      <button id="showInstructions" class="btn">Help</button>
+      <button id="clear" class="btn">NEW</button>
       <label id="setSearchTracker" class="btn coveo-slide-toggle-label boxed" style="padding: 8.5px 16px; line-height: 16px;">
         <span class="toggle-label" style="font-size: 12px;">Search Tracker</span>
         <input type="checkbox" class="coveo-slide-toggle">
@@ -39,10 +40,9 @@
       <button id="getOrgReport" class="btn">Organization</button>
       <button id="getReport" class="btn">Implementation</button>
       <button id="getPerformanceReport" class="btn">Performance</button>
-      <button id="showSFDC" class="btn">SFDC</button>
-      <button id="clear" class="btn">NEW ORG</button>
-      <button id="push" class="btn">Push</button>
-      <button id="reset" class="btn">Reset Report</button>
+      <!--<button id="showSFDC" class="btn">SFDC</button>-->
+      <!--<button id="push" class="btn">Push</button> -->
+      <!-- <button id="reset" class="btn">Reset Report</button> -->
     </div>
     <div id="SFDCInfo" style="margin-left: 10px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #bcc3ca">
       <table class="noborder">
@@ -65,9 +65,8 @@
       <div id="instructions">
       How to use this tool:<br><br>
       <b>If Organization AND Implementation are both enabled, then reload your browsers.</b><br><br>
-      BEFORE YOUR START WITH A NEW ORGANIZATION HIT <b>NEW ORG</b><br>
+      BEFORE YOUR START WITH A NEW ORGANIZATION HIT <b>NEW</b><br>
       <br>
-      When you DO NOT have a Customer Project in SFDC:<br>
       <ul>
         <li>Step  1. Login/navigate to your Coveo Cloud Organization</li>
         <li>Step  2. Click on <b>Organization</b></li>
@@ -82,7 +81,7 @@
         <li>Step 10. Click on <b>Implementation</b></li>
       </ul>
       <br>
-      When you have a Customer Project in SFDC:<br>
+   <!--   When you have a Customer Project in SFDC:<br>
       <ul>
         <li>The Sfdc information will be kept after RESET!</li>
         <li>Step  1. Navigate to the Customer Project in SFDC.</li>
@@ -100,7 +99,7 @@
         <li>         The search query will also be checked when you enable the Search Tracker</li>
         <li>Step 13. Click on <b>Implementation</b></li>
         <li>Step 14. If you want to push it to the Coveo Index: <b>Push</b></li>
-      </ul>
+      </ul>-->
         <br><b>Performance</b>: If you want to know which resources are causing load issues<br>(First reload manually the page without caching enabled).
     </div>
     <div id="loading" class="loading-prompt">
@@ -128,6 +127,9 @@
   </div>
 
   <div class='toast-container'>
+    <div id="makequery" class="toast mod-error mod-hidden mod-animated">
+      <div class="toast-title">First activate searchtracker and execute at least 1 query!!!</div>
+    </div>
     <div id="clipboard-copied" class="toast mod-success mod-hidden mod-animated">
       <div class="toast-title">Copied</div>
     </div>
