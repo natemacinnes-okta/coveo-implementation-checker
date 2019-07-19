@@ -853,7 +853,9 @@ let processReport = (data) => {
             key: 'PerformSearch', label: 'Nr of Searches', hint: 'Last week', ref: '',
           },
           {
-            key: 'SearchWithClick', label: 'Nr of Searches with click', hint: 'Last week', ref: ''
+            key: 'SearchWithClick', label: 'Nr of Searches with click', hint: 'Last week', ref: '', expected: {
+              test: value => (value > 10000)
+            }
           },
           {
             key: 'ClickThroughRatio', label: 'Click Through Ratio (%)', mandatory: true, hint: 'Last week, > 50%', ref: 'https://docs.coveo.com/en/2041', expected: {
@@ -870,6 +872,11 @@ let processReport = (data) => {
           },
           {
             key: 'DocumentView', label: 'Nr of Document Views', hint: 'Last week', ref: ''
+          },
+          {
+            key: 'AvgResponse', label: 'Avg Response Time', mandatory: true, hint: 'Last week, <500', ref: 'https://docs.coveo.com/en/1948', expected: {
+              test: value => (value < 500)
+            }
           },
 
         ]
@@ -1718,66 +1725,172 @@ function getUsageInfo(report) {
   from = from.setDate(now.getDate() - 100);
   var fromlast = new Date(from);
   var to = new Date();
+  var header = "<tr><th><b>Origin 1 (Hub)</b></th><th><b>Origin 2 (Tab)</b></th>"
+  header += "<th style='text-align:right'><b>Uniq Visits</b></th>"
+  header += "<th style='text-align:right'><b>Avg Response</b></th>"
+  //report.details += "<th style='text-align:right'><b>Q with Click</b></th>"
+  header += "<th style='text-align:right'><b>Click through</b></th>"
+  header += "<th style='text-align:right'><b>Avg Click Rank</b></th>"
+  header += "<th style='text-align:right'><b>Session<br>Avg Nr Queries</b></th>"
+  header += "<th style='text-align:right'><b>Session<br>Avg Nr Query Change</b></th>"
+  header += "<th style='text-align:right'><b>Session<br>Avg Nr Clicks</b></th>"
+  header += "<th style='text-align:right'><b>Session<br>% Content Gap</b></th>"
+  header += "<th style='text-align:right'><b>Session<br>Info</b></th>"
+  header += "</tr>"
 
   let froms = '&from=' + fromlast.toISOString() + '&to=' + to.toISOString();
-  let url = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/combinedData?pageSize=25&f=%28origincontext%3D%3D%27Search%27%29&m=AverageClickRank&m=SearchWithClick&m=ClickThroughRatio&m=UniqueVisit&d=originLevel1&d=originLevel2&fm=&p=1&n=80&s=UniqueVisit&asc=true&includeMetadata=true&bindOnLastSearch=true&org=' + report.org + froms);
+  let url = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/combinedData?n=500&m=AverageClickRank&m=SearchWithClick&m=average%28actionresponsetime%29&m=ClickThroughRatio&m=UniqueVisit&d=originLevel1&d=originLevel2&f=%28searchcausev2+IN+%5B%22searchboxSubmit%22%2C%22searchFromLink%22%5D%29&fm=&p=1&s=UniqueVisit&asc=true&includeMetadata=true&bindOnLastSearch=true&org=' + report.org + froms);
   let promise = new Promise((resolve) => {
     executeCall(url, report, "Getting Analytics Usage Info", "thereAreErrorsSearch").then(function (data) {
       if (data) {
+        let counter = 0;
         let total = 0;
-        data['combinations'].map(source => {
+        let responseQ = data['combinations'].map(source => {
           total += source.UniqueVisit;
+          let deturl = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/combinedData?n=2000&m=DocumentView&m=countDistinct%28queryexpression%29&m=ManualQuery&d=sessionGuid&d=hasResult&f=%28searchcausev2+IN+%5B%22searchboxSubmit%22%2C%22searchFromLink%22%5D%29+AND+%28queryexpression%21%3D%27%27%29+AND+%28originlevel1%3D%3D%27' + source.originLevel1 + '%27%29+AND+%28originlevel2%3D%3D%27' + source.originLevel2 + '%27%29&fm=&p=1&s=ManualQuery&asc=false&includeMetadata=true&bindOnLastSearch=false&org=' + report.org + froms);
+          return new Promise((resolve) => {
+            executeCall(deturl, report, "Getting Analytics Usage Info", "thereAreErrorsSearch").then(function (datar) {
+              let manQ = 0;
+              let noRes = 0;
+              let clicks = 0;
+              let uniqQ = 0;
+              let totalR = 0;
+              let totalNoRes = 0;
+              if (datar) {
+                datar['combinations'].map(sourcedet => {
+                  //Discard weird high ManualQueries (higher than 25)
+                  if (sourcedet['ManualQuery'] < 25) {
+                    manQ += sourcedet['ManualQuery'];
+                    if (sourcedet['hasResult'] == false) {
+                      totalNoRes += 1;
+                      noRes += sourcedet['ManualQuery'];
+                    }
+                    else {
+                      clicks += sourcedet['DocumentView'];
+                      uniqQ += sourcedet['countDistinct(queryexpression)'];
+                      totalR += 1;
+                    }
+                  }
+                });
+                if (totalR == 0) {
+                  data['combinations'][counter].AvgNoQ = 0;
+                  data['combinations'][counter].AvgNoQChange = 0;
+                  data['combinations'][counter].AvgNoClicks = 0;
+                  data['combinations'][counter].NoQ = 0;
+                  data['combinations'][counter].NoQChange = 0;
+                  data['combinations'][counter].NoClicks = 0;
+                  data['combinations'][counter].No = 0;
+                  data['combinations'][counter].NoRes = 0;
+                  data['combinations'][counter].NoResTotal = 0;
+                }
+                else {
+                  //Update source
+                  data['combinations'][counter].AvgNoQ = manQ / totalR;
+                  data['combinations'][counter].AvgNoQChange = manQ / uniqQ;
+                  data['combinations'][counter].AvgNoClicks = clicks / totalR;
+                  data['combinations'][counter].NoQ = manQ;
+                  data['combinations'][counter].NoQChange = uniqQ;
+                  data['combinations'][counter].NoClicks = clicks;
+                  data['combinations'][counter].No = totalR;
+                  data['combinations'][counter].NoRes = noRes;
+                  data['combinations'][counter].NoResTotal = totalNoRes;
+                }
+                counter = counter + 1;
+                resolve();
+              }
+            });
+          });
         });
-        report.usagedetails += "<hr><h4>Search Usage Information last 100 days:</h4>";
-        report.usagedetails += "<table><tr><th><b>Origin 1 (Hub)</b></th><th><b>Origin 2 (Tab)</b></th>";
-        report.usagedetails += "<th style='text-align:right'><b>Uniq Visits</b></th>"
-        report.usagedetails += "<th style='text-align:right'><b>% Visits</b></th>"
-        //report.details += "<th style='text-align:right'><b>Q with Click</b></th>"
-        report.usagedetails += "<th style='text-align:right'><b>Click through (%)</b></th>"
-        report.usagedetails += "<th style='text-align:right'><b>Avg Click Rank</b></th>"
-        report.usagedetails += "</tr>"
-        data['combinations'].map(source => {
-          let maincolor = 'green';
-          if (source.UniqueVisit < 100) {
-            report.badUsage.push(source.originLevel1 + "/" + source.originLevel2 + " (" + source.UniqueVisit.toLocaleString() + ")");
-            maincolor = 'red';
-          }
-          if (source.ClickThroughRatio < 50) {
-            report.badClick.push(source.originLevel1 + "/" + source.originLevel2 + " (" + source.ClickThroughRatio.toFixed(0) + "%)");
-            maincolor = 'red';
-          }
-          if (source.AverageClickRank > 3) {
-            report.badRank.push(source.originLevel1 + "/" + source.originLevel2 + " (" + source.AverageClickRank.toFixed(0) + ")");
-            maincolor = 'red';
-          }
-          report.usagedetails += "<tr><td style='color:" + maincolor + ";'>" + source.originLevel1 + "</td><td>" + source.originLevel2 + "</td>";
-          let color = 'green';
-          if (source.UniqueVisit < 100) {
-            color = 'red';
-          }
-          report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.UniqueVisit.toLocaleString() + "</td>";
-          let perc = (source.UniqueVisit / total) * 100;//(5/10)*100;
-          color = 'green';
-          if (perc < 25) {
-            color = 'red';
-          }
-          report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + perc.toFixed(0) + "%</td>";
-          //report.details += "<td style='text-align:right'>" + source.SearchWithClick.toLocaleString() + "</td>";
-          color = 'green';
-          if (source.ClickThroughRatio < 50) {
-            color = 'red';
-          }
-          report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.ClickThroughRatio.toFixed(0) + "%</td>";
-          color = 'green';
-          if (source.AverageClickRank > 3) {
-            color = 'red';
-          }
-          report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.AverageClickRank.toFixed(0) + "</td>";
-          report.usagedetails += "</tr>";
+        executeSequentially(responseQ).then(() => {
+          //Now we need to execute for each originLevel1/originLevel2 combination the Session query
+          report.usagedetails += "<hr><h4>Search Usage Information last 100 days:</h4>";
+          report.usagedetails += "(Session info based upon ca. last 2000 visits)<br>";
+          report.usagedetails += "<div style='overflow:auto;margin:-1px;'>";
+          report.usagedetails += "<table style='width: 1600px !important;'>";
+          report.usagedetails += header;
+          let rowcounter = 0;
+          let extraheaders = data['combinations'].length / 5;
+          let extraheader = (data['combinations'].length / extraheaders)+1;
+          data['combinations'].map(source => {
+            if (rowcounter > extraheader) {
+              report.usagedetails += header;
+              rowcounter = 0;
+            }
+            rowcounter += 1;
+            let maincolor = 'green';
+            if (source.UniqueVisit < 100) {
+              report.badUsage.push(source.originLevel1 + "/" + source.originLevel2 + " (" + source.UniqueVisit.toLocaleString() + ")");
+              maincolor = 'red';
+            }
+            source.ClickThroughRatio = source.ClickThroughRatio * 100;
+            if (source.ClickThroughRatio < 50) {
+              report.badClick.push(source.originLevel1 + "/" + source.originLevel2 + " (" + source.ClickThroughRatio.toFixed(0) + "%)");
+              maincolor = 'red';
+            }
+            if (source.AverageClickRank > 3) {
+              report.badRank.push(source.originLevel1 + "/" + source.originLevel2 + " (" + source.AverageClickRank.toFixed(1) + ")");
+              maincolor = 'red';
+            }
+            report.usagedetails += "<tr><td style='color:" + maincolor + ";'>" + source.originLevel1 + "</td><td>" + source.originLevel2 + "</td>";
+            let color = 'green';
+            if (source.UniqueVisit < 100) {
+              color = 'red';
+            }
+            let perc = (source.UniqueVisit / total) * 100;//(5/10)*100;
+            report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.UniqueVisit.toLocaleString() + " (" + perc.toFixed(0) + "%)</td>";
+            color = 'green';
+            if (source['average(actionresponsetime)'] < 500) {
+              color = 'red';
+            }
+            report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source['average(actionresponsetime)'] + "ms</td>";
+            //report.details += "<td style='text-align:right'>" + source.SearchWithClick.toLocaleString() + "</td>";
+            color = 'green';
+            if (source.ClickThroughRatio < 50) {
+              color = 'red';
+            }
+            report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.ClickThroughRatio.toFixed(0) + "%</td>";
+            color = 'green';
+            if (source.AverageClickRank > 3) {
+              color = 'red';
+            }
+            report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.AverageClickRank.toFixed(1) + "</td>";
+            color = 'green';
+            if (source.AvgNoQ > 2) {
+              color = 'red';
+            }
+            report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.AvgNoQ.toFixed(1) + "</td>";
+            color = 'green';
+            if (source.AvgNoQChange > 2) {
+              color = 'red';
+            }
+            report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.AvgNoQChange.toFixed(1) + "</td>";
+            color = 'green';
+            if (source.AvgNoClicks > 3) {
+              color = 'red';
+            }
+            report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.AvgNoClicks.toFixed(1) + "</td>";
+            perc = (source.NoResTotal / (source.No + source.NoResTotal)) * 100;
+            if (isNaN(perc)) {
+              perc = 0;
+            }
+            color = 'green';
+            if (perc > 25) {
+              color = 'red';
+            }
+            report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + perc.toFixed(0) + "%</td>";
+            report.usagedetails += "<td style='text-align:right;word-break:normal'>" + "Tot Queries: " + source.NoQ.toFixed(0);
+            report.usagedetails += "<br>" + "Tot Unique: " + source.NoQChange.toFixed(0);
+            report.usagedetails += "<br>" + "Tot Clicks: " + source.NoClicks.toFixed(0);
+            report.usagedetails += "<br>" + "Tot No Results: " + source.NoResTotal.toFixed(0);
+            report.usagedetails += "<br>" + "Tot Checks: " + source.No.toFixed(0);
+            report.usagedetails += "</td>";
+            report.usagedetails += "</tr>";
+          });
+          report.usagedetails += "</table>"
+          report.usagedetails += "</div>";
+          resolve(report);
         });
-        report.usagedetails += "</table>"
       }
-      resolve(report);
     });
   });
   return promise;
@@ -1791,7 +1904,7 @@ function getAnalyticsMetricsInfo(report) {
   var to = new Date();
 
   let froms = '&from=' + fromlast.toISOString() + '&to=' + to.toISOString();
-  let url = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/globalData?m=PerformSearch&m=RefinementQuery&m=UniqueVisitorById&m=UniqueVisit&m=DocumentView&m=AverageClickRank&m=ClickThroughRatio&m=SearchWithClick&tz=Z&i=DAY&bindOnLastSearch=false&org=' + report.org + froms);
+  let url = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/globalData?m=PerformSearch&m=RefinementQuery&m=average%28actionresponsetime%29&m=UniqueVisitorById&m=UniqueVisit&m=DocumentView&m=AverageClickRank&m=ClickThroughRatio&m=SearchWithClick&tz=Z&i=DAY&bindOnLastSearch=false&org=' + report.org + froms);
   let promise = new Promise((resolve) => {
     executeCall(url, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch").then(function (data) {
       if (data) {
@@ -1802,6 +1915,7 @@ function getAnalyticsMetricsInfo(report) {
         report.AverageClickRank = (data.globalDatas.AverageClickRank.value).toFixed(2);
         report.RefinementQuery = data.globalDatas.RefinementQuery.total;
         report.DocumentView = data.globalDatas.DocumentView.total;
+        report.AvgResponse = data.globalDatas['average(actionresponsetime)'].value;
       }
       resolve(report);
     });
@@ -3215,6 +3329,7 @@ function processOrgReport(report) {
     AverageClickRank: 0,
     RefinementQuery: 0,
     DocumentView: 0,
+    AvgResponse: 0,
     noscheduledsecprov: []
   };
   //Get sources
@@ -4249,6 +4364,8 @@ document.addEventListener('DOMContentLoaded', function () {
     $(this).prev().click();
     jQueryEventObject.preventDefault();
   });
+  var manifestData = chrome.runtime.getManifest();
+  $('#myTitle').text("Coveo's Checkers " + manifestData.version);
   $('#myscreenimage').css('background-image', 'none').hide();
   $('#legend').hide();
   $('#SFDCInfo').hide();

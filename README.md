@@ -148,6 +148,10 @@ You can load it manually in your browser from the extension page. (chrome://exte
 ## Changes
 0.9.4 Added Analytics overview of OriginLevel1/OriginLevel2 combinations
 0.9.4 Removed unused components
+0.9.5 Use Average Response time in Analytic report
+0.9.5 Added Average Response time to Report
+0.9.5 Added Version into Title
+0.9.5 Added Content Gap info into Analytics Report
 
 ## Build extension package
 
