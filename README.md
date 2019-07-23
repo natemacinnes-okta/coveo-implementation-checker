@@ -153,6 +153,7 @@ You can load it manually in your browser from the extension page. (chrome://exte
 0.9.5 Added Version into Title
 0.9.5 Added Content Gap info into Analytics Report
 0.9.6 Added Detailed OriginLevel1/Level2 information
+0.9.7 In stead of 100 days, use 50 days for Analytics
 
 ## Build extension package
 

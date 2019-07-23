@@ -1734,7 +1734,7 @@ function getTopQueriesInfo(report) {
 function getUsageInfo(report) {
   var now = new Date();
   var from = new Date();
-  from = from.setDate(now.getDate() - 100);
+  from = from.setDate(now.getDate() - 50);
   var fromlast = new Date(from);
   var to = new Date();
   var header = "<tr><th><b>Origin 1 (Hub)</b></th><th><b>Origin 2 (Tab)</b></th>"
@@ -1891,7 +1891,7 @@ function getUsageInfo(report) {
         responseC = responseC.concat(responsePDetails).concat(responseQDetails);
         executeSequentially(responseC).then(() => {
           //Now we need to execute for each originLevel1/originLevel2 combination the Session query
-          report.usagedetails += "<hr><h4>Search Usage Information last 100 days:</h4>";
+          report.usagedetails += "<hr><h4>Search Usage Information last 50 days:</h4>";
           report.usagedetails += "(Session info based upon ca. last 1000 visits)<br>";
           report.usagedetails += "<div style='overflow:auto;margin:-1px;'>";
           report.usagedetails += "<table style='width: 1400px !important;'>";
