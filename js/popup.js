@@ -878,6 +878,18 @@ let processReport = (data) => {
               test: value => (value < 500)
             }
           },
+          {
+            key: 'NrofCaseCreationPageVisits', label: 'Case Creation Visits', hint: 'Self Service', ref: '',
+          },
+          {
+            key: 'NrofCaseCreations', label: 'Cases Created', hint: 'Self Service', ref: '',
+          },
+          {
+            key: 'NrofCaseDeflections', label: 'Cases Deflected', hint: 'Self Service', ref: '',
+          },
+          {
+            key: 'NrofCaseAbandons', label: 'Case creation abandon', hint: 'Self Service', ref: '',
+          },
 
         ]
       },
@@ -1735,19 +1747,94 @@ function getUsageInfo(report) {
   header += "<th style='text-align:right'><b>Session<br>Avg Nr Query Change</b></th>"
   header += "<th style='text-align:right'><b>Session<br>Avg Nr Clicks</b></th>"
   header += "<th style='text-align:right'><b>Session<br>% Content Gap</b></th>"
-  header += "<th style='text-align:right'><b>Session<br>Info</b></th>"
+  //  header += "<th style='text-align:right'><b>Session<br>Info</b></th>"
   header += "</tr>"
 
   let froms = '&from=' + fromlast.toISOString() + '&to=' + to.toISOString();
-  let url = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/combinedData?n=500&m=AverageClickRank&m=SearchWithClick&m=average%28actionresponsetime%29&m=ClickThroughRatio&m=UniqueVisit&d=originLevel1&d=originLevel2&f=%28searchcausev2+IN+%5B%22searchboxSubmit%22%2C%22searchFromLink%22%5D%29&fm=&p=1&s=UniqueVisit&asc=true&includeMetadata=true&bindOnLastSearch=true&org=' + report.org + froms);
+  //let url = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/combinedData?n=500&m=AverageClickRank&m=SearchWithClick&m=average%28actionresponsetime%29&m=ClickThroughRatio&m=UniqueVisit&d=originLevel1&d=originLevel2&f=%28searchcausev2+IN+%5B%22searchboxSubmit%22%2C%22searchFromLink%22%5D%29&fm=&p=1&s=UniqueVisit&asc=true&includeMetadata=true&bindOnLastSearch=true&org=' + report.org + froms);
+  let url = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/combinedData?n=500&m=AverageClickRank&m=SearchWithClick&m=average%28actionresponsetime%29&m=ClickThroughRatio&m=UniqueVisit&d=originLevel1&d=originLevel2&fm=&p=1&s=UniqueVisit&asc=true&includeMetadata=true&bindOnLastSearch=true&org=' + report.org + froms);
   let promise = new Promise((resolve) => {
     executeCall(url, report, "Getting Analytics Usage Info", "thereAreErrorsSearch").then(function (data) {
       if (data) {
-        let counter = 0;
+        let counterC = 0;
+        let counterQ = 0;
+        let counterP = 0;
         let total = 0;
-        let responseQ = data['combinations'].map(source => {
+        //First get summary of the searchCauses
+        //  FacetSelection (facetSelect,facetDeselect, facetExclude)
+        //  InterfaceChange (interfaceChange)
+        //  Sort (resultsSort)
+        //  Querysuggestions (omniboxAnalytics, omniboxFromLink)
+        //  FieldQuerySuggestions (omniboxField)
+        //  Opening (documentOpen,documentQuickview)
+        //  Recommendation (recommendationOpen)
+        //For each combination get Detailed info
+        let responseQDetails = data['combinations'].map(source => {
+          let deturl = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/combinedData?n=2000&m=UniqueVisit&d=searchCauseV2&f=%28originlevel1%3D%3D%27' + source.originLevel1 + '%27%29+AND+%28originlevel2%3D%3D%27' + source.originLevel2 + '%27%29&fm=&p=1&s=UniqueVisit&asc=false&includeMetadata=true&bindOnLastSearch=false&org=' + report.org + froms);
+          return new Promise((resolve) => {
+            executeCall(deturl, report, "Getting Analytics Usage Info", "thereAreErrorsSearch").then(function (datar) {
+              data['combinations'][counterQ].ControlSearch = 0;
+              data['combinations'][counterQ].ControlFacet = 0;
+              data['combinations'][counterQ].ControlInterface = 0;
+              data['combinations'][counterQ].ControlSort = 0;
+              data['combinations'][counterQ].ControlQuerySuggest = 0;
+              data['combinations'][counterQ].ControlFieldQS = 0;
+              data['combinations'][counterQ].ControlOpening = 0;
+              data['combinations'][counterQ].ControlRecommend = 0;
+              if (datar) {
+                datar['combinations'].map(sourcedet => {
+                  if (sourcedet.searchCauseV2 == 'facetSelect' || sourcedet.searchCauseV2 == 'facetDeSelect' || sourcedet.searchCauseV2 == 'facetExclude') {
+                    data['combinations'][counterQ].ControlFacet += sourcedet.UniqueVisit;
+                  }
+                  if (sourcedet.searchCauseV2 == 'interfaceChange') {
+                    data['combinations'][counterQ].ControlInterface += sourcedet.UniqueVisit;
+                  }
+                  if (sourcedet.searchCauseV2 == 'resultsSort') {
+                    data['combinations'][counterQ].ControlSort += sourcedet.UniqueVisit;
+                  }
+                  if (sourcedet.searchCauseV2 == 'omniboxAnalytics' || sourcedet.searchCauseV2 == 'omniboxFromLink') {
+                    data['combinations'][counterQ].ControlQuerySuggest += sourcedet.UniqueVisit;
+                  }
+                  if (sourcedet.searchCauseV2 == 'searchboxSubmit' || sourcedet.searchCauseV2 == 'searchFromLink') {
+                    data['combinations'][counterQ].ControlSearch += sourcedet.UniqueVisit;
+                  }
+                  if (sourcedet.searchCauseV2 == 'omniboxField') {
+                    data['combinations'][counterQ].ControlFieldQS += sourcedet.UniqueVisit;
+                  }
+                  if (sourcedet.searchCauseV2 == 'documentOpen' || sourcedet.searchCauseV2 == 'documentQuickview') {
+                    data['combinations'][counterQ].ControlOpening += sourcedet.UniqueVisit;
+                  }
+                  if (sourcedet.searchCauseV2 == 'recommendationOpen') {
+                    data['combinations'][counterQ].ControlRecommend += sourcedet.UniqueVisit;
+                  }
+                });
+              }
+              counterQ = counterQ + 1;
+              resolve();
+            });
+          });
+        });
+        //Paging requires a different query
+        //  Paging (EventValue: pagerNext,pagerPrevious, pagerScrolling )
+        let responsePDetails = data['combinations'].map(source => {
+          let deturl = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/combinedData?n=1000&m=UniqueVisit&d=customEventValue&s=UniqueVisit&asc=false&includeMetadata=true&bindOnLastSearch=false&f=%28customeventtype%3D%3D%27getMoreResults%27%29+AND+%28originlevel1%3D%3D%27' + source.originLevel1 + '%27%29+AND+%28originlevel2%3D%3D%27' + source.originLevel2 + '%27%29&fm=&p=1&org=' + report.org + froms);
+          return new Promise((resolve) => {
+            executeCall(deturl, report, "Getting Analytics Usage Info", "thereAreErrorsSearch").then(function (datar) {
+              data['combinations'][counterP].ControlPaging = 0;
+              if (datar) {
+                datar['combinations'].map(sourcedet => {
+                  data['combinations'][counterP].ControlPaging += sourcedet.UniqueVisit;
+                });
+              }
+              counterP = counterP + 1;
+              resolve();
+            });
+          });
+        });
+
+        let responseC = data['combinations'].map(source => {
           total += source.UniqueVisit;
-          let deturl = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/combinedData?n=2000&m=DocumentView&m=countDistinct%28queryexpression%29&m=ManualQuery&d=sessionGuid&d=hasResult&f=%28searchcausev2+IN+%5B%22searchboxSubmit%22%2C%22searchFromLink%22%5D%29+AND+%28queryexpression%21%3D%27%27%29+AND+%28originlevel1%3D%3D%27' + source.originLevel1 + '%27%29+AND+%28originlevel2%3D%3D%27' + source.originLevel2 + '%27%29&fm=&p=1&s=ManualQuery&asc=false&includeMetadata=true&bindOnLastSearch=false&org=' + report.org + froms);
+          let deturl = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/combinedData?n=1000&m=DocumentView&m=countDistinct%28queryexpression%29&m=ManualQuery&d=sessionGuid&d=hasResult&f=%28searchcausev2+IN+%5B%22searchboxSubmit%22%2C%22searchFromLink%22%5D%29+AND+%28queryexpression%21%3D%27%27%29+AND+%28originlevel1%3D%3D%27' + source.originLevel1 + '%27%29+AND+%28originlevel2%3D%3D%27' + source.originLevel2 + '%27%29&fm=&p=1&s=ManualQuery&asc=false&includeMetadata=true&bindOnLastSearch=false&org=' + report.org + froms);
           return new Promise((resolve) => {
             executeCall(deturl, report, "Getting Analytics Usage Info", "thereAreErrorsSearch").then(function (datar) {
               let manQ = 0;
@@ -1773,44 +1860,45 @@ function getUsageInfo(report) {
                   }
                 });
                 if (totalR == 0) {
-                  data['combinations'][counter].AvgNoQ = 0;
-                  data['combinations'][counter].AvgNoQChange = 0;
-                  data['combinations'][counter].AvgNoClicks = 0;
-                  data['combinations'][counter].NoQ = 0;
-                  data['combinations'][counter].NoQChange = 0;
-                  data['combinations'][counter].NoClicks = 0;
-                  data['combinations'][counter].No = 0;
-                  data['combinations'][counter].NoRes = 0;
-                  data['combinations'][counter].NoResTotal = 0;
+                  data['combinations'][counterC].AvgNoQ = 0;
+                  data['combinations'][counterC].AvgNoQChange = 0;
+                  data['combinations'][counterC].AvgNoClicks = 0;
+                  data['combinations'][counterC].NoQ = 0;
+                  data['combinations'][counterC].NoQChange = 0;
+                  data['combinations'][counterC].NoClicks = 0;
+                  data['combinations'][counterC].No = 0;
+                  data['combinations'][counterC].NoRes = 0;
+                  data['combinations'][counterC].NoResTotal = 0;
                 }
                 else {
                   //Update source
-                  data['combinations'][counter].AvgNoQ = manQ / totalR;
-                  data['combinations'][counter].AvgNoQChange = manQ / uniqQ;
-                  data['combinations'][counter].AvgNoClicks = clicks / totalR;
-                  data['combinations'][counter].NoQ = manQ;
-                  data['combinations'][counter].NoQChange = uniqQ;
-                  data['combinations'][counter].NoClicks = clicks;
-                  data['combinations'][counter].No = totalR;
-                  data['combinations'][counter].NoRes = noRes;
-                  data['combinations'][counter].NoResTotal = totalNoRes;
+                  data['combinations'][counterC].AvgNoQ = manQ / totalR;
+                  data['combinations'][counterC].AvgNoQChange = manQ / uniqQ;
+                  data['combinations'][counterC].AvgNoClicks = clicks / totalR;
+                  data['combinations'][counterC].NoQ = manQ;
+                  data['combinations'][counterC].NoQChange = uniqQ;
+                  data['combinations'][counterC].NoClicks = clicks;
+                  data['combinations'][counterC].No = totalR;
+                  data['combinations'][counterC].NoRes = noRes;
+                  data['combinations'][counterC].NoResTotal = totalNoRes;
                 }
-                counter = counter + 1;
+                counterC = counterC + 1;
                 resolve();
               }
             });
           });
         });
-        executeSequentially(responseQ).then(() => {
+        responseC = responseC.concat(responsePDetails).concat(responseQDetails);
+        executeSequentially(responseC).then(() => {
           //Now we need to execute for each originLevel1/originLevel2 combination the Session query
           report.usagedetails += "<hr><h4>Search Usage Information last 100 days:</h4>";
-          report.usagedetails += "(Session info based upon ca. last 2000 visits)<br>";
+          report.usagedetails += "(Session info based upon ca. last 1000 visits)<br>";
           report.usagedetails += "<div style='overflow:auto;margin:-1px;'>";
-          report.usagedetails += "<table style='width: 1600px !important;'>";
+          report.usagedetails += "<table style='width: 1400px !important;'>";
           report.usagedetails += header;
           let rowcounter = 0;
           let extraheaders = data['combinations'].length / 5;
-          let extraheader = (data['combinations'].length / extraheaders)+1;
+          let extraheader = (data['combinations'].length / extraheaders) + 1;
           data['combinations'].map(source => {
             if (rowcounter > extraheader) {
               report.usagedetails += header;
@@ -1878,12 +1966,35 @@ function getUsageInfo(report) {
               color = 'red';
             }
             report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + perc.toFixed(0) + "%</td>";
-            report.usagedetails += "<td style='text-align:right;word-break:normal'>" + "Tot Queries: " + source.NoQ.toFixed(0);
-            report.usagedetails += "<br>" + "Tot Unique: " + source.NoQChange.toFixed(0);
-            report.usagedetails += "<br>" + "Tot Clicks: " + source.NoClicks.toFixed(0);
-            report.usagedetails += "<br>" + "Tot No Results: " + source.NoResTotal.toFixed(0);
-            report.usagedetails += "<br>" + "Tot Checks: " + source.No.toFixed(0);
-            report.usagedetails += "</td>";
+            report.usagedetails += "</tr><tr><td></td><td></td>";
+            report.usagedetails += "<td colspan=4 style='vertical-align:top;text-align:left;word-break:normal'>" + "<b>Summary Behavior:</b><br>(Based upon visits)<br>";
+            report.usagedetails += "<table padding=2><tr><td style='text-align:right'>" + "Total Visits:</td><td style='text-align:right'>" + source.UniqueVisit.toFixed(0)+"</td><td></td></tr>";
+            perc = (source.ControlSearch / (source.UniqueVisit)) * 100;
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Executing Search:</td><td style='text-align:right'>" + source.ControlSearch.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            perc = (source.ControlFacet / (source.UniqueVisit)) * 100;
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Facets:</td><td style='text-align:right'>" + source.ControlFacet.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            perc = (source.ControlInterface / (source.UniqueVisit)) * 100;
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Different Interfaces:</td><td style='text-align:right'>" + source.ControlInterface.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            perc = (source.ControlQuerySuggest / (source.UniqueVisit)) * 100;
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Query Suggestions:</td><td style='text-align:right'>" + source.ControlQuerySuggest.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            perc = (source.ControlFacet / (source.UniqueVisit)) * 100;
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Field Query Suggestions:</td><td style='text-align:right'>" + source.ControlFieldQS.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            perc = (source.ControlSort / (source.UniqueVisit)) * 100;
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Sorting:</td><td style='text-align:right'>" + source.ControlSort.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            perc = (source.ControlPaging / (source.UniqueVisit)) * 100;
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Paging:</td><td style='text-align:right'>" + source.ControlPaging.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            perc = (source.ControlOpening / (source.UniqueVisit)) * 100;
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Opening Documents:</td><td style='text-align:right'>" + source.ControlOpening.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            perc = (source.ControlRecommend / (source.UniqueVisit)) * 100;
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Opening Recommendations:</td><td style='text-align:right'>" + source.ControlRecommend.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            report.usagedetails += "</table></td><td colspan=1></td>";
+            report.usagedetails += "<td colspan=2 style='vertical-align:top;text-align:left;word-break:normal'>" + "<b>Summary:</b><br>(For above Session calculation)<br>";
+            report.usagedetails += "<table padding=2><tr><td style='text-align:right'>Tot Queries:</td><td style='text-align:right'>" + source.NoQ.toFixed(0)+"</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Unique:</td><td style='text-align:right'>" + source.NoQChange.toFixed(0)+"</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Clicks:</td><td style='text-align:right'>" + source.NoClicks.toFixed(0)+"</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Zero Results:</td><td style='text-align:right'>" + source.NoResTotal.toFixed(0)+"</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Checks:</td><td style='text-align:right'>" + source.No.toFixed(0)+"</td></tr>";
+            report.usagedetails += "</tr></table></td><td colspan=1></td>";
             report.usagedetails += "</tr>";
           });
           report.usagedetails += "</table>"
@@ -1921,6 +2032,54 @@ function getAnalyticsMetricsInfo(report) {
     });
   });
   return promise;
+}
+
+function getAnalyticsMetricsDetails(report) {
+  https://platform0.cloud.coveo.com/rest/ua/v15/stats/visitsMetrics?org=coveointernaltesting1&from=2019-07-07T00%3A00%3A00.000%2B0200&to=2019-07-22T13%3A47%3A00.000%2B0200&m=UniqueVisit&f=%28origincontext%3D%3D%27CaseCreation%27%29&tz=Europe%2FAmsterdam&queryId=MTU2Mzc5NjA2M0Y2RDFE
+  var now = new Date();
+  var from = new Date();
+  from = from.setDate(now.getDate() - 7);
+  var fromlast = new Date(from);
+  var to = new Date();
+
+  let froms = '&from=' + fromlast.toISOString() + '&to=' + to.toISOString();
+  let url = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/visitsMetrics?m=UniqueVisit&f=%28origincontext%3D%3D%27CaseCreation%27%29&org=' + report.org + froms);
+  let casecreationPageV = new Promise((resolve) => {
+    executeCall(url, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch").then(function (data) {
+      if (data) {
+        report.NrofCaseCreationPageVisits = data.globalDatas.UniqueVisit.value;
+      }
+      resolve(report);
+    });
+  });
+  url = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/visitsMetrics?m=UniqueVisit&f=%28customeventvalue%3D%3D%27submitButton%27%29&org=' + report.org + froms);
+  let casecreationV = new Promise((resolve) => {
+    executeCall(url, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch").then(function (data) {
+      if (data) {
+        report.NrofCaseCreations = data.globalDatas.UniqueVisit.value;
+      }
+      resolve(report);
+    });
+  });
+  url = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/visitsMetrics?&m=UniqueVisit&f=%28customeventtype%3D%3D%27Click%27%29+AND+%28origincontext%3D%3D%27CaseCreation%27%29&fn=%28customeventvalue%21%3Dnull%29+AND+%28customeventvalue%3D%3D%27submitButton%27%29&org=' + report.org + froms);
+  let casedeflectionV = new Promise((resolve) => {
+    executeCall(url, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch").then(function (data) {
+      if (data) {
+        report.NrofCaseDeflections = data.globalDatas.UniqueVisit.value;
+      }
+      resolve(report);
+    });
+  });
+  url = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/visitsMetrics?m=UniqueVisit&f=%28origincontext%3D%3D%27CaseCreation%27%29&fn=%28customeventtype%3D%3D%27Click%27%29+AND+%28origincontext%3D%3D%27CaseCreation%27%29&fn=%28customeventvalue%21%3Dnull%29+AND+%28customeventvalue%3D%3D%27submitButton%27%29&org=' + report.org + froms);
+  let caseabandonV = new Promise((resolve) => {
+    executeCall(url, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch").then(function (data) {
+      if (data) {
+        report.NrofCaseAbandons = data.globalDatas.UniqueVisit.value;
+      }
+      resolve(report);
+    });
+  });
+  return casecreationPageV.then(casecreationV).then(casedeflectionV).then(caseabandonV);
 }
 
 
@@ -3330,6 +3489,10 @@ function processOrgReport(report) {
     RefinementQuery: 0,
     DocumentView: 0,
     AvgResponse: 0,
+    NrofCaseCreationPageVisits: 0,
+    NrofCaseAbandons: 0,
+    NrofCaseCreations: 0,
+    NrofCaseDeflections: 0,
     noscheduledsecprov: []
   };
   //Get sources
@@ -3373,230 +3536,210 @@ function processOrgReport(report) {
                       document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Get Metrics Information.';
                       getAnalyticsMetricsInfo(json).then(function () {
                         document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Get Analytics Information.';
-                        getTopQueriesInfo(json).then(function () {
-                          document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Get Analytics Usage Information.';
-                          getUsageInfo(json).then(function () {
+                        getAnalyticsMetricsDetails(json).then(function () {
+                          document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Get Analytics Information.';
+                          getTopQueriesInfo(json).then(function () {
+                            document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Get Analytics Usage Information.';
+                            getUsageInfo(json).then(function () {
 
-                            document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Get Field Information.';
-                            getAllFields(json).then(function (data) {
-                              //data is all the fields
-                              if (data) {
-                                json.allfields = data;
-                                let fieldsnotused = [];
-                                json.nroffields = data.length;
-                                json.nrofsystemfields = 0;
-                                json.nrofcustomfields = 0;
-                                json.allmetadatavalues = false;
-                                json.nroffieldsnotused = 0;
-                                json.nroffacets = 0;
-                                json.nroffreetext = 0;
-                                json.nrofsorts = 0;
-                                json.nroffieldscachesort = 0;
-                                json.nroffieldscachecomputed = 0;
-                                json.nroffieldscachenested = 0;
-                                json.nroffieldscachenumeric = 0;
-                                data.map((field) => {
-                                  if (field.system) {
-                                    json.nrofsystemfields += 1;
-                                  }
-                                  else {
-                                    json.nrofcustomfields += 1;
-                                  }
-                                  if (field.sources.length == 0) {
-                                    json.nroffieldsnotused += 1;
-                                    fieldsnotused.push(field.name);
-                                  }
-                                  else {
-                                    //Only when field is used
-                                    if (field.name.toLowerCase() == "allmetadatavalues") {
-                                      //json.allmetadatavalues = true;
-                                      //We check it during the execution of the queries
+                              document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Get Field Information.';
+                              getAllFields(json).then(function (data) {
+                                //data is all the fields
+                                if (data) {
+                                  json.allfields = data;
+                                  let fieldsnotused = [];
+                                  json.nroffields = data.length;
+                                  json.nrofsystemfields = 0;
+                                  json.nrofcustomfields = 0;
+                                  json.allmetadatavalues = false;
+                                  json.nroffieldsnotused = 0;
+                                  json.nroffacets = 0;
+                                  json.nroffreetext = 0;
+                                  json.nrofsorts = 0;
+                                  json.nroffieldscachesort = 0;
+                                  json.nroffieldscachecomputed = 0;
+                                  json.nroffieldscachenested = 0;
+                                  json.nroffieldscachenumeric = 0;
+                                  data.map((field) => {
+                                    if (field.system) {
+                                      json.nrofsystemfields += 1;
                                     }
-                                    if (field.facet || field.multiValueFacet) {
-                                      json.nroffacets += 1;
+                                    else {
+                                      json.nrofcustomfields += 1;
                                     }
-                                    if (field.sort) {
-                                      json.nrofsorts += 1;
+                                    if (field.sources.length == 0) {
+                                      json.nroffieldsnotused += 1;
+                                      fieldsnotused.push(field.name);
                                     }
-                                    if (field.useCacheForSort) {
-                                      json.nroffieldscachesort += 1;
-                                    }
-                                    if (field.useCacheForComputedFacet) {
-                                      json.nroffieldscachecomputed += 1;
-                                    }
-                                    if (field.useCacheForNestedQuery) {
-                                      json.nroffieldscachenested += 1;
-                                      //Check if field is numeric, if not add a warning
-                                      if (field.type != "LONG") {
-                                        //Check if field starts with sf, if so ignore
-                                        if (!field.name.toLowerCase().startsWith("sf")) {
-                                          json.badfields_wrong_config.push("<b>" + field.name + "</b>: is a nested query field, <br>but not of type Int 32 (Long). <br>Performance will suffer.<BR>");
+                                    else {
+                                      //Only when field is used
+                                      if (field.name.toLowerCase() == "allmetadatavalues") {
+                                        //json.allmetadatavalues = true;
+                                        //We check it during the execution of the queries
+                                      }
+                                      if (field.facet || field.multiValueFacet) {
+                                        json.nroffacets += 1;
+                                      }
+                                      if (field.sort) {
+                                        json.nrofsorts += 1;
+                                      }
+                                      if (field.useCacheForSort) {
+                                        json.nroffieldscachesort += 1;
+                                      }
+                                      if (field.useCacheForComputedFacet) {
+                                        json.nroffieldscachecomputed += 1;
+                                      }
+                                      if (field.useCacheForNestedQuery) {
+                                        json.nroffieldscachenested += 1;
+                                        //Check if field is numeric, if not add a warning
+                                        if (field.type != "LONG") {
+                                          //Check if field starts with sf, if so ignore
+                                          if (!field.name.toLowerCase().startsWith("sf")) {
+                                            json.badfields_wrong_config.push("<b>" + field.name + "</b>: is a nested query field, <br>but not of type Int 32 (Long). <br>Performance will suffer.<BR>");
+                                          }
                                         }
                                       }
-                                    }
-                                    if (field.useCacheForNumericQuery) {
-                                      json.nroffieldscachenumeric += 1;
-                                    }
-                                    if (field.mergeWithLexicon) {
-                                      json.nroffreetext += 1;
-                                    }
-                                  }
-                                });
-                              }
-
-
-                            }).then(function () {
-                              document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Executing queries and checking usage.';
-                              let requestsQ = json.sourceids.map((source) => {
-                                return new Promise((resolve) => {
-                                  let aq = '@source=="' + source.name + '"';
-                                  executeQuery("", aq, json, "thereAreErrorsFields").then(function (data) {
-                                    if (data) {
-                                      //We get results back investigate them for misuse in fields
-                                      let tresholdFacet = 150;
-                                      let tresholdLongText = 500;
-                                      let pushWithoutHtml = true;
-
-                                      let isPush = json.pushnames.filter(source2 => { if (source2.name == source.name) return source2.name; }).length > 0;
-                                      let endcontent = [];
-                                      data.results.map((result) => {
-                                        if (result.hasHtmlVersion) {
-                                          pushWithoutHtml = false;
-                                        }
-                                        let longcontent = "";
-                                        let otherlargefield = "";
-                                        Object.keys(result.raw).map((field) => {
-                                          //Check if field is multivalue or facet
-                                          let content = result.raw[field];
-                                          if (Array.isArray(content)) {
-                                            //Means Multi Value Facet
-                                            content.map((fieldcontent) => {
-                                              if (fieldcontent.length > tresholdFacet) {
-                                                json.badfields_facettolong.push(field);
-                                                if (json.details_facettolong.indexOf(field) == -1) {
-                                                  json.details_facettolong += "Source: <b>" + source.name + "</b><br>";
-                                                  json.details_facettolong += "Field: <b>" + field + "</b>, content:<BR>";
-                                                  json.details_facettolong += fieldcontent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + "<BR><BR>";
-                                                }
-                                              }
-                                              //Check allfieldvalues script
-                                              if (fieldcontent.includes("crawler") && fieldcontent.includes("converter") && fieldcontent.includes("mapping")) {
-                                                json.allmetadatavalues = true;
-                                                json.badfields_contains_allmeta.push(field + " (Source: " + source.name + ")");
-                                              }
-                                              //Check html tags in field
-                                              fieldcontent = fieldcontent.replace(/<br \/>/g, "");
-                                              if (checkHTML.test(fieldcontent)) {
-                                                json.badfields_contains_html.push(field);
-                                              }
-                                            });
-                                          }
-                                          else {
-                                            if (content.constructor === String) {
-
-                                              //Is it a normal facet
-                                              let fieldinfo = json.allfields.filter(fieldi => { if (fieldi.name == field && (fieldi.facet || fieldi.multiValueFacet)) return fieldi.name; }).length;
-                                              if (fieldinfo > 0) {
-                                                let comment = '';
-                                                if (content.length > tresholdFacet) {
-                                                  //Check if content contains ; --> delimiter
-                                                  if (content.indexOf(';') != -1) {
-                                                    comment = '<b><i>Field content contains a delimiter, configure the field as MultiValue Facet or disable it as a Facet.</b></i><br>';
-                                                  }
-                                                  else {
-
-                                                  }
-                                                  json.badfields_facettolong.push(field);
-                                                  if (json.details_facettolong.indexOf(field) == -1) {
-                                                    json.details_facettolong += "Source: <b>" + source.name + "</b><br>" + comment;
-                                                    json.details_facettolong += "Field: <b>" + field + "</b>, content:<BR>";
-                                                    json.details_facettolong += content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + "<BR><BR>";
-                                                  }
-                                                }
-                                              }
-                                              //Check allfieldvalues script
-                                              if (content.includes("crawler") && content.includes("converter") && content.includes("mapping")) {
-                                                json.allmetadatavalues = true;
-                                                json.badfields_contains_allmeta.push(field + " (Source: " + source.name + ")");
-                                              }
-                                              //Check HTML tags and long fields
-                                              fieldinfo = json.allfields.filter(fieldi => { if (fieldi.name == field && (fieldi.mergeWithLexicon)) return fieldi.name; }).length;
-                                              if (fieldinfo > 0) {
-                                                //Check for same end of content
-                                                if (content.length > (tresholdFacet * 2)) {
-                                                  if (field in endcontent) {
-                                                    if (endcontent[field].content != content.substring(content.length - (tresholdFacet * 2))) {
-                                                      endcontent[field].diff = true;
-
-                                                    }
-                                                  } else {
-                                                    endcontent[field] = { diff: false, field: field, content: content.substring(content.length - (tresholdFacet * 2)) };
-                                                  }
-                                                }
-                                                //Check if duplicate fields, only problem when they are free text searchable
-                                                if (content.length > tresholdLongText) {
-                                                  if (longcontent != "") {
-                                                    if (longcontent == content) {
-                                                      json.badfields_contains_duplicate_info.push(field + "<br>also in: " + otherlargefield);
-                                                    }
-                                                  } else {
-                                                    longcontent = content;
-                                                    otherlargefield = field;
-                                                  }
-                                                }
-                                                //Check html tags in field
-                                                content = content.replace(/<br \/>/g, "");
-                                                if (checkHTML.test(content)) {
-                                                  json.badfields_contains_html.push(field);
-                                                }
-                                              }
-                                              //Check FirstCentences inside field
-                                              //Check html tags in field
-                                              /* let firstSentence = result.firstSentences.replace("...", "");
-                                               if (content.search(new RegExp(firstSentence, "i")) != -1) {
-                                                 json.badfields_contains_body.push(field);
-                                               }*/
-
-                                            }
-                                          }
-                                        });
-                                      });
-                                      if (isPush && pushWithoutHtml) {
-                                        json.push_without_html.push(source.name);
+                                      if (field.useCacheForNumericQuery) {
+                                        json.nroffieldscachenumeric += 1;
                                       }
-                                      if (!isPush && pushWithoutHtml) {
-                                        json.normal_without_html.push(source.name);
-                                      }
-                                      let containsSameEnds = Object.keys(endcontent).filter((field) => { if (!endcontent[field].diff) return field; });
-                                      if (containsSameEnds.length > 0) {
-                                        json.end_content_always_the_same.push(source.name + "<br>in: " + containsSameEnds.join(', ') + "");
-                                        json.details_alwaysthesame += "Source: <b>" + source.name + "</b><br>";
-                                        let contains = Object.keys(endcontent).filter((field) => { if (!endcontent[field].diff) return endcontent[field]; }).map((field) => {
-                                          json.details_alwaysthesame += "Field: <b>" + endcontent[field].field + "</b>, ends with:<BR>";
-                                          json.details_alwaysthesame += endcontent[field].content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + "<BR><BR>";
-                                        });
+                                      if (field.mergeWithLexicon) {
+                                        json.nroffreetext += 1;
                                       }
                                     }
-                                    resolve();
                                   });
-                                });
-                              });
-                              executeSequentially(requestsQ).then(() => {
-                                //.then(function(){
-                                json.badfields_contains_allmeta = [...new Set(json.badfields_contains_allmeta)].sort(caseInsensitiveSort);
-                                json.badfields_contains_html = [...new Set(json.badfields_contains_html)].sort(caseInsensitiveSort);
-                                json.badfields_facettolong = [...new Set(json.badfields_facettolong)].sort(caseInsensitiveSort);
-                                json.badfields_contains_body = [...new Set(json.badfields_contains_body)].sort(caseInsensitiveSort);
-                                json.badfields_contains_duplicate_info = [...new Set(json.badfields_contains_duplicate_info)].sort(caseInsensitiveSort);
+                                }
+
+
                               }).then(function () {
+                                document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Executing queries and checking usage.';
                                 let requestsQ = json.sourceids.map((source) => {
                                   return new Promise((resolve) => {
                                     let aq = '@source=="' + source.name + '"';
-                                    executeQuery("@indexeddate>now-60d", aq, json, "thereAreErrorsSources").then(function (data) {
-                                      document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Executing queries (Source: ' + source.name + ') and checking freshness (last 60 days).';
+                                    executeQuery("", aq, json, "thereAreErrorsFields").then(function (data) {
                                       if (data) {
-                                        if (data.totalCount == 0) {
-                                          json.notfresh.push(source.name);
+                                        //We get results back investigate them for misuse in fields
+                                        let tresholdFacet = 150;
+                                        let tresholdLongText = 500;
+                                        let pushWithoutHtml = true;
+
+                                        let isPush = json.pushnames.filter(source2 => { if (source2.name == source.name) return source2.name; }).length > 0;
+                                        let endcontent = [];
+                                        data.results.map((result) => {
+                                          if (result.hasHtmlVersion) {
+                                            pushWithoutHtml = false;
+                                          }
+                                          let longcontent = "";
+                                          let otherlargefield = "";
+                                          Object.keys(result.raw).map((field) => {
+                                            //Check if field is multivalue or facet
+                                            let content = result.raw[field];
+                                            if (Array.isArray(content)) {
+                                              //Means Multi Value Facet
+                                              content.map((fieldcontent) => {
+                                                if (fieldcontent.length > tresholdFacet) {
+                                                  json.badfields_facettolong.push(field);
+                                                  if (json.details_facettolong.indexOf(field) == -1) {
+                                                    json.details_facettolong += "Source: <b>" + source.name + "</b><br>";
+                                                    json.details_facettolong += "Field: <b>" + field + "</b>, content:<BR>";
+                                                    json.details_facettolong += fieldcontent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + "<BR><BR>";
+                                                  }
+                                                }
+                                                //Check allfieldvalues script
+                                                if (fieldcontent.includes("crawler") && fieldcontent.includes("converter") && fieldcontent.includes("mapping")) {
+                                                  json.allmetadatavalues = true;
+                                                  json.badfields_contains_allmeta.push(field + " (Source: " + source.name + ")");
+                                                }
+                                                //Check html tags in field
+                                                fieldcontent = fieldcontent.replace(/<br \/>/g, "");
+                                                if (checkHTML.test(fieldcontent)) {
+                                                  json.badfields_contains_html.push(field);
+                                                }
+                                              });
+                                            }
+                                            else {
+                                              if (content.constructor === String) {
+
+                                                //Is it a normal facet
+                                                let fieldinfo = json.allfields.filter(fieldi => { if (fieldi.name == field && (fieldi.facet || fieldi.multiValueFacet)) return fieldi.name; }).length;
+                                                if (fieldinfo > 0) {
+                                                  let comment = '';
+                                                  if (content.length > tresholdFacet) {
+                                                    //Check if content contains ; --> delimiter
+                                                    if (content.indexOf(';') != -1) {
+                                                      comment = '<b><i>Field content contains a delimiter, configure the field as MultiValue Facet or disable it as a Facet.</b></i><br>';
+                                                    }
+                                                    else {
+
+                                                    }
+                                                    json.badfields_facettolong.push(field);
+                                                    if (json.details_facettolong.indexOf(field) == -1) {
+                                                      json.details_facettolong += "Source: <b>" + source.name + "</b><br>" + comment;
+                                                      json.details_facettolong += "Field: <b>" + field + "</b>, content:<BR>";
+                                                      json.details_facettolong += content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + "<BR><BR>";
+                                                    }
+                                                  }
+                                                }
+                                                //Check allfieldvalues script
+                                                if (content.includes("crawler") && content.includes("converter") && content.includes("mapping")) {
+                                                  json.allmetadatavalues = true;
+                                                  json.badfields_contains_allmeta.push(field + " (Source: " + source.name + ")");
+                                                }
+                                                //Check HTML tags and long fields
+                                                fieldinfo = json.allfields.filter(fieldi => { if (fieldi.name == field && (fieldi.mergeWithLexicon)) return fieldi.name; }).length;
+                                                if (fieldinfo > 0) {
+                                                  //Check for same end of content
+                                                  if (content.length > (tresholdFacet * 2)) {
+                                                    if (field in endcontent) {
+                                                      if (endcontent[field].content != content.substring(content.length - (tresholdFacet * 2))) {
+                                                        endcontent[field].diff = true;
+
+                                                      }
+                                                    } else {
+                                                      endcontent[field] = { diff: false, field: field, content: content.substring(content.length - (tresholdFacet * 2)) };
+                                                    }
+                                                  }
+                                                  //Check if duplicate fields, only problem when they are free text searchable
+                                                  if (content.length > tresholdLongText) {
+                                                    if (longcontent != "") {
+                                                      if (longcontent == content) {
+                                                        json.badfields_contains_duplicate_info.push(field + "<br>also in: " + otherlargefield);
+                                                      }
+                                                    } else {
+                                                      longcontent = content;
+                                                      otherlargefield = field;
+                                                    }
+                                                  }
+                                                  //Check html tags in field
+                                                  content = content.replace(/<br \/>/g, "");
+                                                  if (checkHTML.test(content)) {
+                                                    json.badfields_contains_html.push(field);
+                                                  }
+                                                }
+                                                //Check FirstCentences inside field
+                                                //Check html tags in field
+                                                /* let firstSentence = result.firstSentences.replace("...", "");
+                                                 if (content.search(new RegExp(firstSentence, "i")) != -1) {
+                                                   json.badfields_contains_body.push(field);
+                                                 }*/
+
+                                              }
+                                            }
+                                          });
+                                        });
+                                        if (isPush && pushWithoutHtml) {
+                                          json.push_without_html.push(source.name);
+                                        }
+                                        if (!isPush && pushWithoutHtml) {
+                                          json.normal_without_html.push(source.name);
+                                        }
+                                        let containsSameEnds = Object.keys(endcontent).filter((field) => { if (!endcontent[field].diff) return field; });
+                                        if (containsSameEnds.length > 0) {
+                                          json.end_content_always_the_same.push(source.name + "<br>in: " + containsSameEnds.join(', ') + "");
+                                          json.details_alwaysthesame += "Source: <b>" + source.name + "</b><br>";
+                                          let contains = Object.keys(endcontent).filter((field) => { if (!endcontent[field].diff) return endcontent[field]; }).map((field) => {
+                                            json.details_alwaysthesame += "Field: <b>" + endcontent[field].field + "</b>, ends with:<BR>";
+                                            json.details_alwaysthesame += endcontent[field].content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + "<BR><BR>";
+                                          });
                                         }
                                       }
                                       resolve();
@@ -3604,227 +3747,250 @@ function processOrgReport(report) {
                                   });
                                 });
                                 executeSequentially(requestsQ).then(() => {
-                                  document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Check Push Batch calls in Log Browser.';
+                                  //.then(function(){
+                                  json.badfields_contains_allmeta = [...new Set(json.badfields_contains_allmeta)].sort(caseInsensitiveSort);
+                                  json.badfields_contains_html = [...new Set(json.badfields_contains_html)].sort(caseInsensitiveSort);
+                                  json.badfields_facettolong = [...new Set(json.badfields_facettolong)].sort(caseInsensitiveSort);
+                                  json.badfields_contains_body = [...new Set(json.badfields_contains_body)].sort(caseInsensitiveSort);
+                                  json.badfields_contains_duplicate_info = [...new Set(json.badfields_contains_duplicate_info)].sort(caseInsensitiveSort);
+                                }).then(function () {
                                   let requestsQ = json.sourceids.map((source) => {
-                                    let isPush = json.pushnames.filter(source2 => { if (source2.name == source.name) return source2.name; }).length > 0;
-                                    if (isPush) {
-                                      return new Promise((resolve) => {
-                                        let aq = JSON.stringify({ sourcesIds: [source.id] });
-                                        executeLogBrowserQuery(aq, json).then(function (data) {
-                                          if (data) {
-                                            let found = false;
-                                            if ('operations' in data) {
-                                              if ('BATCH_FILE' in data.operations) {
-                                                found = true;
-                                              }
-                                            }
-                                            if (!found) {
-                                              json.push_without_batch.push(source.name);
-                                            }
-                                          }
-                                          resolve();
-                                        });
-                                      });
-                                    }
-                                  });
-                                  executeSequentially(requestsQ).then(() => {
-                                    executeLogBrowserQuery("", json).then(function (data) {
-                                      if (data) {
-                                        if ('results' in data) {
-                                          if ('WARNING' in data.results) {
-                                            json.logwarnings = data.results['WARNING'];
-                                          }
-                                          if ('ERROR' in data.results) {
-                                            json.logerrors = data.results['ERROR'];
+                                    return new Promise((resolve) => {
+                                      let aq = '@source=="' + source.name + '"';
+                                      executeQuery("@indexeddate>now-60d", aq, json, "thereAreErrorsSources").then(function (data) {
+                                        document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Executing queries (Source: ' + source.name + ') and checking freshness (last 60 days).';
+                                        if (data) {
+                                          if (data.totalCount == 0) {
+                                            json.notfresh.push(source.name);
                                           }
                                         }
-
-                                      }
-                                    }).then(function () {
-                                      document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Get Query Pipeline Info Information.';
-                                      getQueryPipelinesInfo(json).then(function (json) {
-                                        let requests = json.pipelines.map((pipes) => {
-                                          return new Promise((resolve) => {
-                                            getQueryPipelinesDetails(json, pipes).then(function (data) {
-                                              resolve();
-                                            });
+                                        resolve();
+                                      });
+                                    });
+                                  });
+                                  executeSequentially(requestsQ).then(() => {
+                                    document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Check Push Batch calls in Log Browser.';
+                                    let requestsQ = json.sourceids.map((source) => {
+                                      let isPush = json.pushnames.filter(source2 => { if (source2.name == source.name) return source2.name; }).length > 0;
+                                      if (isPush) {
+                                        return new Promise((resolve) => {
+                                          let aq = JSON.stringify({ sourcesIds: [source.id] });
+                                          executeLogBrowserQuery(aq, json).then(function (data) {
+                                            if (data) {
+                                              let found = false;
+                                              if ('operations' in data) {
+                                                if ('BATCH_FILE' in data.operations) {
+                                                  found = true;
+                                                }
+                                              }
+                                              if (!found) {
+                                                json.push_without_batch.push(source.name);
+                                              }
+                                            }
+                                            resolve();
                                           });
                                         });
-                                        document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Checking Filter and Single words fields with a query.';
-                                        executeSequentially(requests).then(() => {
-                                          //We need to check if we got any filterfields
-                                          //If so we need to check if they contain multi words
-                                          json.filterfields = [...new Set(json.filterfields)];
-                                          let requestsQ = json.filterfields.map((field) => {
+                                      }
+                                    });
+                                    executeSequentially(requestsQ).then(() => {
+                                      executeLogBrowserQuery("", json).then(function (data) {
+                                        if (data) {
+                                          if ('results' in data) {
+                                            if ('WARNING' in data.results) {
+                                              json.logwarnings = data.results['WARNING'];
+                                            }
+                                            if ('ERROR' in data.results) {
+                                              json.logerrors = data.results['ERROR'];
+                                            }
+                                          }
+
+                                        }
+                                      }).then(function () {
+                                        document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Get Query Pipeline Info Information.';
+                                        getQueryPipelinesInfo(json).then(function (json) {
+                                          let requests = json.pipelines.map((pipes) => {
                                             return new Promise((resolve) => {
-                                              let aq = field;
-                                              let cleanfield = field.replace('@', '');
-                                              let multiwords = false;
-                                              executeQuery("", aq, json, "thereAreErrorsFields").then(function (data) {
-                                                if (data) {
-                                                  data.results.map((result) => {
-                                                    if (result.raw[cleanfield]) {
-                                                      if (isNaN(result.raw[cleanfield])) {
-                                                        //Check if it is an array, if so trim all the results
-                                                        if (Array.isArray(result.raw[cleanfield])) {
-                                                          result.raw[cleanfield].map((val) => {
-                                                            if (val.trim().indexOf(' ') != -1) {
+                                              getQueryPipelinesDetails(json, pipes).then(function (data) {
+                                                resolve();
+                                              });
+                                            });
+                                          });
+                                          document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Checking Filter and Single words fields with a query.';
+                                          executeSequentially(requests).then(() => {
+                                            //We need to check if we got any filterfields
+                                            //If so we need to check if they contain multi words
+                                            json.filterfields = [...new Set(json.filterfields)];
+                                            let requestsQ = json.filterfields.map((field) => {
+                                              return new Promise((resolve) => {
+                                                let aq = field;
+                                                let cleanfield = field.replace('@', '');
+                                                let multiwords = false;
+                                                executeQuery("", aq, json, "thereAreErrorsFields").then(function (data) {
+                                                  if (data) {
+                                                    data.results.map((result) => {
+                                                      if (result.raw[cleanfield]) {
+                                                        if (isNaN(result.raw[cleanfield])) {
+                                                          //Check if it is an array, if so trim all the results
+                                                          if (Array.isArray(result.raw[cleanfield])) {
+                                                            result.raw[cleanfield].map((val) => {
+                                                              if (val.trim().indexOf(' ') != -1) {
+                                                                multiwords = true;
+                                                                json.badfields_filtered.push(field);
+                                                              }
+
+                                                            });
+                                                          }
+                                                          else {
+                                                            if (result.raw[cleanfield].trim().indexOf(' ') != -1) {
                                                               multiwords = true;
                                                               json.badfields_filtered.push(field);
                                                             }
-
-                                                          });
-                                                        }
-                                                        else {
-                                                          if (result.raw[cleanfield].trim().indexOf(' ') != -1) {
-                                                            multiwords = true;
-                                                            json.badfields_filtered.push(field);
                                                           }
-                                                        }
 
+                                                        }
                                                       }
-                                                    }
-                                                  });
-                                                }
-                                                resolve();
+                                                    });
+                                                  }
+                                                  resolve();
+                                                });
                                               });
                                             });
-                                          });
-                                          json.singlewordfields = [...new Set(json.singlewordfields)];
-                                          json.singlewordfieldscontains = [...new Set(json.singlewordfieldscontains)];
-                                          json.singlewordfieldsmatch = [...new Set(json.singlewordfieldsmatch)];
-                                          let requestsSQ = json.singlewordfields.map((field) => {
-                                            return new Promise((resolve) => {
-                                              let aq = field;
-                                              let cleanfield = field.replace('@', '');
-                                              let multiwords = false;
-                                              let wehaveresults = false;
-                                              let examples = new Set();
-                                              let badexamples = new Set();
-                                              executeQuery("", aq, json, "thereAreErrorsFields").then(function (data) {
-                                                //json.badquery += "Checking for Field: <b>" + field + "</b><br>";
-                                                if (data) {
-                                                  //json.badquery += "Checking for Field: <b>" + field + "</b>WE HAVE DATA<br>";
-                                                  data.results.map((result) => {
-                                                    if (result.raw[cleanfield]) {
-                                                      wehaveresults = true;
-                                                      if (isNaN(result.raw[cleanfield])) {
-                                                        //Check if it is an array, if so trim all the results
-                                                        if (Array.isArray(result.raw[cleanfield])) {
-                                                          result.raw[cleanfield].map((val) => {
-                                                            examples.add(val.trim());
-                                                            if (val.trim().indexOf(' ') != -1) {
+                                            json.singlewordfields = [...new Set(json.singlewordfields)];
+                                            json.singlewordfieldscontains = [...new Set(json.singlewordfieldscontains)];
+                                            json.singlewordfieldsmatch = [...new Set(json.singlewordfieldsmatch)];
+                                            let requestsSQ = json.singlewordfields.map((field) => {
+                                              return new Promise((resolve) => {
+                                                let aq = field;
+                                                let cleanfield = field.replace('@', '');
+                                                let multiwords = false;
+                                                let wehaveresults = false;
+                                                let examples = new Set();
+                                                let badexamples = new Set();
+                                                executeQuery("", aq, json, "thereAreErrorsFields").then(function (data) {
+                                                  //json.badquery += "Checking for Field: <b>" + field + "</b><br>";
+                                                  if (data) {
+                                                    //json.badquery += "Checking for Field: <b>" + field + "</b>WE HAVE DATA<br>";
+                                                    data.results.map((result) => {
+                                                      if (result.raw[cleanfield]) {
+                                                        wehaveresults = true;
+                                                        if (isNaN(result.raw[cleanfield])) {
+                                                          //Check if it is an array, if so trim all the results
+                                                          if (Array.isArray(result.raw[cleanfield])) {
+                                                            result.raw[cleanfield].map((val) => {
+                                                              examples.add(val.trim());
+                                                              if (val.trim().indexOf(' ') != -1) {
+                                                                multiwords = true;
+                                                                badexamples.add(val.trim());
+                                                              }
+
+                                                            });
+                                                          }
+                                                          else {
+                                                            examples.add(result.raw[cleanfield].trim());
+                                                            if (result.raw[cleanfield].trim().indexOf(' ') != -1) {
                                                               multiwords = true;
-                                                              badexamples.add(val.trim());
+                                                              badexamples.add(result.raw[cleanfield].trim());
                                                             }
+                                                          }
 
-                                                          });
                                                         }
                                                         else {
-                                                          examples.add(result.raw[cleanfield].trim());
-                                                          if (result.raw[cleanfield].trim().indexOf(' ') != -1) {
-                                                            multiwords = true;
-                                                            badexamples.add(result.raw[cleanfield].trim());
-                                                          }
+                                                          examples.add(result.raw[cleanfield]);
                                                         }
-
                                                       }
-                                                      else {
-                                                        examples.add(result.raw[cleanfield]);
-                                                      }
+                                                    });
+                                                  }
+                                                  let containsOperator = false;
+                                                  let matchOperator = false;
+                                                  if (json.singlewordfieldscontains.includes(field)) {
+                                                    containsOperator = true;
+                                                  }
+                                                  if (json.singlewordfieldsmatch.includes(field)) {
+                                                    matchOperator = true;
+                                                  }
+                                                  // json.badquery += "Checking for Field: <b>" + field + "</b>RESULTS: "+wehaveresults+"/"+multiwords+"<BR>";
+                                                  //                                        problems.add("<div class=myexpr>Expression:</div><div class=myexprval><span class='mycode'>" + result[0].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + "</span></div><div class=myexpr>Field:</div><div class=myexprval><b>" + field + "</b></div><div class=myexprcomm>Numeric query, but the field does not have UseCacheForNumericQuery enabled.</div>");
+                                                  //problems.add("<table class=mytable><tr><td class=myexpr>Expression:</td><td class=myexprval><span class='mycode'>" + result[0].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + "</span></td></tr><tr><td class=myexpr>Field:</td><td class=myexprval><b>" + sortfield + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Sorting, but the field does not have UseCacheForSort enabled.</td></tr></table>");
+                                                  //badexamples.add([...examples]);
+                                                  examples.forEach(badexamples.add, badexamples);
+                                                  let comment = '';
+                                                  if (json.allfields.length == 0) {
+                                                    comment = '<br><b>We could not detect if the field is already a facet. Check it in your Coveo Org.</b>';
+                                                  }
+                                                  if (!wehaveresults) {
+                                                    if (matchOperator) {
+                                                      json.badquery = json.badquery.replaceAll(">Facet Field: <b>" + "==" + field + "</b><br>Does it only contains single words? Use = .<",
+                                                        ">Facet Field: </td><td class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>EMPTY</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a == query, but we could not check the content from the index.<br>Check your content, if it contains single words, use = instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</b></td></tr><");
+                                                      json.badquery = json.badquery.replaceAll(">Field: <b>" + "==" + field + "</b><br>Do you really want to use Contains (=) or are you filtering? <br>If you want to filter, use == (exact match), which is faster.<",
+                                                        ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>EMPTY</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a == query, but we could not check the content from the index.<br>Check your content, if it contains single words, use = instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
+                                                      json.badquery = json.badquery.replaceAll(">Field: <b>" + "==" + field + "</b><br>Are you using a lot of exact matches and are you filtering?<br>Consider to make the field a Facet/Multivalue Facet.<br>If your field content only contains single words, use the = operator (No need to create a facet for it).<",
+                                                        ">Field:</td><td  class=myexprval> <b>" + field + "</b></td></tr><tr><td  class=myexpr>Values in the index: </td><td class=myexprval><b>EMPTY</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a == query, but we could not check the content from the index.<br>Check your content, if it contains single words, use = instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
                                                     }
-                                                  });
-                                                }
-                                                let containsOperator = false;
-                                                let matchOperator = false;
-                                                if (json.singlewordfieldscontains.includes(field)) {
-                                                  containsOperator = true;
-                                                }
-                                                if (json.singlewordfieldsmatch.includes(field)) {
-                                                  matchOperator = true;
-                                                }
-                                                // json.badquery += "Checking for Field: <b>" + field + "</b>RESULTS: "+wehaveresults+"/"+multiwords+"<BR>";
-                                                //                                        problems.add("<div class=myexpr>Expression:</div><div class=myexprval><span class='mycode'>" + result[0].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + "</span></div><div class=myexpr>Field:</div><div class=myexprval><b>" + field + "</b></div><div class=myexprcomm>Numeric query, but the field does not have UseCacheForNumericQuery enabled.</div>");
-                                                //problems.add("<table class=mytable><tr><td class=myexpr>Expression:</td><td class=myexprval><span class='mycode'>" + result[0].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + "</span></td></tr><tr><td class=myexpr>Field:</td><td class=myexprval><b>" + sortfield + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Sorting, but the field does not have UseCacheForSort enabled.</td></tr></table>");
-                                                //badexamples.add([...examples]);
-                                                examples.forEach(badexamples.add, badexamples);
-                                                let comment = '';
-                                                if (json.allfields.length == 0) {
-                                                  comment = '<br><b>We could not detect if the field is already a facet. Check it in your Coveo Org.</b>';
-                                                }
-                                                if (!wehaveresults) {
-                                                  if (matchOperator) {
-                                                    json.badquery = json.badquery.replaceAll(">Facet Field: <b>" + "==" + field + "</b><br>Does it only contains single words? Use = .<",
-                                                      ">Facet Field: </td><td class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>EMPTY</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a == query, but we could not check the content from the index.<br>Check your content, if it contains single words, use = instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</b></td></tr><");
-                                                    json.badquery = json.badquery.replaceAll(">Field: <b>" + "==" + field + "</b><br>Do you really want to use Contains (=) or are you filtering? <br>If you want to filter, use == (exact match), which is faster.<",
-                                                      ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>EMPTY</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a == query, but we could not check the content from the index.<br>Check your content, if it contains single words, use = instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
-                                                    json.badquery = json.badquery.replaceAll(">Field: <b>" + "==" + field + "</b><br>Are you using a lot of exact matches and are you filtering?<br>Consider to make the field a Facet/Multivalue Facet.<br>If your field content only contains single words, use the = operator (No need to create a facet for it).<",
-                                                      ">Field:</td><td  class=myexprval> <b>" + field + "</b></td></tr><tr><td  class=myexpr>Values in the index: </td><td class=myexprval><b>EMPTY</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a == query, but we could not check the content from the index.<br>Check your content, if it contains single words, use = instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
-                                                  }
-                                                  if (containsOperator) {
-                                                    json.badquery = json.badquery.replaceAll(">Facet Field: <b>" + "=" + field + "</b><br>Does it only contains single words? Use = .<",
-                                                      ">Facet Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index:</td><td class=myexprval><b>EMPTY</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a = (contains) query, but we could not check the content from the index.<br>Check your content, if it contains single words, use = instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
-                                                    json.badquery = json.badquery.replaceAll(">Field: <b>" + "=" + field + "</b><br>Do you really want to use Contains (=) or are you filtering? <br>If you want to filter, use == (exact match), which is faster.<",
-                                                      ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>EMPTY</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a = query, but we could not check the content from the index.<br>Check your content, if it contains single words, use = instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
-                                                    json.badquery = json.badquery.replaceAll(">Field: <b>" + "=" + field + "</b><br>Are you using a lot of exact matches and are you filtering?<br>Consider to make the field a Facet/Multivalue Facet.<br>If your field content only contains single words, use the = operator (No need to create a facet for it).<",
-                                                      ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td  class=myexpr>Values in the index: </td><td class=myexprval><b>EMPTY</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a == query, but we could not check the content from the index.<br>Check your content, if it contains single words, use = instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
-                                                  }
-
-                                                }
-                                                if (!multiwords && wehaveresults) {
-                                                  if (matchOperator) {
-                                                    json.badfields_query.push(field);
-                                                    json.badquery = json.badquery.replaceAll(">Facet Field: <b>" + "==" + field + "</b><br>Does it only contains single words? Use = .<",
-                                                      ">Facet Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexpr><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a == query.<br>Based on the first 500 results, it only contains single words. <b>Use = instead.</b><br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
-                                                    json.badquery = json.badquery.replaceAll(">Field: <b>" + "==" + field + "</b><br>Do you really want to use Contains (=) or are you filtering? <br>If you want to filter, use == (exact match), which is faster.<",
-                                                      ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a == query.<br>Based on the first 500 results, it only contains single words. <b>Use = instead.</b><br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
-                                                    json.badquery = json.badquery.replaceAll(">Field: <b>" + "==" + field + "</b><br>Are you using a lot of exact matches and are you filtering?<br>Consider to make the field a Facet/Multivalue Facet.<br>If your field content only contains single words, use the = operator (No need to create a facet for it).<",
-                                                      ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index:</td><td class=myexprval> <b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a == query.<br>Based on the first 500 results, it only contains single words. <b>Use = instead.</b><br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
-                                                    //json.badquery += "Contents: <b>" + [...examples].join(', ') + "</b><br>Is used with a == query.<br>Based on the first 500 results, it only contains single words. Use = instead.<BR><BR>";
-                                                  }
-                                                  if (containsOperator) {
-                                                    json.badquery = json.badquery.replaceAll(">Facet Field: <b>" + "=" + field + "</b><br>Does it only contains single words? Use = .<",
-                                                      ">Facet Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a = query.<br>Based on the first 500 results, the content contains single words. Keep it like this!</td></tr><");
-                                                    json.badquery = json.badquery.replaceAll(">Field: <b>" + "=" + field + "</b><br>Do you really want to use Contains (=) or are you filtering? <br>If you want to filter, use == (exact match), which is faster.<",
-                                                      ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a = query.<br>Based on the first 500 results, the content contains single words. Keep it like this!</td></tr><");
-                                                    json.badquery = json.badquery.replaceAll(">Field: <b>" + "=" + field + "</b><br>Are you using a lot of exact matches and are you filtering?<br>Consider to make the field a Facet/Multivalue Facet.<br>If your field content only contains single words, use the = operator (No need to create a facet for it).<",
-                                                      ">Field:</td><td  class=myexprval> <b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a = query.<br>Based on the first 500 results, the content contains single words. Keep it like this!</td></tr><");
+                                                    if (containsOperator) {
+                                                      json.badquery = json.badquery.replaceAll(">Facet Field: <b>" + "=" + field + "</b><br>Does it only contains single words? Use = .<",
+                                                        ">Facet Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index:</td><td class=myexprval><b>EMPTY</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a = (contains) query, but we could not check the content from the index.<br>Check your content, if it contains single words, use = instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
+                                                      json.badquery = json.badquery.replaceAll(">Field: <b>" + "=" + field + "</b><br>Do you really want to use Contains (=) or are you filtering? <br>If you want to filter, use == (exact match), which is faster.<",
+                                                        ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>EMPTY</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a = query, but we could not check the content from the index.<br>Check your content, if it contains single words, use = instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
+                                                      json.badquery = json.badquery.replaceAll(">Field: <b>" + "=" + field + "</b><br>Are you using a lot of exact matches and are you filtering?<br>Consider to make the field a Facet/Multivalue Facet.<br>If your field content only contains single words, use the = operator (No need to create a facet for it).<",
+                                                        ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td  class=myexpr>Values in the index: </td><td class=myexprval><b>EMPTY</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a == query, but we could not check the content from the index.<br>Check your content, if it contains single words, use = instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
+                                                    }
 
                                                   }
-                                                }
-                                                if (multiwords && wehaveresults) {
-                                                  if (matchOperator) {
-                                                    json.badquery = json.badquery.replaceAll(">Facet Field: <b>" + "==" + field + "</b><br>Does it only contains single words? Use = .<",
-                                                      ">Facet Field:</td><td  class=myexprval> <b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index:</td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a == query.<br>Based on the first 500 results, the content contains multiple words. Keep it like this!</td></tr><");
-                                                    json.badquery = json.badquery.replaceAll(">Field: <b>" + "==" + field + "</b><br>Do you really want to use Contains (=) or are you filtering? <br>If you want to filter, use == (exact match), which is faster.<",
-                                                      ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexprval>Values in the index:</td><td class=myexprval> <b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Based on the first 500 results, the content contains multiple words. Keep it like this!</td></tr><");
-                                                    json.badquery = json.badquery.replaceAll(">Field: <b>" + "==" + field + "</b><br>Are you using a lot of exact matches and are you filtering?<br>Consider to make the field a Facet/Multivalue Facet.<br>If your field content only contains single words, use the = operator (No need to create a facet for it).<",
-                                                      ">Field:</td><td class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index:</td><td class=myexprval> <b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Consider to make the field a Facet/Multivalue Facet (When cardinality is < 10.000)." + comment + "</td></tr><");
-                                                  }
-                                                  if (containsOperator) {
-                                                    json.badquery = json.badquery.replaceAll(">Facet Field: <b>" + "=" + field + "</b><br>Does it only contains single words? Use = .<",
-                                                      ">Facet Field:</td><td  class=myexprval> <b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a = query.<br>This is not an exact match, but a <b>contains</b> statement.<br>Are you filtering on this field? Consider to use == instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
-                                                    json.badquery = json.badquery.replaceAll(">Field: <b>" + "=" + field + "</b><br>Do you really want to use Contains (=) or are you filtering? <br>If you want to filter, use == (exact match), which is faster.<",
-                                                      ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexprval>Values in the index: </td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a = query.<br>This is not an exact match, but a <b>contains</b> statement.<br>Are you filtering on this field? Consider to make the field a Facet/Multivalue Facet and use == instead." + comment + "</td></tr><");
-                                                    json.badquery = json.badquery.replaceAll(">Field: <b>" + "=" + field + "</b><br>Are you using a lot of exact matches and are you filtering?<br>Consider to make the field a Facet/Multivalue Facet.<br>If your field content only contains single words, use the = operator (No need to create a facet for it).<",
-                                                      ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index:</td><td class=myexprval> <b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a = query.<br>This is not an exact match, but a <b>contains</b> statement.<br>Are you filtering on this field? Consider to make the field a Facet/Multivalue Facet and use == instead." + comment + "</td></tr><");
+                                                  if (!multiwords && wehaveresults) {
+                                                    if (matchOperator) {
+                                                      json.badfields_query.push(field);
+                                                      json.badquery = json.badquery.replaceAll(">Facet Field: <b>" + "==" + field + "</b><br>Does it only contains single words? Use = .<",
+                                                        ">Facet Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexpr><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a == query.<br>Based on the first 500 results, it only contains single words. <b>Use = instead.</b><br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
+                                                      json.badquery = json.badquery.replaceAll(">Field: <b>" + "==" + field + "</b><br>Do you really want to use Contains (=) or are you filtering? <br>If you want to filter, use == (exact match), which is faster.<",
+                                                        ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a == query.<br>Based on the first 500 results, it only contains single words. <b>Use = instead.</b><br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
+                                                      json.badquery = json.badquery.replaceAll(">Field: <b>" + "==" + field + "</b><br>Are you using a lot of exact matches and are you filtering?<br>Consider to make the field a Facet/Multivalue Facet.<br>If your field content only contains single words, use the = operator (No need to create a facet for it).<",
+                                                        ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index:</td><td class=myexprval> <b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a == query.<br>Based on the first 500 results, it only contains single words. <b>Use = instead.</b><br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
+                                                      //json.badquery += "Contents: <b>" + [...examples].join(', ') + "</b><br>Is used with a == query.<br>Based on the first 500 results, it only contains single words. Use = instead.<BR><BR>";
+                                                    }
+                                                    if (containsOperator) {
+                                                      json.badquery = json.badquery.replaceAll(">Facet Field: <b>" + "=" + field + "</b><br>Does it only contains single words? Use = .<",
+                                                        ">Facet Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a = query.<br>Based on the first 500 results, the content contains single words. Keep it like this!</td></tr><");
+                                                      json.badquery = json.badquery.replaceAll(">Field: <b>" + "=" + field + "</b><br>Do you really want to use Contains (=) or are you filtering? <br>If you want to filter, use == (exact match), which is faster.<",
+                                                        ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a = query.<br>Based on the first 500 results, the content contains single words. Keep it like this!</td></tr><");
+                                                      json.badquery = json.badquery.replaceAll(">Field: <b>" + "=" + field + "</b><br>Are you using a lot of exact matches and are you filtering?<br>Consider to make the field a Facet/Multivalue Facet.<br>If your field content only contains single words, use the = operator (No need to create a facet for it).<",
+                                                        ">Field:</td><td  class=myexprval> <b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a = query.<br>Based on the first 500 results, the content contains single words. Keep it like this!</td></tr><");
 
+                                                    }
                                                   }
-                                                }
-                                                resolve();
+                                                  if (multiwords && wehaveresults) {
+                                                    if (matchOperator) {
+                                                      json.badquery = json.badquery.replaceAll(">Facet Field: <b>" + "==" + field + "</b><br>Does it only contains single words? Use = .<",
+                                                        ">Facet Field:</td><td  class=myexprval> <b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index:</td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a == query.<br>Based on the first 500 results, the content contains multiple words. Keep it like this!</td></tr><");
+                                                      json.badquery = json.badquery.replaceAll(">Field: <b>" + "==" + field + "</b><br>Do you really want to use Contains (=) or are you filtering? <br>If you want to filter, use == (exact match), which is faster.<",
+                                                        ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexprval>Values in the index:</td><td class=myexprval> <b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Based on the first 500 results, the content contains multiple words. Keep it like this!</td></tr><");
+                                                      json.badquery = json.badquery.replaceAll(">Field: <b>" + "==" + field + "</b><br>Are you using a lot of exact matches and are you filtering?<br>Consider to make the field a Facet/Multivalue Facet.<br>If your field content only contains single words, use the = operator (No need to create a facet for it).<",
+                                                        ">Field:</td><td class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index:</td><td class=myexprval> <b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Consider to make the field a Facet/Multivalue Facet (When cardinality is < 10.000)." + comment + "</td></tr><");
+                                                    }
+                                                    if (containsOperator) {
+                                                      json.badquery = json.badquery.replaceAll(">Facet Field: <b>" + "=" + field + "</b><br>Does it only contains single words? Use = .<",
+                                                        ">Facet Field:</td><td  class=myexprval> <b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index: </td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td  colspan=2 class=myexprcomm>Is used with a = query.<br>This is not an exact match, but a <b>contains</b> statement.<br>Are you filtering on this field? Consider to use == instead.<br>When cardinality is < 10.000, create a Facet." + comment + "</td></tr><");
+                                                      json.badquery = json.badquery.replaceAll(">Field: <b>" + "=" + field + "</b><br>Do you really want to use Contains (=) or are you filtering? <br>If you want to filter, use == (exact match), which is faster.<",
+                                                        ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexprval>Values in the index: </td><td class=myexprval><b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a = query.<br>This is not an exact match, but a <b>contains</b> statement.<br>Are you filtering on this field? Consider to make the field a Facet/Multivalue Facet and use == instead." + comment + "</td></tr><");
+                                                      json.badquery = json.badquery.replaceAll(">Field: <b>" + "=" + field + "</b><br>Are you using a lot of exact matches and are you filtering?<br>Consider to make the field a Facet/Multivalue Facet.<br>If your field content only contains single words, use the = operator (No need to create a facet for it).<",
+                                                        ">Field: </td><td  class=myexprval><b>" + field + "</b></td></tr><tr><td class=myexpr>Values in the index:</td><td class=myexprval> <b>" + [...badexamples].slice(0, 10).join(', ') + "</b></td></tr><tr><td colspan=2 class=myexprcomm>Is used with a = query.<br>This is not an exact match, but a <b>contains</b> statement.<br>Are you filtering on this field? Consider to make the field a Facet/Multivalue Facet and use == instead." + comment + "</td></tr><");
+
+                                                    }
+                                                  }
+                                                  resolve();
+                                                });
                                               });
                                             });
+                                            requestsQ = requestsQ.concat(requestsSQ);
+                                            executeSequentially(requestsQ).then(
+                                              function () {
+                                                json.qpl_with_filters = [...new Set(json.qpl_with_filters)];
+                                                json.badfields_filtered = [...new Set(json.badfields_filtered)];
+                                                json.badfields_query = [...new Set(json.badfields_query)];
+                                                SendMessage({ type: 'saveOrg', json: json });
+                                                document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Generating Report';
+                                                processReport(json);
+                                              });
                                           });
-                                          requestsQ = requestsQ.concat(requestsSQ);
-                                          executeSequentially(requestsQ).then(
-                                            function () {
-                                              json.qpl_with_filters = [...new Set(json.qpl_with_filters)];
-                                              json.badfields_filtered = [...new Set(json.badfields_filtered)];
-                                              json.badfields_query = [...new Set(json.badfields_query)];
-                                              SendMessage({ type: 'saveOrg', json: json });
-                                              document.getElementById('loadTitle').innerHTML = 'Currently loading. Please wait.<br>Generating Report';
-                                              processReport(json);
-                                            });
                                         });
                                       });
                                     });
