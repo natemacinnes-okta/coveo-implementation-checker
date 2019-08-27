@@ -148,7 +148,7 @@ class InspectAllOrganizations {
   a img {outline: none;}
   img {border: 0;}
   a:focus {outline: none;}
-  
+
 h4 {
   font-size: 17px;
   background-color: lightyellow;
@@ -693,19 +693,19 @@ tr td.line-ttfb, tr th.line-ttfb {
     //document.getElementById('scores').innerHTML = '<h2>' + maintitle + '</h2>' + scores.join('\n');
     /*
         if (data.errors != "" && data.errors !== undefined) {
-    
+
           data.details += "<hr><h4 style='color: red;  font-size: 20px;'>Errors during processing:</h4>" + data.errors;
         }
         if (data.badquery != "") {
-    
+
           data.details += "<hr><h4 style='color:red'>Queries which need attention:</h4>" + data.badquery + "";
         }
         if (data.details_facettolong != "") {
-    
+
           data.details += "<hr><h4>Facet values which are too long:</h4>" + data.details_facettolong;
         }
         if (data.details_alwaysthesame != "") {
-    
+
           data.details += "<hr><h4>Fields where the end of the content is the same:</h4>" + data.details_alwaysthesame;
         }
         */
@@ -2105,9 +2105,7 @@ tr td.line-ttfb, tr th.line-ttfb {
       thesearchurl: []
     };
     console.log('GetSourceInfo');
-    await inspect.getSourceInfo(json).then(function (data) {
-      json = data;
-    });
+    json = await inspect.getSourceInfo(json);
     /*let data=json;
     let html = this.processReport(data);
     //let html = `<html><body><h1>${data.org}</h1>${report}${JSON.stringify(mydata)}</body></html>`;
@@ -2126,55 +2124,45 @@ tr td.line-ttfb, tr th.line-ttfb {
       //Get source Schedules
       console.log('GetSourceSchedules');
       let sourcenoschedule = [];
-      let requests = json.sourceids.map(async source => {
-        let isPush = json.pushnames.filter(source2 => { if (source2.name == source.name) return source2.name; }).length > 0;
+
+      for (const source of json.sourceids) {
+        // [JD] not sure what 'isPush' means here.
+        let isPush = json.pushnames.includes(source.name);
         if (!isPush) {
-          await inspect.getSourceSchedules(json, source.id).then(function (data) {
-            //console.log(data);
-            if (!data) {
-              sourcenoschedule.push(source.name);
-            }
-          });
+          const data = await inspect.getSourceSchedules(json, source.id);
+          //console.log(data);
+          if (!data) {
+            sourcenoschedule.push(source.name);
+          }
         }
-      });
-      await Promise.all(requests);
+      }
+
       json.noscheduledsources = sourcenoschedule;
       json.nrofnoschedulessources = sourcenoschedule.length;
 
       console.log('getSecurityInfo');
       //Get Security Providers info
-      await inspect.getSecurityInfo(json).then(function (data) {
-        json = data;
-      });
+      json = await inspect.getSecurityInfo(json);
       console.log(json.noscheduledsecprov);
+
       console.log('getExtensionInfo');
       //Get Extensions Info
-      await inspect.getExtensionInfo(json).then(function (data) {
-        json = data;
-      });
+      json = await inspect.getExtensionInfo(json);
 
       console.log('getModelsInfo');
       //Get Models Info
-      await inspect.getModelsInfo(json).then(function (data) {
-        json = data;
-      });
-
+      json = await inspect.getModelsInfo(json);
 
       console.log("getLicense");
-      await inspect.getLicense(json).then(function (data) {
-        json = data;
-      });
+      json = await inspect.getLicense(json);
+
       console.log('getNodeInfo');
       //Get Node Info
-      await inspect.getNodeInfo(json).then(function (data) {
-        json = data;
-      });
+      json = await inspect.getNodeInfo(json);
 
       console.log('getAnalyticsMetricsInfo');
       //Get Analytics Metrics Info
-      await inspect.getAnalyticsMetricsInfo(json).then(function (data) {
-        json = data;
-      });
+      json = await inspect.getAnalyticsMetricsInfo(json);
 
       /*console.log('got Analytics');
       Promise.resolve().then(
@@ -2187,40 +2175,36 @@ tr td.line-ttfb, tr th.line-ttfb {
       //inspect.executeSequentially(tasks).then(function (data) {
       // inspect.getUsageInfo(data).then(function (data) {
       console.log('getAnalyticsMetricsDetails');
-      await inspect.getAnalyticsMetricsDetails(json).then(function (data) {
-        json = data;
-      });
+      json = await inspect.getAnalyticsMetricsDetails(json);
+
       let requestsQPL = [];
       let pipesToCheck = [];
       //If json.usedQueryPip
       console.log('getQueryPipelinesInfo');
-      await inspect.getQueryPipelinesInfo(json).then(function (data) {
-        json = data;
-        if (json.usedPipelines.length == 0) {
-          data.pipelines.map(pipes => {
-            pipesToCheck.push(pipes.name);
-          });
-        }
-        else {
-          json.usedPipelines.map(pipes => {
-            pipesToCheck.push(pipes);
-          });
-        }
-        requestsQPL = data.pipelines.map(async pipes => {
-          //Only if inside pipesToCheck
-          if (pipesToCheck.includes(pipes.name)) {
-            await inspect.getQueryPipelinesDetails(json, pipes).then(function (data2) {
-              //json = data2;
-              console.log('Getting QPL Details');
-              //console.log(data2);
-            });
-          }
+      json = await inspect.getQueryPipelinesInfo(json);
+
+      if (json.usedPipelines.length == 0) {
+        json.pipelines.map(pipes => {
+          pipesToCheck.push(pipes.name);
         });
-        //});
-        //});
-      });
+      }
+      else {
+        json.usedPipelines.map(pipes => {
+          pipesToCheck.push(pipes);
+        });
+      }
+
+      for (const pipes of json.pipelines) {
+        //Only if inside pipesToCheck
+        if (pipesToCheck.includes(pipes.name)) {
+          await inspect.getQueryPipelinesDetails(json, pipes);
+        }
+      }
+      //});
+      //});
+
       //let allPromises = await Promise.all(requestsQPL);
-      await inspect.executeSequentially(requests);
+      // await inspect.executeSequentially(requests);
       console.log('got QPLS');
       //console.log(data);
       let data = json;
@@ -2351,9 +2335,10 @@ tr td.line-ttfb, tr th.line-ttfb {
           'Content-Type': 'application/x-www-form-urlencoded',
         }
       }
-      callApi(options, dataEncoded).then(response => {
-        //console.log(response);
-      });
+
+      const response = await callApi(options, dataEncoded)
+      //console.log(response);
+
       //}
       //});
       //});
@@ -2379,155 +2364,155 @@ tr td.line-ttfb, tr th.line-ttfb {
     let pageIndex = 0;
     let orgs = await this.getOrganizations(pageIndex);
     let toprocess = ['aaamidatlanticincprod',
-      'ahaproduction437qnnvv',
-      'alcatellucententerpriseeurope',
-      'asqproductiongm5sinb9',
-      'carolinashealthcare',
-      'instrongg4wmwqf',
-      'canadacouncilfortheartsprod',
-      'childrenshospitalboston',
-      'colliersinternational',
-      'commissiondelaconstructionduqubecproductionauss8jo9',
-      'faskenmartineau',
-      'firstqualityenterprisesproductionpxzxo2aq',
-      'focusonthefamilyrg75ntbs',
-      'fondsdesolidarite',
-      'bekaerttk0lcw7o',
-      'bluegreenvacationsproductionjuct2d8e',
-      'bonsecourshealthsystemsinc',
-      'bowvalleycollegeproductionrisjbxxj',
-      'acuitybrands',
-      'barco807v1hty',
-      'bcevzjxr5qt',
-      'changehealthcare1sj1geuy',
-      'oclcprodbkh6ljcv',
-      'texasinstrumentsof16fcd3',
-      'xilinxprdkmx6qjsc',
-      'amfamnonproductionhsyl9vm3',
-      'andersencorporation',
-      'anritsu',
-      'aopa9nc4vnbc',
-      'aorn',
-      'argonnenationallaboratoryproductionhw38oy9c',
-      'armlimitedproductionubhpo2y4',
-      'asaamericansocietyofanesthesiologists',
-      'dalhousieuniversityproductionqax94e5b',
-      'pitneybowessoftwareik898xxa',
-      'principalfinancialgroupqpnzn1vj',
-      'mitelfkipvyf8',
-      'schlumbergerproduction0cs2zrh7',
-      'pfizer',
-      'tsiaproduction',
-      'aviva65jyt1nn',
-      'fundaciontelefonicaproduction7cl3rm0a',
-      'dropboxproductionpmlw0l3v',
-      'wisconsindepartmentoftourismproductionoth7hkq2',
-      'levitonmanufacturing',
-      'questsoftwareproductionl1k3xvdx',
-      'junipernetworkswebsitecwcpnoiw',
-      'siemenshealthcarediagnosticsincproductionrguljwfe',
-      'repsolprodo2v1rcfc',
-      'americanassociationofclinicalchemistryproductionkdycizsv',
-      'americancollegeofradiology',
-      'motorolasolutionsincproductionmq0wx9mn',
-      'albertasecuritiescommissionprod2a34tiy7',
-      'americanoccupationaltherapyassociationprod',
-      'blackanddeckergmwgue73',
-      'chicagouniversityls5ir32t',
-      'theconferenceboardofcanada',
-      'itronproductionn7namvto',
-      'jonesdayproductionbi4jtoh5',
-      '7summitsascustomertrialhgnn0gy3',
-      'aarpu11lxv0p',
-      'abaproduction5u1a80ud',
-      'abbottlaboratoriesincproductionfjb9noe8',
-      'acogproduction8v7ii7qa',
-      'actianynmehrnx',
-      'adaproduction',
-      'adobev2prod9e382h1q',
-      'adventsoftwareproductionxghzutpq',
-      'aecomproductionay3rk4zi',
-      'alienvaultproda2gz1am5',
-      'alliantcreditunionfoundationproductionxfrd37iv',
-      'americanexpresscompany',
-      'analogdevicesproductionrzsvdg7d',
-      'anaplani1in68v0',
-      'anheuserbuschinbevprod',
-      'aofoundationproductionji8iisfk',
-      'architecturalwoodworkinginstituteproduction3fy1pta6',
-      'arrisgroupproductionz5r0cdvg',
-      'ascrsproduction80tq3shr',
-      'atcc3h1cvdzh',
-      'aureasoftwareproductionbpdv7cxq',
-      'automaticdataprocessingadpproductionvnn3f29q',
-      'avanadesc9productionlk3bs0x7',
-      'bcfproductionynpjp0nj',
-      'bdcprod',
-      'beckmancoulterhn9i3bqk',
-      'becukst2l7fr',
-      'beldencableproductionbugpvwoi',
-      'bjservicesm5t7xrg8',
-      'blackberry',
-      'blgproductionhcvwnqfi',
-      'boomiproduction308bh8om',
-      'branzlimitedprodp8kbgo00',
-      'c40citiesclimateleadershipgroupproductionsezdi5l7',
-      'cadenceelz4c78u',
-      'caleresproduction4uzryqju',
-      'cambridgeinvestmentresearchua',
-      'cbre4fbpdild',
-      'cdkglobalproductionccaz989b',
-      'centralsquaretechnologiesproduction2v1fbhxv',
-      'cfainstitute',
-      'chamberlaingroupk5f2dpwl',
-      'churchcommunitybuilderincproductione0wcwqin',
-      'cienacorporation50auilr9',
-      'citrixsystemsincproductionrofn69qv',
-      'clarivateanalytics',
-      'clarkconstructiongroupproductionfiy6iuys',
-      'cmhcn5w3hbfi',
-      'cohnreznick',
-      'columbiauniversityalumniportal',
-      'compuwarecorporationproductionfzk8h5rn',
-      'concury9vvkaz3',
-      'coveodemocommerceqmqaepc4',
-      'coveodemohabitathomecoveodemocom2nvhoe1r4',
-      'crossmarkinc',
-      'cushmanwakefieldproductionm8c7yxjk',
-      'dellprod',
-      'deltekinccustomercareua',
-      'dfaproduction7j3xksbp',
-      'dlapiperproductionntg1e3se',
-      'dominionenergyproductionivjj00jb',
-      'dorelproductionstrojqun',
-      'drhortonproductionbsf4s1r1',
-      'druvaproductione1shh13i',
-      'egdproductionbxtotgts',
-      'ellucian',
-      'enduranceproductionsfmneu4v',
-      'epriproductione28sc58i',
-      'everestreinsurancecompany',
-      'f5networksproduction0ypjm87g',
-      'f5networksproduction5vkhn00h',
-      'fanniemae9glu2r77',
-      'farahexperiencesllc',
-      'fcotetrainingorg',
-      'foresterscloudproductionagkwgtjx',
-      'formicaprod',
-      'foxentertainmentgroup1',
-      'fsecurecorporationproductionsjnl4jqt',
-      'fticonsultinginch36whs6v',
-      'fticonsultingproductionikz7qfd7',
-      'gapincproductionjra34f3l',
-      'geicoinsuranceproductionsvptcq2f',
-      'genworthfinancialsefuludv',
-      'gmproductione2yq29g7',
-      'gojoindustriesproductione3z8ghx9',
-      'grantthornton0efn6zju',
-      'gtaaproduction4ya6bu7h',
-      'healthspanprod',
-      'hewlettpackardproductioniwmg9b9w',
-      'hexagonwez3ntfa'];
+    'ahaproduction437qnnvv',
+    'alcatellucententerpriseeurope',
+    'asqproductiongm5sinb9',
+    'carolinashealthcare',
+    'instrongg4wmwqf',
+    'canadacouncilfortheartsprod',
+    'childrenshospitalboston',
+    'colliersinternational',
+    'commissiondelaconstructionduqubecproductionauss8jo9',
+    'faskenmartineau',
+    'firstqualityenterprisesproductionpxzxo2aq',
+    'focusonthefamilyrg75ntbs',
+    'fondsdesolidarite',
+    'bekaerttk0lcw7o',
+    'bluegreenvacationsproductionjuct2d8e',
+    'bonsecourshealthsystemsinc',
+    'bowvalleycollegeproductionrisjbxxj',
+    'acuitybrands',
+    'barco807v1hty',
+    'bcevzjxr5qt',
+    'changehealthcare1sj1geuy',
+    'oclcprodbkh6ljcv',
+    'texasinstrumentsof16fcd3',
+    'xilinxprdkmx6qjsc',
+    'amfamnonproductionhsyl9vm3',
+    'andersencorporation',
+    'anritsu',
+    'aopa9nc4vnbc',
+    'aorn',
+    'argonnenationallaboratoryproductionhw38oy9c',
+    'armlimitedproductionubhpo2y4',
+    'asaamericansocietyofanesthesiologists',
+    'dalhousieuniversityproductionqax94e5b',
+    'pitneybowessoftwareik898xxa',
+    'principalfinancialgroupqpnzn1vj',
+    'mitelfkipvyf8',
+    'schlumbergerproduction0cs2zrh7',
+    'pfizer',
+    'tsiaproduction',
+    'aviva65jyt1nn',
+    'fundaciontelefonicaproduction7cl3rm0a',
+    'dropboxproductionpmlw0l3v',
+    'wisconsindepartmentoftourismproductionoth7hkq2',
+    'levitonmanufacturing',
+    'questsoftwareproductionl1k3xvdx',
+    'junipernetworkswebsitecwcpnoiw',
+    'siemenshealthcarediagnosticsincproductionrguljwfe',
+    'repsolprodo2v1rcfc',
+    'americanassociationofclinicalchemistryproductionkdycizsv',
+    'americancollegeofradiology',
+    'motorolasolutionsincproductionmq0wx9mn',
+    'albertasecuritiescommissionprod2a34tiy7',
+    'americanoccupationaltherapyassociationprod',
+    'blackanddeckergmwgue73',
+    'chicagouniversityls5ir32t',
+    'theconferenceboardofcanada',
+    'itronproductionn7namvto',
+    'jonesdayproductionbi4jtoh5',
+    '7summitsascustomertrialhgnn0gy3',
+    'aarpu11lxv0p',
+    'abaproduction5u1a80ud',
+    'abbottlaboratoriesincproductionfjb9noe8',
+    'acogproduction8v7ii7qa',
+    'actianynmehrnx',
+    'adaproduction',
+    'adobev2prod9e382h1q',
+    'adventsoftwareproductionxghzutpq',
+    'aecomproductionay3rk4zi',
+    'alienvaultproda2gz1am5',
+    'alliantcreditunionfoundationproductionxfrd37iv',
+    'americanexpresscompany',
+    'analogdevicesproductionrzsvdg7d',
+    'anaplani1in68v0',
+    'anheuserbuschinbevprod',
+    'aofoundationproductionji8iisfk',
+    'architecturalwoodworkinginstituteproduction3fy1pta6',
+    'arrisgroupproductionz5r0cdvg',
+    'ascrsproduction80tq3shr',
+    'atcc3h1cvdzh',
+    'aureasoftwareproductionbpdv7cxq',
+    'automaticdataprocessingadpproductionvnn3f29q',
+    'avanadesc9productionlk3bs0x7',
+    'bcfproductionynpjp0nj',
+    'bdcprod',
+    'beckmancoulterhn9i3bqk',
+    'becukst2l7fr',
+    'beldencableproductionbugpvwoi',
+    'bjservicesm5t7xrg8',
+    'blackberry',
+    'blgproductionhcvwnqfi',
+    'boomiproduction308bh8om',
+    'branzlimitedprodp8kbgo00',
+    'c40citiesclimateleadershipgroupproductionsezdi5l7',
+    'cadenceelz4c78u',
+    'caleresproduction4uzryqju',
+    'cambridgeinvestmentresearchua',
+    'cbre4fbpdild',
+    'cdkglobalproductionccaz989b',
+    'centralsquaretechnologiesproduction2v1fbhxv',
+    'cfainstitute',
+    'chamberlaingroupk5f2dpwl',
+    'churchcommunitybuilderincproductione0wcwqin',
+    'cienacorporation50auilr9',
+    'citrixsystemsincproductionrofn69qv',
+    'clarivateanalytics',
+    'clarkconstructiongroupproductionfiy6iuys',
+    'cmhcn5w3hbfi',
+    'cohnreznick',
+    'columbiauniversityalumniportal',
+    'compuwarecorporationproductionfzk8h5rn',
+    'concury9vvkaz3',
+    'coveodemocommerceqmqaepc4',
+    'coveodemohabitathomecoveodemocom2nvhoe1r4',
+    'crossmarkinc',
+    'cushmanwakefieldproductionm8c7yxjk',
+    'dellprod',
+    'deltekinccustomercareua',
+    'dfaproduction7j3xksbp',
+    'dlapiperproductionntg1e3se',
+    'dominionenergyproductionivjj00jb',
+    'dorelproductionstrojqun',
+    'drhortonproductionbsf4s1r1',
+    'druvaproductione1shh13i',
+    'egdproductionbxtotgts',
+    'ellucian',
+    'enduranceproductionsfmneu4v',
+    'epriproductione28sc58i',
+    'everestreinsurancecompany',
+    'f5networksproduction0ypjm87g',
+    'f5networksproduction5vkhn00h',
+    'fanniemae9glu2r77',
+    'farahexperiencesllc',
+    'fcotetrainingorg',
+    'foresterscloudproductionagkwgtjx',
+    'formicaprod',
+    'foxentertainmentgroup1',
+    'fsecurecorporationproductionsjnl4jqt',
+    'fticonsultinginch36whs6v',
+    'fticonsultingproductionikz7qfd7',
+    'gapincproductionjra34f3l',
+    'geicoinsuranceproductionsvptcq2f',
+    'genworthfinancialsefuludv',
+    'gmproductione2yq29g7',
+    'gojoindustriesproductione3z8ghx9',
+    'grantthornton0efn6zju',
+    'gtaaproduction4ya6bu7h',
+    'healthspanprod',
+    'hewlettpackardproductioniwmg9b9w',
+    'hexagonwez3ntfa'];
     //orgs.items = orgs.items.filter(org => (/aarp/i).test(org.id));
     while (pageIndex < orgs.totalPages) {
 
