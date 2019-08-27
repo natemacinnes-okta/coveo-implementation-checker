@@ -6,7 +6,7 @@ var pHash = require("image-hash");
 const qs = require('querystring');
 const fs = require('fs');
 const nrofdaysAnalytics = 14;
-const debug = true;
+const debug = false;
 const puppeteer = require('puppeteer');
 let browser; //= await puppeteer.launch();
 
@@ -17,10 +17,8 @@ class InspectAllOrganizations {
     this.apiKey = settings.apiKey;
     this.baseUrl = settings.baseUrl;
     this.baseUrlAnalytics = settings.baseUrlAnalytics;
-    //this.browser = null;
-    //this.page = null;
-
   }
+
   async initPuppet() {
     browser = await puppeteer.launch();
   }
@@ -41,6 +39,7 @@ class InspectAllOrganizations {
     // convert binary data to base64 encoded string
     return new Buffer(bitmap).toString('base64');
   }
+
   hammingDistance(str1, str2) {
     /* If the strings are equal, bail */
     if (str1 === str2) {
@@ -69,16 +68,11 @@ class InspectAllOrganizations {
     let promise = new Promise((resolve) => {
 
       let mydata2 = pHash.imageHash(file, 32, true, (error, data) => {
-        //if (error) throw error;
-        //console.log(data);
         mydata = data;
         resolve(mydata);
-        //return Promise.resolve(mydata);
-        // 0773063f063f36070e070a070f378e7f1f000fff0fff020103f00ffb0f810ff0
       });
     });
     return promise;
-    //return mydata;
   }
 
   createWheel(data) {
@@ -770,7 +764,6 @@ tr td.line-ttfb, tr th.line-ttfb {
     let promise = new Promise((resolve) => {
       this.executeCall(url, report, "Getting Source Info", "thereAreErrorsSources", "GET", this.apiKey).then(function (data) {
         try {
-          //console.log('returned getSourceInfo');
           if (data) {
             const utils = require('./utils');
             report.docsfromsources = 0;
@@ -817,7 +810,6 @@ tr td.line-ttfb, tr th.line-ttfb {
         }
         catch{
         }
-
         resolve(report);
       });
     });
@@ -833,7 +825,6 @@ tr td.line-ttfb, tr th.line-ttfb {
           console.log(data);
         }
         if (data) {
-          //console.log(data.length);
           resolve(data.length != 0);
         }
         else {
@@ -985,11 +976,7 @@ tr td.line-ttfb, tr th.line-ttfb {
     var to = new Date();
 
     let froms = '&from=' + fromlast.toISOString() + '&to=' + to.toISOString();
-    //console.log(froms);
-    //https://platformdev.cloud.coveo.com/rest/ua/v15/stats/globalData?
-    //https://platformdev0.cloud.coveo.com/rest/ua/v15/stats/combinedData
     let url = this.baseUrlAnalytics + '/rest/ua/v15/stats/globalData?m=PerformSearch&m=RefinementQuery&m=average%28actionresponsetime%29&m=UniqueVisitorById&m=UniqueVisit&m=DocumentView&m=AverageClickRank&m=ClickThroughRatio&m=SearchWithClick&tz=Z&i=DAY&bindOnLastSearch=false&org=' + report.org + froms;
-    //console.log(url);
     let promise = new Promise((resolve) => {
       this.executeCall(url, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch", "GET", this.apiKey).then(function (data) {
         if (debug) {
@@ -1080,14 +1067,11 @@ tr td.line-ttfb, tr th.line-ttfb {
     let url = this.baseUrl + escape('/rest/search/admin/pipelines/' + id + '/statements') + '?organizationId=' + report.org + '&feature=' + type + "&perPage=200";
     let promise = new Promise((resolve) => {
       this.executeCall(url, report, "Getting Query Pipeline Details for " + type, "thereAreErrorsSearch", "GET", this.apiKey).then(function (data) {
-        // console.log(data);
         if (data) {
           resolve(data);
-          //return data;
         }
         else {
           resolve(undefined);
-          //return (undefined);
         }
 
       });
@@ -1100,13 +1084,10 @@ tr td.line-ttfb, tr th.line-ttfb {
     let promise = new Promise((resolve) => {
       this.executeCall(url, report, "Getting Query Pipeline Details ", "thereAreErrorsSearch", "GET", this.apiKey).then(function (data) {
         if (data) {
-          //    console.log(data);
           resolve(data);
-          //return(data);
         }
         else {
           resolve(undefined);
-          //return (undefined);
         }
 
       });
@@ -1256,22 +1237,6 @@ tr td.line-ttfb, tr th.line-ttfb {
         if (data) {
           data.statements.map((statement) => {
             json.qpl_with_filters.push(pipe.name);
-            //Basic (q)
-            /* if (statement.definition.startsWith("filter q")) {
-               json = checkQueryUse("Pipeline: " + pipe.name + ", Filter q", pipe.id, statement.detailed.expressions.join(' '), json, true, false, true, false);
-             }
-             //Advanced (aq)
-             if (statement.definition.startsWith("filter aq")) {
-               json = checkQueryUse("Pipeline: " + pipe.name + ", Filter aq", pipe.id, statement.detailed.expressions.join(' '), json, false, false, false, false);
-             }
-             //Constant (cq)
-             if (statement.definition.startsWith("filter cq")) {
-               json = checkQueryUse("Pipeline: " + pipe.name + ", Filter cq", pipe.id, statement.detailed.expressions.join(' '), json, false, true, true, false);
-             }
-             //Disjunction (dq)
-             if (statement.definition.startsWith("filter dq")) {
-               json = checkQueryUse("Pipeline: " + pipe.name + ", Filter dq", pipe.id, statement.detailed.expressions.join(' '), json, false, true, true, false);
-             }*/
           });
         }
         resolve();
@@ -1288,7 +1253,6 @@ tr td.line-ttfb, tr th.line-ttfb {
 
           }
           data.statements.map((statement) => {
-            //json = checkQueryUse("Pipeline: " + pipe.name + ", QRE ", statement.id, statement.detailed.expressions.join(' '), json, false, false, false, true);
           });
           json.nrofqre += data.totalCount;
         }
@@ -1314,34 +1278,18 @@ tr td.line-ttfb, tr th.line-ttfb {
       if (debug) {
         console.log('Adding Promises for QPL');
       }
-      /*let promise = new Promise((resolve) => {
-        (async () => {
-          await Promise.all([QuerySuggest, Recommendation, Ranking, Featured, Filter, QRE, Thesaurus]).then(() => {
-            resolve();
-          });
-        });
-      });
-      return promise;*/
       return QuerySuggest.then(Recommendation).then(Ranking).then(Featured).then(Filter).then(QRE).then(Thesaurus);
     }
     else {
-      /*let promise = new Promise((resolve) => {
-        (async () => {
-        await Promise.all([QuerySuggest, Featured, Filter, QRE, Thesaurus]).then(() => {
-          resolve();
-        });
-      });
-      });
-      return promise;*/
       return QuerySuggest.then(Featured).then(Filter).then(QRE).then(Thesaurus);
     }
   }
 
- sleeper(ms) {
-  return function (x) {
-    return new Promise(resolve => setTimeout(() => resolve(x), ms));
-  };
-}
+  sleeper(ms) {
+    return function (x) {
+      return new Promise(resolve => setTimeout(() => resolve(x), ms));
+    };
+  }
 
   executeSequentially(tasks) {
     return tasks.reduce(function (sequence, curPromise) {
@@ -1352,287 +1300,9 @@ tr td.line-ttfb, tr th.line-ttfb {
     }, Promise.resolve());
   }
 
-  getUsageInfo(report) {
-    var now = new Date();
-    var from = new Date();
-    from = from.setDate(now.getDate() - nrofdaysAnalytics);
-    var fromlast = new Date(from);
-    var to = new Date();
-    var header = "<tr><th><b>Origin 1 (Hub)</b></th><th><b>Origin 2 (Tab)</b></th>"
-    header += "<th style='text-align:right'><b>Uniq Visits</b></th>"
-    header += "<th style='text-align:right'><b>Avg Response</b></th>"
-    //report.details += "<th style='text-align:right'><b>Q with Click</b></th>"
-    header += "<th style='text-align:right'><b>Click through</b></th>"
-    header += "<th style='text-align:right'><b>Avg Click Rank</b></th>"
-    header += "<th style='text-align:right'><b>Session<br>Avg Nr Queries</b></th>"
-    header += "<th style='text-align:right'><b>Session<br>Avg Nr Query Change</b></th>"
-    header += "<th style='text-align:right'><b>Session<br>Avg Nr Clicks</b></th>"
-    header += "<th style='text-align:right'><b>Session<br>% Content Gap</b></th>"
-    //  header += "<th style='text-align:right'><b>Session<br>Info</b></th>"
-    header += "</tr>"
-
-    let froms = '&from=' + fromlast.toISOString() + '&to=' + to.toISOString();
-    //let url = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/combinedData?n=500&m=AverageClickRank&m=SearchWithClick&m=average%28actionresponsetime%29&m=ClickThroughRatio&m=UniqueVisit&d=originLevel1&d=originLevel2&f=%28searchcausev2+IN+%5B%22searchboxSubmit%22%2C%22searchFromLink%22%5D%29&fm=&p=1&s=UniqueVisit&asc=true&includeMetadata=true&bindOnLastSearch=true&org=' + report.org + froms);
-    let url = inspect.baseUrlAnalytics + '/rest/ua/v15/stats/combinedData?n=500&m=AverageClickRank&m=SearchWithClick&m=average%28actionresponsetime%29&m=ClickThroughRatio&m=UniqueVisit&d=originLevel1&d=originLevel2&fm=&p=1&s=UniqueVisit&asc=true&includeMetadata=true&bindOnLastSearch=true&org=' + report.org + froms;
-    let promise = new Promise((resolve) => {
-      inspect.executeCall(url, report, "Getting Analytics Usage Info", "thereAreErrorsSearch", "GET", inspect.apiKey).then(function (data) {
-        if (data) {
-          let counterC = 0;
-          let counterQ = 0;
-          let counterP = 0;
-          let total = 0;
-          //First get summary of the searchCauses
-          //  FacetSelection (facetSelect,facetDeselect, facetExclude)
-          //  InterfaceChange (interfaceChange)
-          //  Sort (resultsSort)
-          //  Querysuggestions (omniboxAnalytics, omniboxFromLink)
-          //  FieldQuerySuggestions (omniboxField)
-          //  Opening (documentOpen,documentQuickview)
-          //  Recommendation (recommendationOpen)
-          //For each combination get Detailed info
-          let responseQDetails = data['combinations'].map(source => {
-            let deturl = inspect.baseUrlAnalytics + '/rest/ua/v15/stats/combinedData?n=2000&m=UniqueVisit&d=searchCauseV2&f=%28originlevel1%3D%3D%27' + source.originLevel1 + '%27%29+AND+%28originlevel2%3D%3D%27' + source.originLevel2 + '%27%29&fm=&p=1&s=UniqueVisit&asc=false&includeMetadata=true&bindOnLastSearch=false&org=' + report.org + froms;
-            return new Promise((resolve) => {
-              inspect.executeCall(deturl, report, "Getting Analytics Usage Info", "thereAreErrorsSearch", "GET", inspect.apiKey).then(function (datar) {
-                data['combinations'][counterQ].ControlSearch = 0;
-                data['combinations'][counterQ].ControlFacet = 0;
-                data['combinations'][counterQ].ControlInterface = 0;
-                data['combinations'][counterQ].ControlSort = 0;
-                data['combinations'][counterQ].ControlQuerySuggest = 0;
-                data['combinations'][counterQ].ControlFieldQS = 0;
-                data['combinations'][counterQ].ControlOpening = 0;
-                data['combinations'][counterQ].ControlRecommend = 0;
-                if (datar) {
-                  datar['combinations'].map(sourcedet => {
-                    if (sourcedet.searchCauseV2 == 'facetSelect' || sourcedet.searchCauseV2 == 'facetDeSelect' || sourcedet.searchCauseV2 == 'facetExclude') {
-                      data['combinations'][counterQ].ControlFacet += sourcedet.UniqueVisit;
-                    }
-                    if (sourcedet.searchCauseV2 == 'interfaceChange') {
-                      data['combinations'][counterQ].ControlInterface += sourcedet.UniqueVisit;
-                    }
-                    if (sourcedet.searchCauseV2 == 'resultsSort') {
-                      data['combinations'][counterQ].ControlSort += sourcedet.UniqueVisit;
-                    }
-                    if (sourcedet.searchCauseV2 == 'omniboxAnalytics' || sourcedet.searchCauseV2 == 'omniboxFromLink') {
-                      data['combinations'][counterQ].ControlQuerySuggest += sourcedet.UniqueVisit;
-                    }
-                    if (sourcedet.searchCauseV2 == 'searchboxSubmit' || sourcedet.searchCauseV2 == 'searchFromLink') {
-                      data['combinations'][counterQ].ControlSearch += sourcedet.UniqueVisit;
-                    }
-                    if (sourcedet.searchCauseV2 == 'omniboxField') {
-                      data['combinations'][counterQ].ControlFieldQS += sourcedet.UniqueVisit;
-                    }
-                    if (sourcedet.searchCauseV2 == 'documentOpen' || sourcedet.searchCauseV2 == 'documentQuickview') {
-                      data['combinations'][counterQ].ControlOpening += sourcedet.UniqueVisit;
-                    }
-                    if (sourcedet.searchCauseV2 == 'recommendationOpen') {
-                      data['combinations'][counterQ].ControlRecommend += sourcedet.UniqueVisit;
-                    }
-                  });
-                }
-                counterQ = counterQ + 1;
-                resolve();
-              });
-            });
-          });
-          //Paging requires a different query
-          //  Paging (EventValue: pagerNext,pagerPrevious, pagerScrolling )
-          let responsePDetails = data['combinations'].map(source => {
-            let deturl = inspect.baseUrlAnalytics + '/rest/ua/v15/stats/combinedData?n=1000&m=UniqueVisit&d=customEventValue&s=UniqueVisit&asc=false&includeMetadata=true&bindOnLastSearch=false&f=%28customeventtype%3D%3D%27getMoreResults%27%29+AND+%28originlevel1%3D%3D%27' + source.originLevel1 + '%27%29+AND+%28originlevel2%3D%3D%27' + source.originLevel2 + '%27%29&fm=&p=1&org=' + report.org + froms;
-            return new Promise((resolve) => {
-              inspect.executeCall(deturl, report, "Getting Analytics Usage Info", "thereAreErrorsSearch", "GET", inspect.apiKey).then(function (datar) {
-                data['combinations'][counterP].ControlPaging = 0;
-                if (datar) {
-                  datar['combinations'].map(sourcedet => {
-                    data['combinations'][counterP].ControlPaging += sourcedet.UniqueVisit;
-                  });
-                }
-                counterP = counterP + 1;
-                resolve();
-              });
-            });
-          });
-
-          let responseC = data['combinations'].map(source => {
-            total += source.UniqueVisit;
-            let deturl = inspect.baseUrlAnalytics + '/rest/ua/v15/stats/combinedData?n=1000&m=DocumentView&m=countDistinct%28queryexpression%29&m=ManualQuery&d=sessionGuid&d=hasResult&f=%28searchcausev2+IN+%5B%22searchboxSubmit%22%2C%22searchFromLink%22%5D%29+AND+%28queryexpression%21%3D%27%27%29+AND+%28originlevel1%3D%3D%27' + source.originLevel1 + '%27%29+AND+%28originlevel2%3D%3D%27' + source.originLevel2 + '%27%29&fm=&p=1&s=ManualQuery&asc=false&includeMetadata=true&bindOnLastSearch=false&org=' + report.org + froms;
-            return new Promise((resolve) => {
-              inspect.executeCall(deturl, report, "Getting Analytics Usage Info", "thereAreErrorsSearch", "GET", inspect.apiKey).then(function (datar) {
-                let manQ = 0;
-                let noRes = 0;
-                let clicks = 0;
-                let uniqQ = 0;
-                let totalR = 0;
-                let totalNoRes = 0;
-                if (datar) {
-                  datar['combinations'].map(sourcedet => {
-                    //Discard weird high ManualQueries (higher than 25)
-                    if (sourcedet['ManualQuery'] < 25) {
-                      manQ += sourcedet['ManualQuery'];
-                      if (sourcedet['hasResult'] == false) {
-                        totalNoRes += 1;
-                        noRes += sourcedet['ManualQuery'];
-                      }
-                      else {
-                        clicks += sourcedet['DocumentView'];
-                        uniqQ += sourcedet['countDistinct(queryexpression)'];
-                        totalR += 1;
-                      }
-                    }
-                  });
-                  if (totalR == 0) {
-                    data['combinations'][counterC].AvgNoQ = 0;
-                    data['combinations'][counterC].AvgNoQChange = 0;
-                    data['combinations'][counterC].AvgNoClicks = 0;
-                    data['combinations'][counterC].NoQ = 0;
-                    data['combinations'][counterC].NoQChange = 0;
-                    data['combinations'][counterC].NoClicks = 0;
-                    data['combinations'][counterC].No = 0;
-                    data['combinations'][counterC].NoRes = 0;
-                    data['combinations'][counterC].NoResTotal = 0;
-                  }
-                  else {
-                    //Update source
-                    data['combinations'][counterC].AvgNoQ = manQ / totalR;
-                    data['combinations'][counterC].AvgNoQChange = manQ / uniqQ;
-                    data['combinations'][counterC].AvgNoClicks = clicks / totalR;
-                    data['combinations'][counterC].NoQ = manQ;
-                    data['combinations'][counterC].NoQChange = uniqQ;
-                    data['combinations'][counterC].NoClicks = clicks;
-                    data['combinations'][counterC].No = totalR;
-                    data['combinations'][counterC].NoRes = noRes;
-                    data['combinations'][counterC].NoResTotal = totalNoRes;
-                  }
-                  counterC = counterC + 1;
-                  resolve();
-                }
-              });
-            });
-          });
-          responseC = responseC.concat(responsePDetails).concat(responseQDetails);
-          inspect.executeSequentially(responseC).then(() => {
-            //Now we need to execute for each originLevel1/originLevel2 combination the Session query
-            report.usagedetails += "<hr><h4>Search Usage Information last 50 days:</h4>";
-            report.usagedetails += "(Session info based upon ca. last 1000 visits)<br>";
-            report.usagedetails += "<div style='overflow:auto;margin:-1px;'>";
-            report.usagedetails += "<table style='width: 1400px !important;'>";
-            report.usagedetails += header;
-            let rowcounter = 0;
-            let extraheaders = data['combinations'].length / 5;
-            let extraheader = (data['combinations'].length / extraheaders) + 1;
-            data['combinations'].map(source => {
-              if (rowcounter > extraheader) {
-                report.usagedetails += header;
-                rowcounter = 0;
-              }
-              rowcounter += 1;
-              let maincolor = 'green';
-              if (source.UniqueVisit < 100) {
-                report.badUsage.push(source.originLevel1 + "/" + source.originLevel2 + " (" + source.UniqueVisit.toLocaleString() + ")");
-                maincolor = 'red';
-              }
-              source.ClickThroughRatio = source.ClickThroughRatio * 100;
-              if (source.ClickThroughRatio < 50) {
-                report.badClick.push(source.originLevel1 + "/" + source.originLevel2 + " (" + source.ClickThroughRatio.toFixed(0) + "%)");
-                maincolor = 'red';
-              }
-              if (source.AverageClickRank > 3) {
-                report.badRank.push(source.originLevel1 + "/" + source.originLevel2 + " (" + source.AverageClickRank.toFixed(1) + ")");
-                maincolor = 'red';
-              }
-              report.usagedetails += "<tr><td style='color:" + maincolor + ";'>" + source.originLevel1 + "</td><td>" + source.originLevel2 + "</td>";
-              let color = 'green';
-              if (source.UniqueVisit < 100) {
-                color = 'red';
-              }
-              let perc = (source.UniqueVisit / total) * 100;//(5/10)*100;
-              report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.UniqueVisit.toLocaleString() + " (" + perc.toFixed(0) + "%)</td>";
-              color = 'green';
-              if (source['average(actionresponsetime)'] < 500) {
-                color = 'red';
-              }
-              report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source['average(actionresponsetime)'] + "ms</td>";
-              //report.details += "<td style='text-align:right'>" + source.SearchWithClick.toLocaleString() + "</td>";
-              color = 'green';
-              if (source.ClickThroughRatio < 50) {
-                color = 'red';
-              }
-              report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.ClickThroughRatio.toFixed(0) + "%</td>";
-              color = 'green';
-              if (source.AverageClickRank > 3) {
-                color = 'red';
-              }
-              report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.AverageClickRank.toFixed(1) + "</td>";
-              color = 'green';
-              if (source.AvgNoQ > 2) {
-                color = 'red';
-              }
-              report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.AvgNoQ.toFixed(1) + "</td>";
-              color = 'green';
-              if (source.AvgNoQChange > 2) {
-                color = 'red';
-              }
-              report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.AvgNoQChange.toFixed(1) + "</td>";
-              color = 'green';
-              if (source.AvgNoClicks > 3) {
-                color = 'red';
-              }
-              report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + source.AvgNoClicks.toFixed(1) + "</td>";
-              perc = (source.NoResTotal / (source.No + source.NoResTotal)) * 100;
-              if (isNaN(perc)) {
-                perc = 0;
-              }
-              color = 'green';
-              if (perc > 25) {
-                color = 'red';
-              }
-              report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + perc.toFixed(0) + "%</td>";
-              report.usagedetails += "</tr><tr><td></td><td></td>";
-              report.usagedetails += "<td colspan=4 style='vertical-align:top;text-align:left;word-break:normal'>" + "<b>Summary Behavior:</b><br>(Based upon visits)<br>";
-              report.usagedetails += "<table padding=2><tr><td style='text-align:right'>" + "Total Visits:</td><td style='text-align:right'>" + source.UniqueVisit.toFixed(0) + "</td><td></td></tr>";
-              perc = (source.ControlSearch / (source.UniqueVisit)) * 100;
-              report.usagedetails += "<tr><td style='text-align:right'>" + "Executing Search:</td><td style='text-align:right'>" + source.ControlSearch.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
-              perc = (source.ControlFacet / (source.UniqueVisit)) * 100;
-              report.usagedetails += "<tr><td style='text-align:right'>" + "Using Facets:</td><td style='text-align:right'>" + source.ControlFacet.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
-              perc = (source.ControlInterface / (source.UniqueVisit)) * 100;
-              report.usagedetails += "<tr><td style='text-align:right'>" + "Using Different Interfaces:</td><td style='text-align:right'>" + source.ControlInterface.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
-              perc = (source.ControlQuerySuggest / (source.UniqueVisit)) * 100;
-              report.usagedetails += "<tr><td style='text-align:right'>" + "Using Query Suggestions:</td><td style='text-align:right'>" + source.ControlQuerySuggest.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
-              perc = (source.ControlFacet / (source.UniqueVisit)) * 100;
-              report.usagedetails += "<tr><td style='text-align:right'>" + "Using Field Query Suggestions:</td><td style='text-align:right'>" + source.ControlFieldQS.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
-              perc = (source.ControlSort / (source.UniqueVisit)) * 100;
-              report.usagedetails += "<tr><td style='text-align:right'>" + "Using Sorting:</td><td style='text-align:right'>" + source.ControlSort.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
-              perc = (source.ControlPaging / (source.UniqueVisit)) * 100;
-              report.usagedetails += "<tr><td style='text-align:right'>" + "Using Paging:</td><td style='text-align:right'>" + source.ControlPaging.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
-              perc = (source.ControlOpening / (source.UniqueVisit)) * 100;
-              report.usagedetails += "<tr><td style='text-align:right'>" + "Opening Documents:</td><td style='text-align:right'>" + source.ControlOpening.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
-              perc = (source.ControlRecommend / (source.UniqueVisit)) * 100;
-              report.usagedetails += "<tr><td style='text-align:right'>" + "Opening Recommendations:</td><td style='text-align:right'>" + source.ControlRecommend.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
-              report.usagedetails += "</table></td><td colspan=1></td>";
-              report.usagedetails += "<td colspan=2 style='vertical-align:top;text-align:left;word-break:normal'>" + "<b>Summary:</b><br>(For above Session calculation)<br>";
-              report.usagedetails += "<table padding=2><tr><td style='text-align:right'>Tot Queries:</td><td style='text-align:right'>" + source.NoQ.toFixed(0) + "</td></tr>";
-              report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Unique:</td><td style='text-align:right'>" + source.NoQChange.toFixed(0) + "</td></tr>";
-              report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Clicks:</td><td style='text-align:right'>" + source.NoClicks.toFixed(0) + "</td></tr>";
-              report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Zero Results:</td><td style='text-align:right'>" + source.NoResTotal.toFixed(0) + "</td></tr>";
-              report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Checks:</td><td style='text-align:right'>" + source.No.toFixed(0) + "</td></tr>";
-              report.usagedetails += "</tr></table></td><td colspan=1></td>";
-              report.usagedetails += "</tr>";
-            });
-            report.usagedetails += "</table>"
-            report.usagedetails += "</div>";
-            resolve(report);
-          });
-        }
-      });
-    });
-    return promise;
-  }
-
   async createScreenshot(url, file) {
-    //let promise = new Promise((resolve) => {
     const page = await browser.newPage();
     try {
-      //url = 'https://midatlantic.aaa.com/search%20results?';
       if (debug) {
         console.log('Creating screenshot: ' + url);
       }
@@ -1640,6 +1310,7 @@ tr td.line-ttfb, tr th.line-ttfb {
       page.on('error', msg => {
         throw msg;
       });
+      //Set proper resolution
       await page.setViewport({
         width: 1920,
         height: 1580,
@@ -1650,6 +1321,7 @@ tr td.line-ttfb, tr th.line-ttfb {
       await page.goto(url, {
         waitUntil: 'networkidle0',
       });
+      //Check if no redirect
       const pageurl = page.url();
       if (pageurl.includes(url)) {
         moveOn = true;
@@ -1657,6 +1329,11 @@ tr td.line-ttfb, tr th.line-ttfb {
       if (moveOn) {
         let data = await page.evaluate(() => {
           let all = {};
+          //Calculate score based upon coveo components in the page
+          //If it contains facets: highest score
+          //If it contains results: mid score
+          //If it contains Coveo components: lowest
+          //If it does not contain anything: score=1, simply take a screenshot
           all.coveo = document.querySelectorAll('[class^="Coveo"]').length;
           all.results = document.querySelectorAll('.CoveoResult').length;
           all.facets = document.querySelectorAll('.coveo-facet-selectable').length;
@@ -1723,22 +1400,17 @@ tr td.line-ttfb, tr th.line-ttfb {
   }
 
   async getAnalyticsMetricsDetails(report) {
-    https://platform0.cloud.coveo.com/rest/ua/v15/stats/visitsMetrics?org=coveointernaltesting1&from=2019-07-07T00%3A00%3A00.000%2B0200&to=2019-07-22T13%3A47%3A00.000%2B0200&m=UniqueVisit&f=%28origincontext%3D%3D%27CaseCreation%27%29&tz=Europe%2FAmsterdam&queryId=MTU2Mzc5NjA2M0Y2RDFE
     var now = new Date();
     var from = new Date();
     var dateusage = new Date();
-    //console.log(dateusage);
     dateusage.setMonth(dateusage.getMonth() - 1);
     var dateformetrics = dateusage.getFullYear() + '-' + (dateusage.getMonth() + 1);
-    //console.log(dateformetrics);
     from = from.setDate(now.getDate() - (nrofdaysAnalytics * 4));
     var fromlast = new Date(from);
     var to = new Date();
     let tasks = [];
     let froms = '&from=' + fromlast.toISOString() + '&to=' + to.toISOString();
     let url1 = this.baseUrl + '/rest/organizations/' + report.org + '/searchusagemetrics/raw/monthly?month=' + dateformetrics + '&minimumQueries=10';
-    //let emptyHub = new Promise((resolve1) => {
-    //tasks = tasks.concat(new Promise((resolve1) => {
     await this.executeCall(url1, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch", "GET", this.apiKey).then(function (data) {
       if (debug) {
         console.log(url1);
@@ -1769,13 +1441,8 @@ tr td.line-ttfb, tr th.line-ttfb {
         report.details += "Total Search Hub Queries: " + totalQ + "<br>";
         report.details += "% Empty Search Hub Queries: " + ((emptyQ / totalQ) * 100).toFixed(0) + "%<br><br>";
       }
-      //resolve1(report);
     });
-    //});
-    // /rest/ua/v15/stats/combinedData?org=levitonmanufacturing&from=2019-08-01T00%3A00%3A00.000%2B0200&to=2019-08-26T09%3A39%3A00.000%2B0200&m=PerformSearch&d=queryPipeline&f=&fm=&p=1&n=90&s=PerformSearch&asc=false&includeMetadata=true&bindOnLastSearch=true&tz=Europe%2FAmsterdam&_=1566802657997&queryId=MTU2NjgwNTE5NDUyMEQ3
     let url2a = this.baseUrl + '/rest/ua/v15/stats/combinedData?m=PerformSearch&d=queryPipeline&f=&fm=&p=1&n=90&s=PerformSearch&asc=false&includeMetadata=true&bindOnLastSearch=true&org=' + report.org + froms;
-    //let searchAsYouType = new Promise((resolve2) => {
-    //tasks = tasks.concat(new Promise((resolve2) => {
     await this.executeCall(url2a, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch", "GET", this.apiKey).then(function (data) {
       if (debug) {
         console.log('SearchAsyoutype' + ' :' + report.org);
@@ -1788,11 +1455,8 @@ tr td.line-ttfb, tr th.line-ttfb {
           }
         });
       }
-      //resolve2(report);
     });
     let url2 = this.baseUrl + '/rest/ua/v15/stats/visitsMetrics?m=UniqueVisit&f=%28customeventtype%3D%3D%27Search%27%29+AND+%28causev2%3D%3D%27searchAsYouType%27%29&org=' + report.org + froms;
-    //let searchAsYouType = new Promise((resolve2) => {
-    //tasks = tasks.concat(new Promise((resolve2) => {
     await this.executeCall(url2, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch", "GET", this.apiKey).then(function (data) {
       if (debug) {
         console.log('SearchAsyoutype' + ' :' + report.org);
@@ -1801,7 +1465,6 @@ tr td.line-ttfb, tr th.line-ttfb {
       if (data) {
         report.SearchAsYouType = data.globalDatas.UniqueVisit.value;
       }
-      //resolve2(report);
     });
     report.ControlSearch = 0;
     report.ControlFacet = 0;
@@ -1884,90 +1547,15 @@ tr td.line-ttfb, tr th.line-ttfb {
           }
         });
       }
-      //counterQ = counterQ + 1;
     });
 
-    //});
-    /*let url3 = this.baseUrl + '/rest/ua/v15/stats/visitsMetrics?m=UniqueVisit&f=%28origincontext%3D%3D%27CaseCreation%27%29&org=' + report.org + froms;
-    //let casecreationPageV = new Promise((resolve3) => {
-    //tasks = tasks.concat(new Promise((resolve3) => {
-    await this.executeCall(url3, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch", "GET", this.apiKey).then(function (data) {
-      if (debug) {
-        console.log('NrofCaseCreationPageVisits' + ' :' + report.org);
-        console.log(data);
-      }
-      if (data) {
-        report.NrofCaseCreationPageVisits = data.globalDatas.UniqueVisit.value;
-      }
-      //resolve3(report);
-    });
-    //});
-    let url4 = this.baseUrl + '/rest/ua/v15/stats/visitsMetrics?m=UniqueVisit&f=%28customeventvalue%3D%3D%27submitButton%27%29&org=' + report.org + froms;
-    //let casecreationV = new Promise((resolve4) => {
-    //tasks = tasks.concat(new Promise((resolve4) => {
-    await this.executeCall(url4, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch", "GET", this.apiKey).then(function (data) {
-      if (debug) {
-        console.log('NrofCaseCreations' + ' :' + report.org);
-        console.log(data);
-      }
-      if (data) {
-        report.NrofCaseCreations = data.globalDatas.UniqueVisit.value;
-      }
-      //resolve4(report);
-    });
-    //});
-    let url5 = this.baseUrl + '/rest/ua/v15/stats/visitsMetrics?&m=UniqueVisit&f=%28customeventtype%3D%3D%27Click%27%29+AND+%28origincontext%3D%3D%27CaseCreation%27%29&fn=%28customeventvalue%21%3Dnull%29+AND+%28customeventvalue%3D%3D%27submitButton%27%29&org=' + report.org + froms;
-    //let casedeflectionV = new Promise((resolve5) => {
-    //tasks = tasks.concat(new Promise((resolve5) => {
-    await this.executeCall(url5, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch", "GET", this.apiKey).then(function (data) {
-      if (debug) {
-        console.log('NrofCaseDeflections' + ' :' + report.org);
-        console.log(data);
-      }
-      if (data) {
-        report.NrofCaseDeflections = data.globalDatas.UniqueVisit.value;
-      }
-      //resolve5(report);
-    });
-    //});
-    let url6 = this.baseUrl + '/rest/ua/v15/stats/visitsMetrics?m=UniqueVisit&f=%28origincontext%3D%3D%27CaseCreation%27%29&fn=%28customeventtype%3D%3D%27Click%27%29+AND+%28origincontext%3D%3D%27CaseCreation%27%29&fn=%28customeventvalue%21%3Dnull%29+AND+%28customeventvalue%3D%3D%27submitButton%27%29&org=' + report.org + froms;
-    //let caseabandonV = new Promise((resolve6) => {
-    //tasks = tasks.concat(new Promise((resolve6) => {
-    await this.executeCall(url6, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch", "GET", this.apiKey).then(function (data) {
-      if (debug) {
-        console.log('NrofCaseAbandons' + ' :' + report.org);
-        console.log(data);
-      }
-      if (data) {
-        report.NrofCaseAbandons = data.globalDatas.UniqueVisit.value;
-      }
-      //resolve6(report);
-    });
-    //});*/
-    /*await caseabandonV;
-    await casedeflectionV;
-    await casecreationV;
-    await casecreationPageV;
-    await searchAsYouType;
-    await emptyHub;*/
     return report;
-    /*return new Promise((resolve7) => {
-      tasks.map((task) => {
-        await task;
-      });
-      resolve7(report);
-      //inspect.executeSequentially(tasks).then(() => { resolve7(report); });
-    });*/
-    //return tasks;
   }
 
   async getOrganizations(page) {
     return new Promise((resolve, reject) => {
       request.get(`${this.baseUrl}/rest/organizations?page=` + page, this.getOptions(), (error, response, body) => {
-        //console.log(response);
         if ((response && response.statusCode) !== 200) {
-          //console.log('body:', body);
-          //console.log('error:', error); // Print the error if one occurred
           reject();
           return;
         }
@@ -2106,11 +1694,6 @@ tr td.line-ttfb, tr th.line-ttfb {
     };
     console.log('GetSourceInfo');
     json = await inspect.getSourceInfo(json);
-    /*let data=json;
-    let html = this.processReport(data);
-    //let html = `<html><body><h1>${data.org}</h1>${report}${JSON.stringify(mydata)}</body></html>`;
-
-    fs.writeFileSync('./results/' + data.org + ".html", html);*/
 
     if (json.nrofsources == 0) {
       if (debug) {
@@ -2126,11 +1709,10 @@ tr td.line-ttfb, tr th.line-ttfb {
       let sourcenoschedule = [];
 
       for (const source of json.sourceids) {
-        // [JD] not sure what 'isPush' means here.
+        //If a push source is used no need to check for a schedule.
         let isPush = json.pushnames.includes(source.name);
         if (!isPush) {
           const data = await inspect.getSourceSchedules(json, source.id);
-          //console.log(data);
           if (!data) {
             sourcenoschedule.push(source.name);
           }
@@ -2143,7 +1725,6 @@ tr td.line-ttfb, tr th.line-ttfb {
       console.log('getSecurityInfo');
       //Get Security Providers info
       json = await inspect.getSecurityInfo(json);
-      console.log(json.noscheduledsecprov);
 
       console.log('getExtensionInfo');
       //Get Extensions Info
@@ -2164,25 +1745,14 @@ tr td.line-ttfb, tr th.line-ttfb {
       //Get Analytics Metrics Info
       json = await inspect.getAnalyticsMetricsInfo(json);
 
-      /*console.log('got Analytics');
-      Promise.resolve().then(
-        function () {*/
-      /*let tasks = inspect.getAnalyticsMetricsDetails(json);
-      tasks.map((task) => {
-        json = inspect.anAsyncFunction(task(json));
-      });
-      let data = json;*/
-      //inspect.executeSequentially(tasks).then(function (data) {
-      // inspect.getUsageInfo(data).then(function (data) {
       console.log('getAnalyticsMetricsDetails');
       json = await inspect.getAnalyticsMetricsDetails(json);
 
-      let requestsQPL = [];
       let pipesToCheck = [];
-      //If json.usedQueryPip
       console.log('getQueryPipelinesInfo');
       json = await inspect.getQueryPipelinesInfo(json);
 
+      //If usedPipelines is empty, then use all Query pipelines
       if (json.usedPipelines.length == 0) {
         json.pipelines.map(pipes => {
           pipesToCheck.push(pipes.name);
@@ -2200,13 +1770,9 @@ tr td.line-ttfb, tr th.line-ttfb {
           await inspect.getQueryPipelinesDetails(json, pipes);
         }
       }
-      //});
-      //});
 
-      //let allPromises = await Promise.all(requestsQPL);
-      // await inspect.executeSequentially(requests);
       console.log('got QPLS');
-      //console.log(data);
+
       let data = json;
       if (debug) {
         console.log(data.org);
@@ -2337,16 +1903,7 @@ tr td.line-ttfb, tr th.line-ttfb {
       }
 
       const response = await callApi(options, dataEncoded)
-      //console.log(response);
-
-      //}
-      //});
-      //});
-      //   });
-      //});
     }
-
-    //});
 
   }
 
@@ -2364,155 +1921,155 @@ tr td.line-ttfb, tr th.line-ttfb {
     let pageIndex = 0;
     let orgs = await this.getOrganizations(pageIndex);
     let toprocess = ['aaamidatlanticincprod',
-    'ahaproduction437qnnvv',
-    'alcatellucententerpriseeurope',
-    'asqproductiongm5sinb9',
-    'carolinashealthcare',
-    'instrongg4wmwqf',
-    'canadacouncilfortheartsprod',
-    'childrenshospitalboston',
-    'colliersinternational',
-    'commissiondelaconstructionduqubecproductionauss8jo9',
-    'faskenmartineau',
-    'firstqualityenterprisesproductionpxzxo2aq',
-    'focusonthefamilyrg75ntbs',
-    'fondsdesolidarite',
-    'bekaerttk0lcw7o',
-    'bluegreenvacationsproductionjuct2d8e',
-    'bonsecourshealthsystemsinc',
-    'bowvalleycollegeproductionrisjbxxj',
-    'acuitybrands',
-    'barco807v1hty',
-    'bcevzjxr5qt',
-    'changehealthcare1sj1geuy',
-    'oclcprodbkh6ljcv',
-    'texasinstrumentsof16fcd3',
-    'xilinxprdkmx6qjsc',
-    'amfamnonproductionhsyl9vm3',
-    'andersencorporation',
-    'anritsu',
-    'aopa9nc4vnbc',
-    'aorn',
-    'argonnenationallaboratoryproductionhw38oy9c',
-    'armlimitedproductionubhpo2y4',
-    'asaamericansocietyofanesthesiologists',
-    'dalhousieuniversityproductionqax94e5b',
-    'pitneybowessoftwareik898xxa',
-    'principalfinancialgroupqpnzn1vj',
-    'mitelfkipvyf8',
-    'schlumbergerproduction0cs2zrh7',
-    'pfizer',
-    'tsiaproduction',
-    'aviva65jyt1nn',
-    'fundaciontelefonicaproduction7cl3rm0a',
-    'dropboxproductionpmlw0l3v',
-    'wisconsindepartmentoftourismproductionoth7hkq2',
-    'levitonmanufacturing',
-    'questsoftwareproductionl1k3xvdx',
-    'junipernetworkswebsitecwcpnoiw',
-    'siemenshealthcarediagnosticsincproductionrguljwfe',
-    'repsolprodo2v1rcfc',
-    'americanassociationofclinicalchemistryproductionkdycizsv',
-    'americancollegeofradiology',
-    'motorolasolutionsincproductionmq0wx9mn',
-    'albertasecuritiescommissionprod2a34tiy7',
-    'americanoccupationaltherapyassociationprod',
-    'blackanddeckergmwgue73',
-    'chicagouniversityls5ir32t',
-    'theconferenceboardofcanada',
-    'itronproductionn7namvto',
-    'jonesdayproductionbi4jtoh5',
-    '7summitsascustomertrialhgnn0gy3',
-    'aarpu11lxv0p',
-    'abaproduction5u1a80ud',
-    'abbottlaboratoriesincproductionfjb9noe8',
-    'acogproduction8v7ii7qa',
-    'actianynmehrnx',
-    'adaproduction',
-    'adobev2prod9e382h1q',
-    'adventsoftwareproductionxghzutpq',
-    'aecomproductionay3rk4zi',
-    'alienvaultproda2gz1am5',
-    'alliantcreditunionfoundationproductionxfrd37iv',
-    'americanexpresscompany',
-    'analogdevicesproductionrzsvdg7d',
-    'anaplani1in68v0',
-    'anheuserbuschinbevprod',
-    'aofoundationproductionji8iisfk',
-    'architecturalwoodworkinginstituteproduction3fy1pta6',
-    'arrisgroupproductionz5r0cdvg',
-    'ascrsproduction80tq3shr',
-    'atcc3h1cvdzh',
-    'aureasoftwareproductionbpdv7cxq',
-    'automaticdataprocessingadpproductionvnn3f29q',
-    'avanadesc9productionlk3bs0x7',
-    'bcfproductionynpjp0nj',
-    'bdcprod',
-    'beckmancoulterhn9i3bqk',
-    'becukst2l7fr',
-    'beldencableproductionbugpvwoi',
-    'bjservicesm5t7xrg8',
-    'blackberry',
-    'blgproductionhcvwnqfi',
-    'boomiproduction308bh8om',
-    'branzlimitedprodp8kbgo00',
-    'c40citiesclimateleadershipgroupproductionsezdi5l7',
-    'cadenceelz4c78u',
-    'caleresproduction4uzryqju',
-    'cambridgeinvestmentresearchua',
-    'cbre4fbpdild',
-    'cdkglobalproductionccaz989b',
-    'centralsquaretechnologiesproduction2v1fbhxv',
-    'cfainstitute',
-    'chamberlaingroupk5f2dpwl',
-    'churchcommunitybuilderincproductione0wcwqin',
-    'cienacorporation50auilr9',
-    'citrixsystemsincproductionrofn69qv',
-    'clarivateanalytics',
-    'clarkconstructiongroupproductionfiy6iuys',
-    'cmhcn5w3hbfi',
-    'cohnreznick',
-    'columbiauniversityalumniportal',
-    'compuwarecorporationproductionfzk8h5rn',
-    'concury9vvkaz3',
-    'coveodemocommerceqmqaepc4',
-    'coveodemohabitathomecoveodemocom2nvhoe1r4',
-    'crossmarkinc',
-    'cushmanwakefieldproductionm8c7yxjk',
-    'dellprod',
-    'deltekinccustomercareua',
-    'dfaproduction7j3xksbp',
-    'dlapiperproductionntg1e3se',
-    'dominionenergyproductionivjj00jb',
-    'dorelproductionstrojqun',
-    'drhortonproductionbsf4s1r1',
-    'druvaproductione1shh13i',
-    'egdproductionbxtotgts',
-    'ellucian',
-    'enduranceproductionsfmneu4v',
-    'epriproductione28sc58i',
-    'everestreinsurancecompany',
-    'f5networksproduction0ypjm87g',
-    'f5networksproduction5vkhn00h',
-    'fanniemae9glu2r77',
-    'farahexperiencesllc',
-    'fcotetrainingorg',
-    'foresterscloudproductionagkwgtjx',
-    'formicaprod',
-    'foxentertainmentgroup1',
-    'fsecurecorporationproductionsjnl4jqt',
-    'fticonsultinginch36whs6v',
-    'fticonsultingproductionikz7qfd7',
-    'gapincproductionjra34f3l',
-    'geicoinsuranceproductionsvptcq2f',
-    'genworthfinancialsefuludv',
-    'gmproductione2yq29g7',
-    'gojoindustriesproductione3z8ghx9',
-    'grantthornton0efn6zju',
-    'gtaaproduction4ya6bu7h',
-    'healthspanprod',
-    'hewlettpackardproductioniwmg9b9w',
-    'hexagonwez3ntfa'];
+      'ahaproduction437qnnvv',
+      'alcatellucententerpriseeurope',
+      'asqproductiongm5sinb9',
+      'carolinashealthcare',
+      'instrongg4wmwqf',
+      'canadacouncilfortheartsprod',
+      'childrenshospitalboston',
+      'colliersinternational',
+      'commissiondelaconstructionduqubecproductionauss8jo9',
+      'faskenmartineau',
+      'firstqualityenterprisesproductionpxzxo2aq',
+      'focusonthefamilyrg75ntbs',
+      'fondsdesolidarite',
+      'bekaerttk0lcw7o',
+      'bluegreenvacationsproductionjuct2d8e',
+      'bonsecourshealthsystemsinc',
+      'bowvalleycollegeproductionrisjbxxj',
+      'acuitybrands',
+      'barco807v1hty',
+      'bcevzjxr5qt',
+      'changehealthcare1sj1geuy',
+      'oclcprodbkh6ljcv',
+      'texasinstrumentsof16fcd3',
+      'xilinxprdkmx6qjsc',
+      'amfamnonproductionhsyl9vm3',
+      'andersencorporation',
+      'anritsu',
+      'aopa9nc4vnbc',
+      'aorn',
+      'argonnenationallaboratoryproductionhw38oy9c',
+      'armlimitedproductionubhpo2y4',
+      'asaamericansocietyofanesthesiologists',
+      'dalhousieuniversityproductionqax94e5b',
+      'pitneybowessoftwareik898xxa',
+      'principalfinancialgroupqpnzn1vj',
+      'mitelfkipvyf8',
+      'schlumbergerproduction0cs2zrh7',
+      'pfizer',
+      'tsiaproduction',
+      'aviva65jyt1nn',
+      'fundaciontelefonicaproduction7cl3rm0a',
+      'dropboxproductionpmlw0l3v',
+      'wisconsindepartmentoftourismproductionoth7hkq2',
+      'levitonmanufacturing',
+      'questsoftwareproductionl1k3xvdx',
+      'junipernetworkswebsitecwcpnoiw',
+      'siemenshealthcarediagnosticsincproductionrguljwfe',
+      'repsolprodo2v1rcfc',
+      'americanassociationofclinicalchemistryproductionkdycizsv',
+      'americancollegeofradiology',
+      'motorolasolutionsincproductionmq0wx9mn',
+      'albertasecuritiescommissionprod2a34tiy7',
+      'americanoccupationaltherapyassociationprod',
+      'blackanddeckergmwgue73',
+      'chicagouniversityls5ir32t',
+      'theconferenceboardofcanada',
+      'itronproductionn7namvto',
+      'jonesdayproductionbi4jtoh5',
+      '7summitsascustomertrialhgnn0gy3',
+      'aarpu11lxv0p',
+      'abaproduction5u1a80ud',
+      'abbottlaboratoriesincproductionfjb9noe8',
+      'acogproduction8v7ii7qa',
+      'actianynmehrnx',
+      'adaproduction',
+      'adobev2prod9e382h1q',
+      'adventsoftwareproductionxghzutpq',
+      'aecomproductionay3rk4zi',
+      'alienvaultproda2gz1am5',
+      'alliantcreditunionfoundationproductionxfrd37iv',
+      'americanexpresscompany',
+      'analogdevicesproductionrzsvdg7d',
+      'anaplani1in68v0',
+      'anheuserbuschinbevprod',
+      'aofoundationproductionji8iisfk',
+      'architecturalwoodworkinginstituteproduction3fy1pta6',
+      'arrisgroupproductionz5r0cdvg',
+      'ascrsproduction80tq3shr',
+      'atcc3h1cvdzh',
+      'aureasoftwareproductionbpdv7cxq',
+      'automaticdataprocessingadpproductionvnn3f29q',
+      'avanadesc9productionlk3bs0x7',
+      'bcfproductionynpjp0nj',
+      'bdcprod',
+      'beckmancoulterhn9i3bqk',
+      'becukst2l7fr',
+      'beldencableproductionbugpvwoi',
+      'bjservicesm5t7xrg8',
+      'blackberry',
+      'blgproductionhcvwnqfi',
+      'boomiproduction308bh8om',
+      'branzlimitedprodp8kbgo00',
+      'c40citiesclimateleadershipgroupproductionsezdi5l7',
+      'cadenceelz4c78u',
+      'caleresproduction4uzryqju',
+      'cambridgeinvestmentresearchua',
+      'cbre4fbpdild',
+      'cdkglobalproductionccaz989b',
+      'centralsquaretechnologiesproduction2v1fbhxv',
+      'cfainstitute',
+      'chamberlaingroupk5f2dpwl',
+      'churchcommunitybuilderincproductione0wcwqin',
+      'cienacorporation50auilr9',
+      'citrixsystemsincproductionrofn69qv',
+      'clarivateanalytics',
+      'clarkconstructiongroupproductionfiy6iuys',
+      'cmhcn5w3hbfi',
+      'cohnreznick',
+      'columbiauniversityalumniportal',
+      'compuwarecorporationproductionfzk8h5rn',
+      'concury9vvkaz3',
+      'coveodemocommerceqmqaepc4',
+      'coveodemohabitathomecoveodemocom2nvhoe1r4',
+      'crossmarkinc',
+      'cushmanwakefieldproductionm8c7yxjk',
+      'dellprod',
+      'deltekinccustomercareua',
+      'dfaproduction7j3xksbp',
+      'dlapiperproductionntg1e3se',
+      'dominionenergyproductionivjj00jb',
+      'dorelproductionstrojqun',
+      'drhortonproductionbsf4s1r1',
+      'druvaproductione1shh13i',
+      'egdproductionbxtotgts',
+      'ellucian',
+      'enduranceproductionsfmneu4v',
+      'epriproductione28sc58i',
+      'everestreinsurancecompany',
+      'f5networksproduction0ypjm87g',
+      'f5networksproduction5vkhn00h',
+      'fanniemae9glu2r77',
+      'farahexperiencesllc',
+      'fcotetrainingorg',
+      'foresterscloudproductionagkwgtjx',
+      'formicaprod',
+      'foxentertainmentgroup1',
+      'fsecurecorporationproductionsjnl4jqt',
+      'fticonsultinginch36whs6v',
+      'fticonsultingproductionikz7qfd7',
+      'gapincproductionjra34f3l',
+      'geicoinsuranceproductionsvptcq2f',
+      'genworthfinancialsefuludv',
+      'gmproductione2yq29g7',
+      'gojoindustriesproductione3z8ghx9',
+      'grantthornton0efn6zju',
+      'gtaaproduction4ya6bu7h',
+      'healthspanprod',
+      'hewlettpackardproductioniwmg9b9w',
+      'hexagonwez3ntfa'];
     //orgs.items = orgs.items.filter(org => (/aarp/i).test(org.id));
     while (pageIndex < orgs.totalPages) {
 
@@ -2543,3 +2100,4 @@ tr td.line-ttfb, tr th.line-ttfb {
 let inspect = new InspectAllOrganizations();
 inspect.initPuppet();
 inspect.start();
+console.log('Ready');
