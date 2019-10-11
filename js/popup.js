@@ -555,6 +555,7 @@ let processReport = (data) => {
             }
           },
           { key: 'types', notForTotal: true, mandatory: false, label: 'Types of Connectors Used', hint: '', ref: '' },
+          { key: 'sourceWebWarning', mandatory: true, label: 'Contains Web sources with to much docs (>100K)', hint: 'Replace indexing with Sitemap or Generic REST API', expected: false, ref: 'https://docs.coveo.com/en/1967' },
           { key: 'containspush', notForTotal: true, mandatory: false, label: 'Contains Push sources', hint: '', ref: '' },
           { key: 'containsonprem', notForTotal: true, mandatory: false, label: 'Contains Crawling Modules', hint: '', ref: '' },
 
@@ -831,6 +832,12 @@ let processReport = (data) => {
       },
       {
         title: 'Analytics', label: 'Analytics', attributes: [
+          {
+            key: 'det_analyticsSent', label: 'Analytics Sent', hint: 'Search & Open document Analytics calls should be present', mandatory: true, ref: '', expected: true
+          },
+          {
+            key: 'EmptyHubs', label: 'Empty Hubs', hint: 'Make sure you set the OriginLevel1 in your calls', mandatory: true, ref: '', expected: false
+          },
           {
             key: 'topQueries', label: 'Top Queries', hint: '', ref: ''
           },
@@ -1521,12 +1528,16 @@ function getSourceInfo(report) {
             report.nrofsources = data.length;
             let sourceTypes = data.map(source => source.sourceType);
             report.types = [...new Set(sourceTypes)].sort(caseInsensitiveSort);
-            report.pushnames = data.filter(source => { if (source.pushEnabled) return source.name; });
+            report.pushnames = data.filter(source => { if (source.pushEnabled || source.sourceType == 'SITECORE') return source.name; });
             report.containsonprem = data.filter(source => { if (source.onPremisesEnabled) return source.name; }).length > 0;
             report.containspush = data.filter(source => { if (source.pushEnabled) return source.name; }).length > 0;
             report.details += "<hr><h4>Source Information:</h4>";
             report.details += "<table><tr><th><b>Source</b></th><th style='text-align:right'><b>Nr of Docs</b></th></tr>"
             data.map(source => {
+              //Check for Websources
+              if (source.sourceType == "WEB2" && source.information.numberOfDocuments > 100000) {
+                report.sourceWebWarning = true;
+              }
               report.docsfromsources += source.information.numberOfDocuments;
               report.details += "<tr><td>" + source.name + "</td><td style='text-align:right'>" + source.information.numberOfDocuments.toLocaleString() + "</td></tr>";
             });
@@ -1630,25 +1641,30 @@ function getSecurityInfo(report) {
               });
             }
             requests = data.map((sec) => {
-              return new Promise((resolve) => {
-                getSecProvSchedules(report, sec.id).then(function (datas) {
-                  if (!datas) {
-                    report.noscheduledsecprov.push(sec.name);
-                  } else {
-                    if (data.map) {
-                      let enabled = false;
-                      data.map((sec) => {
-                        if (sec.enabled) enabled = true;
-                      });
-                      if (!enabled) {
-                        report.noscheduledsecprov.push(sec.name);
+              if (sec.type == 'EMAIL' || sec.type == 'EXPANDED') {
+
+              } else {
+                return new Promise((resolve) => {
+                  getSecProvSchedules(report, sec.id).then(function (datas) {
+                    if (!datas) {
+                      report.noscheduledsecprov.push(sec.name);
+                    } else {
+                      if (data.map) {
+                        let enabled = false;
+                        data.map((sec) => {
+                          if (sec.enabled) enabled = true;
+                        });
+                        if (!enabled) {
+                          report.noscheduledsecprov.push(sec.name);
+                        }
                       }
                     }
-                  }
-                  resolve();
+                    resolve();
+                  });
                 });
-              });
+              }
             });
+
 
           }
           catch{
@@ -1757,6 +1773,7 @@ function getUsageInfo(report) {
     executeCall(url, report, "Getting Analytics Usage Info", "thereAreErrorsSearch").then(function (data) {
       if (data) {
         let counterC = 0;
+        let counterCL = 0;
         let counterQ = 0;
         let counterP = 0;
         let total = 0;
@@ -1779,8 +1796,6 @@ function getUsageInfo(report) {
               data['combinations'][counterQ].ControlSort = 0;
               data['combinations'][counterQ].ControlQuerySuggest = 0;
               data['combinations'][counterQ].ControlFieldQS = 0;
-              data['combinations'][counterQ].ControlOpening = 0;
-              data['combinations'][counterQ].ControlRecommend = 0;
               if (datar) {
                 datar['combinations'].map(sourcedet => {
                   if (sourcedet.searchCauseV2 == 'facetSelect' || sourcedet.searchCauseV2 == 'facetDeSelect' || sourcedet.searchCauseV2 == 'facetExclude') {
@@ -1801,15 +1816,30 @@ function getUsageInfo(report) {
                   if (sourcedet.searchCauseV2 == 'omniboxField') {
                     data['combinations'][counterQ].ControlFieldQS += sourcedet.UniqueVisit;
                   }
-                  if (sourcedet.searchCauseV2 == 'documentOpen' || sourcedet.searchCauseV2 == 'documentQuickview') {
-                    data['combinations'][counterQ].ControlOpening += sourcedet.UniqueVisit;
-                  }
-                  if (sourcedet.searchCauseV2 == 'recommendationOpen') {
-                    data['combinations'][counterQ].ControlRecommend += sourcedet.UniqueVisit;
-                  }
                 });
               }
               counterQ = counterQ + 1;
+              resolve();
+            });
+          });
+        });
+        let responseQCDetails = data['combinations'].map(source => {
+          let deturlc = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/combinedData?n=2000&m=UniqueVisit&d=clickCauseV2&f=%28originlevel1%3D%3D%27' + source.originLevel1 + '%27%29+AND+%28originlevel2%3D%3D%27' + source.originLevel2 + '%27%29&fm=&p=1&s=UniqueVisit&asc=false&includeMetadata=true&bindOnLastSearch=false&org=' + report.org + froms);
+          return new Promise((resolve) => {
+            executeCall(deturlc, report, "Getting Analytics Usage Info", "thereAreErrorsSearch").then(function (datar) {
+              data['combinations'][counterCL].ControlOpening = 0;
+              data['combinations'][counterCL].ControlRecommend = 0;
+              if (datar) {
+                datar['combinations'].map(sourcedet => {
+                  if (sourcedet.clickCauseV2 == 'documentOpen' || sourcedet.clickCauseV2 == 'documentQuickview') {
+                    data['combinations'][counterCL].ControlOpening += sourcedet.UniqueVisit;
+                  }
+                  if (sourcedet.clickCauseV2 == 'recommendationOpen') {
+                    data['combinations'][counterCL].ControlRecommend += sourcedet.UniqueVisit;
+                  }
+                });
+              }
+              counterCL = counterCL + 1;
               resolve();
             });
           });
@@ -1888,7 +1918,7 @@ function getUsageInfo(report) {
             });
           });
         });
-        responseC = responseC.concat(responsePDetails).concat(responseQDetails);
+        responseC = responseC.concat(responsePDetails).concat(responseQDetails).concat(responseQCDetails);
         executeSequentially(responseC).then(() => {
           //Now we need to execute for each originLevel1/originLevel2 combination the Session query
           report.usagedetails += "<hr><h4>Search Usage Information last 50 days:</h4>";
@@ -1968,32 +1998,32 @@ function getUsageInfo(report) {
             report.usagedetails += "<td style='color:" + color + ";text-align:right'>" + perc.toFixed(0) + "%</td>";
             report.usagedetails += "</tr><tr><td></td><td></td>";
             report.usagedetails += "<td colspan=4 style='vertical-align:top;text-align:left;word-break:normal'>" + "<b>Summary Behavior:</b><br>(Based upon visits)<br>";
-            report.usagedetails += "<table padding=2><tr><td style='text-align:right'>" + "Total Visits:</td><td style='text-align:right'>" + source.UniqueVisit.toFixed(0)+"</td><td></td></tr>";
+            report.usagedetails += "<table padding=2><tr><td style='text-align:right'>" + "Total Visits:</td><td style='text-align:right'>" + source.UniqueVisit.toFixed(0) + "</td><td></td></tr>";
             perc = (source.ControlSearch / (source.UniqueVisit)) * 100;
-            report.usagedetails += "<tr><td style='text-align:right'>" + "Executing Search:</td><td style='text-align:right'>" + source.ControlSearch.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Executing Search:</td><td style='text-align:right'>" + source.ControlSearch.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
             perc = (source.ControlFacet / (source.UniqueVisit)) * 100;
-            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Facets:</td><td style='text-align:right'>" + source.ControlFacet.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Facets:</td><td style='text-align:right'>" + source.ControlFacet.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
             perc = (source.ControlInterface / (source.UniqueVisit)) * 100;
-            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Different Interfaces:</td><td style='text-align:right'>" + source.ControlInterface.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Different Interfaces:</td><td style='text-align:right'>" + source.ControlInterface.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
             perc = (source.ControlQuerySuggest / (source.UniqueVisit)) * 100;
-            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Query Suggestions:</td><td style='text-align:right'>" + source.ControlQuerySuggest.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Query Suggestions:</td><td style='text-align:right'>" + source.ControlQuerySuggest.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
             perc = (source.ControlFacet / (source.UniqueVisit)) * 100;
-            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Field Query Suggestions:</td><td style='text-align:right'>" + source.ControlFieldQS.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Field Query Suggestions:</td><td style='text-align:right'>" + source.ControlFieldQS.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
             perc = (source.ControlSort / (source.UniqueVisit)) * 100;
-            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Sorting:</td><td style='text-align:right'>" + source.ControlSort.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Sorting:</td><td style='text-align:right'>" + source.ControlSort.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
             perc = (source.ControlPaging / (source.UniqueVisit)) * 100;
-            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Paging:</td><td style='text-align:right'>" + source.ControlPaging.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Using Paging:</td><td style='text-align:right'>" + source.ControlPaging.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
             perc = (source.ControlOpening / (source.UniqueVisit)) * 100;
-            report.usagedetails += "<tr><td style='text-align:right'>" + "Opening Documents:</td><td style='text-align:right'>" + source.ControlOpening.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Opening Documents:</td><td style='text-align:right'>" + source.ControlOpening.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
             perc = (source.ControlRecommend / (source.UniqueVisit)) * 100;
-            report.usagedetails += "<tr><td style='text-align:right'>" + "Opening Recommendations:</td><td style='text-align:right'>" + source.ControlRecommend.toFixed(0)+"</td><td style='text-align:left'>("+perc.toFixed(0)+"%)</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Opening Recommendations:</td><td style='text-align:right'>" + source.ControlRecommend.toFixed(0) + "</td><td style='text-align:left'>(" + perc.toFixed(0) + "%)</td></tr>";
             report.usagedetails += "</table></td><td colspan=1></td>";
             report.usagedetails += "<td colspan=2 style='vertical-align:top;text-align:left;word-break:normal'>" + "<b>Summary:</b><br>(For above Session calculation)<br>";
-            report.usagedetails += "<table padding=2><tr><td style='text-align:right'>Tot Queries:</td><td style='text-align:right'>" + source.NoQ.toFixed(0)+"</td></tr>";
-            report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Unique:</td><td style='text-align:right'>" + source.NoQChange.toFixed(0)+"</td></tr>";
-            report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Clicks:</td><td style='text-align:right'>" + source.NoClicks.toFixed(0)+"</td></tr>";
-            report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Zero Results:</td><td style='text-align:right'>" + source.NoResTotal.toFixed(0)+"</td></tr>";
-            report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Checks:</td><td style='text-align:right'>" + source.No.toFixed(0)+"</td></tr>";
+            report.usagedetails += "<table padding=2><tr><td style='text-align:right'>Tot Queries:</td><td style='text-align:right'>" + source.NoQ.toFixed(0) + "</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Unique:</td><td style='text-align:right'>" + source.NoQChange.toFixed(0) + "</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Clicks:</td><td style='text-align:right'>" + source.NoClicks.toFixed(0) + "</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Zero Results:</td><td style='text-align:right'>" + source.NoResTotal.toFixed(0) + "</td></tr>";
+            report.usagedetails += "<tr><td style='text-align:right'>" + "Tot Checks:</td><td style='text-align:right'>" + source.No.toFixed(0) + "</td></tr>";
             report.usagedetails += "</tr></table></td><td colspan=1></td>";
             report.usagedetails += "</tr>";
           });
@@ -2027,6 +2057,9 @@ function getAnalyticsMetricsInfo(report) {
         report.RefinementQuery = data.globalDatas.RefinementQuery.total;
         report.DocumentView = data.globalDatas.DocumentView.total;
         report.AvgResponse = data.globalDatas['average(actionresponsetime)'].value;
+        if (report.PerformSearch > 0 && report.DocumentView > 0) {
+          report.det_analyticsSent = true;
+        }
       }
       resolve(report);
     });
@@ -2041,7 +2074,45 @@ function getAnalyticsMetricsDetails(report) {
   from = from.setDate(now.getDate() - 7);
   var fromlast = new Date(from);
   var to = new Date();
+  var dateusage = new Date();
+  dateusage.setMonth(dateusage.getMonth() - 1);
+  var dateformetrics = dateusage.getFullYear() + '-' + (dateusage.getMonth() + 1);
+  let url1 = getPlatformUrl(report, report.location + '/rest/organizations/' + report.org + '/searchusagemetrics/raw/monthly?month=' + dateformetrics + '&minimumQueries=10');
+  let emptyHubsR = new Promise((resolve) => {
+    executeCall(url1, report, "Getting Analtyics Metrics Info", "thereAreErrorsSearch", "GET", this.apiKey).then(function (data) {
+      if (debug) {
+        console.log(url1);
+        console.log('EmptyHubs' + ' :' + report.org);
+        console.log(data);
+      }
+      if (data) {
+        let totalQ = 0;
+        let emptyQ = 0;
+        data.searchHubs.map(hub => {
+          if (hub.searchHub == "") {
+            emptyQ = hub.normalQueries;
+            totalQ += hub.normalQueries;
+          } else {
+            totalQ += hub.normalQueries;
+          }
+        });
+        report.details += "<hr>Usage Metrics info:<br>";
+        //EmptyHubs if emptyQ is 10% or higher
+        if ((emptyQ / totalQ) * 100 > 10) {
+          report.EmptyHubs = true;
+          //If so, we also set the det_analyticsSent to false
+          report.det_analyticsSent = false;
+        } else {
+          report.EmptyHubs = false;
+        }
+        report.details += "Empty Search Hub Queries: " + emptyQ + "<br>";
+        report.details += "Total Search Hub Queries: " + totalQ + "<br>";
+        report.details += "% Empty Search Hub Queries: " + ((emptyQ / totalQ) * 100).toFixed(0) + "%<br><br>";
 
+      }
+      resolve(report);
+    });
+  });
   let froms = '&from=' + fromlast.toISOString() + '&to=' + to.toISOString();
   let url = getPlatformUrl(report, report.location + '/rest/ua/v15/stats/visitsMetrics?m=UniqueVisit&f=%28origincontext%3D%3D%27CaseCreation%27%29&org=' + report.org + froms);
   let casecreationPageV = new Promise((resolve) => {
@@ -2079,7 +2150,7 @@ function getAnalyticsMetricsDetails(report) {
       resolve(report);
     });
   });
-  return casecreationPageV.then(casecreationV).then(casedeflectionV).then(caseabandonV);
+  return casecreationPageV.then(emptyHubsR).then(casecreationV).then(casedeflectionV).then(caseabandonV);
 }
 
 
@@ -3439,6 +3510,7 @@ function processOrgReport(report) {
     badfields_filtered: [],
     badfields_query: [],
     types: [],
+    sourceWebWarning: false,
     containspush: false,
     containsonprem: false,
     push_without_html: [],
@@ -3467,6 +3539,8 @@ function processOrgReport(report) {
     models_platformVersion: 1,
     mldne: false,
     nrofthesaurus: 0,
+    EmptyHubs: false,
+    det_analyticsSent: false,
     nrofqre: 0,
     nroffeatured: 0,
     docsfromsources: 0,
