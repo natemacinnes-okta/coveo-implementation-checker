@@ -1,8 +1,8 @@
 # InspectAllOrgs
 The coveo-implementation-checker (the non-Chrome version) will inspect all production orgs.
 
-## Organization
-Check your Coveo Organization. Is it properly configured, Sources, Fields, Extensions, Query Pipelines.
+## Organizations
+Checks all Coveo Organizations. Is it properly configured, Sources, Analytics, Query Pipelines.
 *Since the automated checker does normally not have access to Content/Log browser data certain checks are not being made
 
 The following checks are made:
@@ -51,7 +51,6 @@ Dependencies:
 npm install puppeteer
 npm i -S image-hash
 npm install node-salesforce
-npm install sharp
 ```
 
 Node.js application. In the results directory the output is written.
@@ -59,6 +58,7 @@ Node.js application. In the results directory the output is written.
 - `debug` in InspectAllOrgs.js can be set to get additional debug info.
 - `nrofdaysAnalytics` is used to retrieve the nr of days for the Analytics.
 - `s3Loc` location pointing to the S3 location of the output.html results.
+- `addGoogleSheet` if all info also needs to be written to a Google Sheet.
 
 Speed, the application processes around 2 orgs a minute.
 

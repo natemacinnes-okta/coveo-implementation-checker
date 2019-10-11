@@ -736,9 +736,9 @@ updateCustomerProject = async data => {
     console.log("Data:");
     console.log(data);
     await page.screenshot({ path: "results/test.png" });
-    await sharp("results/test.png")
+    /*await sharp("results/test.png")
       .resize({ height: 100 })
-      .toFile("results/test2.png");
+      .toFile("results/test2.png");*/
     console.log("Image size:" + getImage64("results/test2.png").length);
     if (data > 3) {
       await page.screenshot({ path: "results/test.png" });

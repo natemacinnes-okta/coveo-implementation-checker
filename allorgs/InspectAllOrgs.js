@@ -1,15 +1,14 @@
 // npm install puppeteer
 // npm i -S image-hash
 // npm install node-salesforce
-// npm install sharp
 const request = require("request");
 var pHash = require("image-hash");
 const qs = require("querystring");
 const fs = require("fs");
 var sf = require("node-salesforce");
-const sharp = require("sharp");
 const nrofdaysAnalytics = 14;
-const debug = true;
+const debug = false;
+const addGoogleSheet = false;
 const puppeteer = require("puppeteer");
 let browser; //= await puppeteer.launch();
 const s3Loc = "https://s3.amazonaws.com/NOTYET/";
@@ -3401,7 +3400,9 @@ tr td.line-ttfb, tr th.line-ttfb {
       };
 
       //Push it to the google Sheet
-      const response = await callApi(options, dataEncoded);
+      if (addGoogleSheet){
+        const response = await callApi(options, dataEncoded);
+      }
 
       //Push it to Salesforce
       //First check if we have a cloud Org
