@@ -1745,8 +1745,10 @@ tr td.line-ttfb, tr th.line-ttfb {
             json.details_pipelines +=
               "Machine Learning, using old version, consider upgrading to the latest (platformVersion 2).<BR>";
           }
+          if (debug){
           console.log("Get Query Suggest data:");
           console.log(data);
+          }
           if (data) {
             if (data.totalCount == 0) {
               if (json.details_pipelines.indexOf(pipe.name) == -1) {
@@ -1777,8 +1779,10 @@ tr td.line-ttfb, tr th.line-ttfb {
             json.details_pipelines +=
               "Machine Learning, using old version, consider upgrading to the latest (platformVersion 2).<BR>";
           }
+          if (debug){
           console.log("Get Recommendation data:");
           console.log(data);
+          }
           if (data) {
             if (data.totalCount == 0) {
               if (json.details_pipelines.indexOf(pipe.name) == -1) {
@@ -1807,8 +1811,10 @@ tr td.line-ttfb, tr th.line-ttfb {
               json.details_pipelines +=
                 "Machine Learning, using old version, consider upgrading to the latest (platformVersion 2).<BR>";
             }
+            if (debug){
             console.log("Get ART data:");
             console.log(data);
+            }
             if (data) {
               if (data.totalCount == 0) {
                 if (json.details_pipelines.indexOf(pipe.name) == -1) {
@@ -2070,24 +2076,32 @@ tr td.line-ttfb, tr th.line-ttfb {
               counter++;
             });
           } catch (ex2) {
+            if (debug){
             console.log(ex2.message);
+            }
           }
           all.uiVersion = "";
           try {
             all.uiVersion = Coveo.version.lib;
           } catch (ex) {
+            if (debug){
             console.log(ex.message);
+            }
           }
           all.EndpointVersion = "";
           try {
             all.EndpointVersion = Coveo.SearchEndpoint.endpoints.default.options.version.toUpperCase();
           } catch (ex) {
+            if (debug){
             console.log(ex.message);
+            }
           }
           try {
             all.EndpointVersion = Coveo.Rest.SearchEndpoint.endpoints.default.options.version.toUpperCase();
           } catch (ex) {
+            if (debug){
             console.log(ex.message);
+            }
           }
           all.score = 1;
           all.img = "";
@@ -2107,8 +2121,9 @@ tr td.line-ttfb, tr th.line-ttfb {
           }
           return all;
         });
-
+if (debug){
         console.log("Number of Coveo occurences: " + JSON.stringify(data));
+}
         if (data.score > 0) {
           data.img = file;
           data.url = url;
@@ -2208,24 +2223,24 @@ tr td.line-ttfb, tr th.line-ttfb {
               counter++;
             });
           } catch (ex2) {
-            console.log(ex2.message);
+            if (debug) console.log(ex2.message);
           }
           all.uiVersion = "";
           try {
             all.uiVersion = Coveo.version.lib;
           } catch (ex) {
-            console.log(ex.message);
+            if (debug) console.log(ex.message);
           }
           all.EndpointVersion = "";
           try {
             all.EndpointVersion = Coveo.SearchEndpoint.endpoints.default.options.version.toUpperCase();
           } catch (ex) {
-            console.log(ex.message);
+            if (debug) console.log(ex.message);
           }
           try {
             all.EndpointVersion = Coveo.Rest.SearchEndpoint.endpoints.default.options.version.toUpperCase();
           } catch (ex) {
-            console.log(ex.message);
+            if (debug) console.log(ex.message);
           }
           all.score = 1;
           all.img = "";
@@ -2246,7 +2261,7 @@ tr td.line-ttfb, tr th.line-ttfb {
           return all;
         });
 
-        console.log("Number of Coveo occurences: " + JSON.stringify(data));
+        if (debug) console.log("Number of Coveo occurences: " + JSON.stringify(data));
         if (data.score > 0) {
           data.img = file;
           data.url = url;
@@ -2503,7 +2518,7 @@ tr td.line-ttfb, tr th.line-ttfb {
       }
       //Sort the array
       report.thesearchurl.sort((a, b) => (a.score > b.score ? -1 : 1));
-      console.log(JSON.stringify(report.thesearchurl));
+      //console.log(JSON.stringify(report.thesearchurl));
     });
 
     let deturl =
@@ -2668,7 +2683,7 @@ tr td.line-ttfb, tr th.line-ttfb {
           data.orgId = "";
         }
         if (result.records.length == 1) {
-          console.log(result);
+          //console.log(result);
           console.log("Cloud Org Record exists, id=" + result.records[0]["Id"]);
           data.orgId = result.records[0]["Id"];
           data.accId = "";
@@ -3027,7 +3042,7 @@ tr td.line-ttfb, tr th.line-ttfb {
       regions: [],
       thesearchurl: []
     };
-    console.log("GetSourceInfo");
+    //console.log("GetSourceInfo");
     json = await inspect.getSourceInfo(json);
 
     if (json.nrofsources == 0) {
@@ -3043,7 +3058,7 @@ tr td.line-ttfb, tr th.line-ttfb {
       }
     } else {
       //Get source Schedules
-      console.log("GetSourceSchedules");
+      if (debug) console.log("GetSourceSchedules");
       let sourcenoschedule = [];
 
       for (const source of json.sourceids) {
@@ -3063,7 +3078,7 @@ tr td.line-ttfb, tr th.line-ttfb {
       json.noscheduledsources = sourcenoschedule;
       json.nrofnoschedulessources = sourcenoschedule.length;
 
-      console.log("getSecurityInfo");
+      if (debug) console.log("getSecurityInfo");
       //Get Security Providers info
       json = await inspect.getSecurityInfo(json);
       json.nrofnoscheduledsecprov = json.noscheduledsecprov.length;
@@ -3073,11 +3088,11 @@ tr td.line-ttfb, tr th.line-ttfb {
       //Get Extensions Info
       //json = await inspect.getExtensionInfo(json);
 
-      console.log("getModelsInfo");
+      if (debug) console.log("getModelsInfo");
       //Get Models Info
       json = await inspect.getModelsInfo(json);
 
-      console.log("getLicense");
+      if (debug) console.log("getLicense");
       json = await inspect.getLicense(json);
 
       //IF we have the wrong productType, abort
@@ -3086,22 +3101,22 @@ tr td.line-ttfb, tr th.line-ttfb {
         return;
       }
 
-      console.log("getNodeInfo");
+      if (debug) console.log("getNodeInfo");
       //Get Node Info
       json = await inspect.getNodeInfo(json);
 
-      console.log("getAnalyticsMetricsInfo");
+      if (debug) console.log("getAnalyticsMetricsInfo");
       //Get Analytics Metrics Info
       json = await inspect.getAnalyticsMetricsInfo(json);
 
-      console.log("getAnalyticsMetricsDetails");
+      if (debug) console.log("getAnalyticsMetricsDetails");
       json = await inspect.getAnalyticsMetricsDetails(json);
 
-      console.log("getMLModels");
+      if (debug) console.log("getMLModels");
       json = await inspect.getMLModels(json);
 
       let pipesToCheck = [];
-      console.log("getQueryPipelinesInfo");
+      if (debug) console.log("getQueryPipelinesInfo");
       json = await inspect.getQueryPipelinesInfo(json);
 
       //If usedPipelines is empty, then use all Query pipelines
@@ -3123,7 +3138,7 @@ tr td.line-ttfb, tr th.line-ttfb {
       }
       json.nrofqpl_with_filters = json.qpl_with_filters.length;
 
-      console.log("got QPLS");
+      if (debug) console.log("got QPLS");
 
       let data = json;
       if (debug) {
@@ -3154,10 +3169,7 @@ tr td.line-ttfb, tr th.line-ttfb {
           "," +
           (data.EmptyHubs != 0) +
           "," +
-          (data.SearchAsYouType != 0) +
-          ",<html><body>" +
-          data.usagedetails +
-          "</body></html>"
+          (data.SearchAsYouType != 0) 
       );
       let report =
         "<p>   Analytics Tracked: " + data.det_analyticsSent + "<br>";
@@ -3174,37 +3186,6 @@ tr td.line-ttfb, tr th.line-ttfb {
       //Provide a Status based upon analysis
       data.status = "";
       data.statusDetails = "";
-      /* let actionFor = [];
-       let actionForCM='Intervention Required CM';
-       let actionForCSM='Intervention Required CSM';
-       let actionForBoth='Intervention Required CSM/CM';
-       let actionForCloudOps='Intervention Required CloudOps';
- 
-       if (data.EmptyHubs){
-         data.statusDetails += "Fix EmptyHubs (OriginLevel1 is empty).<br>";
-         actionFor.push(actionForCM);
-       }
-       if (data.PerformSearch == 0){
-         data.statusDetails += "Fix Analytics (No searches are detected).<br>";
-         actionFor.push(actionForCM);
-       }
-       if (data.DocumentView == 0){
-         data.statusDetails += "Fix Analytics (No document opening actions are detected).<br>";
-         actionFor.push(actionForCM);
-       }
-       if (data.mlart){
-         data.statusDetails += "Fix ML ART (No ML ART in the QPL are detected).<br>";
-         actionFor.push(actionForCSM);
-       }
-       if (data.mlquerysuggest){
-         data.statusDetails += "Fix ML QS (No ML QS in the QPL are detected).<br>";
-         actionFor.push(actionForCSM);
-       }
-       if (data.infra){
-         data.statusDetails += "Fix ML QS (No ML QS in the QPL are detected).<br>";
-         actionFor.push(actionForCSM);
-       }
- */
 
       let mysearchurls = "";
       data.accessibleUrls = [];
