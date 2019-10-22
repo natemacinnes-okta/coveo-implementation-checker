@@ -21,6 +21,29 @@ url = "https://www.al-enterprise.com/en/search";
 url = "https://kb.vmware.com/s/global-search/%40uri";
 var SFDCConnection;
 
+/*
+var fileOnServer = '/home/ubuntu/myuploaddir/randomfile/randomimage.jpg',
+    fileName = 'MyRandomImage.jpg',
+    fileType = 'image/jpeg';
+
+fs.readFile(fileOnServer, function (err, filedata) {
+    if (err){
+        console.error(err);
+    }
+    else{
+        var base64data = new Buffer(filedata).toString('base64');
+        jsForceConn.sobject('Attachment').create({ 
+                ParentId: 'mysalesforceContactID',
+                Name : fileName,
+                Body: base64data,
+                ContentType : fileType,  
+            }, 
+            function(err, uploadedAttachment) {
+                console.log(err,uploadedAttachment);
+        });
+}
+});
+*/
 hammingDistance = (str1, str2) => {
   /* If the strings are equal, bail */
   if (str1 === str2) {
@@ -50,6 +73,12 @@ getImage64 = file => {
   var bitmap = fs.readFileSync(file);
   // convert binary data to base64 encoded string
   return new Buffer(bitmap).toString("base64");
+};
+getHTML = file => {
+  // read binary data
+  var bitmap = fs.readFileSync(file);
+  // convert binary data to base64 encoded string
+  return new Buffer(bitmap).toString();
 };
 
 myimageHash = file => {
@@ -159,6 +188,134 @@ checkCustomerProject = async orgId => {
   return cp_id;
 };
 
+getAttach = async () => {
+  
+
+  await SFDCConnection.describe("ContentVersion", function(err, meta) {
+    if (err) { return console.error(err); }
+    console.log('Label : ' + meta.label);
+    console.log('Num of Fields : ' + meta.fields.length);
+    console
+    for (field of meta.fields){
+      console.log(field.name+" Create: "+field.createable+" Update: "+field.updateable);
+    }
+    // ...
+  });
+
+}
+
+deleteAttachment = async data => {
+  var cp_id = "";
+  console.log('Start checking delete');
+  await SFDCConnection.query(
+    `SELECT ContentDocumentId FROM ContentVersion where Title ='${data.name}'`,
+    function(err, result) {
+      if (err) {
+        console.error(err);
+        cp_id = "";
+      }
+      if (result.records.length >= 1) {
+        //console.log(result);
+        console.log("Attachment exists, id=" + result.records[0]["ContentDocumentId"]);
+        cp_id = result.records[0]["ContentDocumentId"];
+        
+      } else {
+        console.log(
+          "No Attachment yet"
+        );
+        cp_id = "";
+      }
+    }
+  );
+  if (cp_id!=""){
+    /*await SFDCConnection.query(
+      `DELETE [ Select Id FROM ContentVersion where Title ='${data.name}']`,
+      function(err, result) {
+        if (err) {
+          console.error(err);
+          cp_id = "";
+        }
+        if (result.records.length == 1) {
+          //console.log(result);
+          console.log("Attachment exists, id=" + result.records[0]["Id"]);
+          cp_id = result.records[0]["Id"];
+          
+        } else {
+          console.log(
+            "No Attachment yet"
+          );
+          cp_id = "";
+        }
+      }
+    );*/
+    await SFDCConnection.sobject('ContentDocument').del([cp_id] ,
+      function(err, rets) {
+        if (err) { return console.error(err); }
+        for (var i=0; i < rets.length; i++) {
+          if (rets[i].success) {
+            console.log("Deleted Successfully : " + rets[i].id);
+          }
+        }
+      });
+  }
+  console.log('Done checking delete');
+  return cp_id;
+}
+
+createAttachment = async data => {
+  let id='';
+  await SFDCConnection.sobject("ContentVersion").create(
+    [
+      {
+        //This is the 
+        FirstPublishLocationId : 'a6M0d000000D6gz',
+        Title : data.name,
+        PathOnClient : '/'+data.file,
+        VersionData : getImage64(data.file)
+      }
+    ],
+    function(err, rets) {
+      if (err) {
+        return console.error(err);
+      }
+      for (var i = 0; i < rets.length; i++) {
+        if (rets[i].success) {
+          console.log(rets[i]);
+          console.log("Created record id : " + rets[i].id);
+          id=rets[i].id;
+        }
+      }
+    }
+    );
+    return id;
+  };
+
+  
+updateAttachment = async data => {
+  console.log("Update Attach1");
+  await SFDCConnection.sobject("ContentVersion").update(
+    [
+      {
+        Id: '06811000001EIzfAAG',
+        Title : "TestMeWim2",
+        VersionNumber: '1.2',
+        VersionData : getImage64(data.file)
+      }
+    ],
+    function(err, rets) {
+      console.log("Update Attach2");
+      if (err) {
+        return console.error(err);
+      }
+      for (var i = 0; i < rets.length; i++) {
+        if (rets[i].success) {
+          console.log(rets[i]);
+          console.log("Updated record id : " + rets[i].id);
+        }
+      }
+    }
+    );
+  };
 createCustomerProject = async data => {
   var date = new Date();
   const SFDCRecType = "0120d0000001GrS";
@@ -340,7 +497,7 @@ updateCustomerProject = async data => {
   console.log(hammingDistance(hashA, hashB));
 */
   let settings = require("../secrets/settings.json");
-  /*var conn = await loginSFDC(settings.SFDC_User, settings.SFDC_Pass).then(
+  var conn = await loginSFDC(settings.SFDC_Usert, settings.SFDC_Passt).then(
     function(data) {
       //if (err) { console.log("Error:");console.error(err); return err; }
       // logged in user property
@@ -352,7 +509,14 @@ updateCustomerProject = async data => {
   //console.log(SFDCConnection);
   console.log(SFDCConnection.accessToken);
   console.log(SFDCConnection.instanceUrl);
-*/
+  await getAttach();
+  mydata = {};
+  mydata.file = 'results/vmwaregssservicecloud7kngelu5.html';
+  mydata.name = 'vmwaregssservicecloud7kngelu5.html';
+  await deleteAttachment(mydata);
+  let atid=await createAttachment(mydata);
+  //await updateAttachment('');
+  await logoutSFDC();
   //conn.login(settings.SFDC_User, settings.SFDC_Pass, function (err, userInfo) {
   /* if (err) { return console.error(err); }
     // Now you can get the access token and instance URL information.

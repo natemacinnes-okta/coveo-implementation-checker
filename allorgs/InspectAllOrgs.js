@@ -38,10 +38,15 @@ class InspectAllOrganizations {
 
   // function to encode file data to base64 encoded string
   getImage64(file) {
+    try {
     // read binary data
     var bitmap = fs.readFileSync(file);
     // convert binary data to base64 encoded string
     return new Buffer(bitmap).toString("base64");
+    }
+    catch(e){
+      return "";
+    }
   }
 
   hammingDistance(str1, str2) {
@@ -543,11 +548,11 @@ tr td.line-ttfb, tr th.line-ttfb {
               test: value => value > 20
             }
           },
-            {
-              key: "isLive",
-              label: "Is Live",
-              ref: "",
-              expected: true
+          {
+            key: "isLive",
+            label: "Is Live",
+            ref: "",
+            expected: true
           }
         ]
       },
@@ -654,7 +659,7 @@ tr td.line-ttfb, tr th.line-ttfb {
           }
         ]
       },
- {
+      {
         title: "Search",
         label: "Search",
         attributes: [
@@ -973,8 +978,9 @@ tr td.line-ttfb, tr th.line-ttfb {
     });
     //Add details_ml to fixes
     if (data.details_ml != "") {
-      allFixes = "<h4>Search - Machine Learning Models which need attention:</h4>" +
-      data.details_ml;
+      allFixes =
+        "<h4>Search - Machine Learning Models which need attention:</h4>" +
+        data.details_ml;
     }
     data.statusDetails = allFixes;
     let scores = sectionCharts.map(this.createWheel);
@@ -1007,12 +1013,12 @@ tr td.line-ttfb, tr th.line-ttfb {
           data.details += "<hr><h4>Fields where the end of the content is the same:</h4>" + data.details_alwaysthesame;
         }
         */
-       if (data.details_ml != "") {
-        data.details +=
-          "<hr><h4>Search - Machine Learning Models which need attention:</h4>" +
-          data.details_ml;
-      }
-        if (data.details_pipelines != "") {
+    if (data.details_ml != "") {
+      data.details +=
+        "<hr><h4>Search - Machine Learning Models which need attention:</h4>" +
+        data.details_ml;
+    }
+    if (data.details_pipelines != "") {
       data.details +=
         "<hr><h4>Search - Query Pipelines which need attention:</h4>" +
         data.details_pipelines;
@@ -1116,7 +1122,7 @@ tr td.line-ttfb, tr th.line-ttfb {
               //console.log(report.types);
               report.pushnames = data.filter(source => {
                 if (source.pushEnabled || source.sourceType == "SITECORE")
-                  return source.name;
+                  return source.id;
               });
               report.containsonprem =
                 data.filter(source => {
@@ -1140,7 +1146,7 @@ tr td.line-ttfb, tr th.line-ttfb {
                 report.docsfromsources += source.information.numberOfDocuments;
                 report.details +=
                   "<tr><td>" +
-                  source.name +
+                  source.id +
                   "</td><td style='text-align:right'>" +
                   source.information.numberOfDocuments.toLocaleString() +
                   "</td></tr>";
@@ -1166,7 +1172,7 @@ tr td.line-ttfb, tr th.line-ttfb {
                 report.docsfromsources += source.numberOfDocuments;
                 report.details +=
                   "<tr><td>" +
-                  source.name +
+                  source.id +
                   "</td><td style='text-align:right'>" +
                   source.numberOfDocuments.toLocaleString() +
                   "</td></tr>";
@@ -1442,7 +1448,7 @@ tr td.line-ttfb, tr th.line-ttfb {
                 })
                 .map(source => {
                   report.details +=
-                    source.name +
+                    source.id +
                     ": <b>" +
                     source.status.dailyStatistics.averageDurationInSeconds.toFixed(
                       2
@@ -1599,8 +1605,12 @@ tr td.line-ttfb, tr th.line-ttfb {
     return promise;
   }
 
-  getMLModels(report){
-    let url = this.baseUrl + "/rest/organizations/" + report.org + "/machinelearning/models/details";
+  getMLModels(report) {
+    let url =
+      this.baseUrl +
+      "/rest/organizations/" +
+      report.org +
+      "/machinelearning/models/details";
     let promise = new Promise(resolve => {
       this.executeCall(
         url,
@@ -1611,21 +1621,21 @@ tr td.line-ttfb, tr th.line-ttfb {
         this.apiKey
       ).then(function(data) {
         if (data) {
-          let models=[]
+          let models = [];
           data.map(model => {
             let count = 0;
-            if ('totalQueries' in model.info){
-              count = model.info['totalQueries'];
+            if ("totalQueries" in model.info) {
+              count = model.info["totalQueries"];
             }
-            if ('candidates' in model.info){
-              count = model.info['candidates'];
+            if ("candidates" in model.info) {
+              count = model.info["candidates"];
             }
-            if ('primaryIdToValue' in model.info){
-              count = model.info['primaryIdToValue'];
+            if ("primaryIdToValue" in model.info) {
+              count = model.info["primaryIdToValue"];
             }
-            models.push({name: model.modelDisplayName, count: count});
+            models.push({ name: model.modelDisplayName, count: count });
           });
-          if (debug){
+          if (debug) {
             console.log(models);
           }
           report.MLModelsInfo = models;
@@ -1695,34 +1705,40 @@ tr td.line-ttfb, tr th.line-ttfb {
   }
 
   checkProperML(checkmodel, report, models, indicator) {
-    let result=true;
+    let result = true;
     models.map(model => {
-      if (model.name == checkmodel){
-          //Check if this one is present in MLModelsInfo, if so check count (>10)
-          if (model.count<=10){
-            result = false;
-          }
+      if (model.name == checkmodel) {
+        //Check if this one is present in MLModelsInfo, if so check count (>10)
+        if (model.count <= 10) {
+          result = false;
+        }
       }
     });
-    if (!result)
-    {
-        report[indicator] = false;
-        if (report.details_ml.indexOf(checkmodel) == -1) {
-          report.details_ml +=
-            "<BR><BR>ML Model: <b>" + checkmodel + "</b><BR>";
-          report.details_ml +=
-            "Machine Learning, is not learning. Check your ML Configuration.<BR>";
+    if (!result) {
+      report[indicator] = false;
+      if (report.details_ml.indexOf(checkmodel) == -1) {
+        report.details_ml += "<BR><BR>ML Model: <b>" + checkmodel + "</b><BR>";
+        report.details_ml +=
+          "Machine Learning, is not learning. Check your ML Configuration.<BR>";
       }
     }
     return report;
-
   }
 
-  addPipeLineModels(json,report, indicator) {
+  addPipeLineModels(json, report, indicator) {
     json.statements.map(model => {
-      report.MLModels.push(model.displayName);
+      let name = model.displayName;
+      if (name==undefined){
+         name = model.modelName;
+      }
+      report.MLModels.push(name);
       //Check if this one is present in MLModelsInfo, if so check count (>10)
-      report = inspect.checkProperML(model.displayName, report, report.MLModelsInfo, indicator)
+      report = inspect.checkProperML(
+        name,
+        report,
+        report.MLModelsInfo,
+        indicator
+      );
     });
     return report;
   }
@@ -1738,16 +1754,15 @@ tr td.line-ttfb, tr th.line-ttfb {
           pipe.id,
           "querySuggest"
         ).then(function(data) {
-          
           if (json.details_pipelines.indexOf(pipe.name) == -1) {
             json.details_pipelines +=
               "<BR><BR>Pipeline: <b>" + pipe.name + "</b><BR>";
             json.details_pipelines +=
               "Machine Learning, using old version, consider upgrading to the latest (platformVersion 2).<BR>";
           }
-          if (debug){
-          console.log("Get Query Suggest data:");
-          console.log(data);
+          if (debug) {
+            console.log("Get Query Suggest data:");
+            console.log(data);
           }
           if (data) {
             if (data.totalCount == 0) {
@@ -1758,10 +1773,8 @@ tr td.line-ttfb, tr th.line-ttfb {
               json.details_pipelines +=
                 "Machine Learning, Query Suggestions not enabled.<BR>";
               json.mlquerysuggest = false;
-            }
-            else
-            {
-              json = inspect.addPipeLineModels(data, json,'mlquerysuggest');
+            } else {
+              json = inspect.addPipeLineModels(data, json, "mlquerysuggest");
             }
           }
           resolve();
@@ -1779,9 +1792,9 @@ tr td.line-ttfb, tr th.line-ttfb {
             json.details_pipelines +=
               "Machine Learning, using old version, consider upgrading to the latest (platformVersion 2).<BR>";
           }
-          if (debug){
-          console.log("Get Recommendation data:");
-          console.log(data);
+          if (debug) {
+            console.log("Get Recommendation data:");
+            console.log(data);
           }
           if (data) {
             if (data.totalCount == 0) {
@@ -1792,11 +1805,8 @@ tr td.line-ttfb, tr th.line-ttfb {
               json.details_pipelines +=
                 "Machine Learning, Recommendations not enabled.<BR>";
               json.mlrecommendation = false;
-            }
-            else
-            {
-              json = inspect.addPipeLineModels(data, json,'mlrecommendation');
-
+            } else {
+              json = inspect.addPipeLineModels(data, json, "mlrecommendation");
             }
           }
           resolve();
@@ -1811,9 +1821,9 @@ tr td.line-ttfb, tr th.line-ttfb {
               json.details_pipelines +=
                 "Machine Learning, using old version, consider upgrading to the latest (platformVersion 2).<BR>";
             }
-            if (debug){
-            console.log("Get ART data:");
-            console.log(data);
+            if (debug) {
+              console.log("Get ART data:");
+              console.log(data);
             }
             if (data) {
               if (data.totalCount == 0) {
@@ -1824,12 +1834,9 @@ tr td.line-ttfb, tr th.line-ttfb {
                 json.details_pipelines +=
                   "Machine Learning, Automatic Relevancy Tuning not enabled.<BR>";
                 json.mlart = false;
+              } else {
+                json = inspect.addPipeLineModels(data, json, "mlart");
               }
-              else
-              {
-                json = inspect.addPipeLineModels(data, json,'mlart');
-              }
-  
             }
             resolve();
           }
@@ -1849,24 +1856,47 @@ tr td.line-ttfb, tr th.line-ttfb {
               json.mldne = false;
             } else {
               data.rules.map(model => {
-                json.MLModels.push(model.modelDisplayName);
+                let name = model.modelDisplayName;
+                if (name==undefined){
+                  name = model.modelName;
+                }
+                json.MLModels.push(name);
                 if (model.modelStatus == "ONLINE") {
                   if (model.modelId.indexOf("_topclicks_") != -1) {
                     json.mlart = true;
-                    json = inspect.checkProperML(model.modelDisplayName, json, json.MLModelsInfo, 'mlart')
-
+                    json = inspect.checkProperML(
+                      name,
+                      json,
+                      json.MLModelsInfo,
+                      "mlart"
+                    );
                   }
                   if (model.modelId.indexOf("_facetsense_") != -1) {
                     json.mldne = true;
-                    json = inspect.checkProperML(model.modelDisplayName, json, json.MLModelsInfo, 'mldne')
+                    json = inspect.checkProperML(
+                      name,
+                      json,
+                      json.MLModelsInfo,
+                      "mldne"
+                    );
                   }
                   if (model.modelId.indexOf("_eventrecommendation_") != -1) {
                     json.mlrecommendation = true;
-                    json = inspect.checkProperML(model.modelDisplayName, json, json.MLModelsInfo, 'mlrecommendation')
+                    json = inspect.checkProperML(
+                      name,
+                      json,
+                      json.MLModelsInfo,
+                      "mlrecommendation"
+                    );
                   }
                   if (model.modelId.indexOf("_querysuggest_") != -1) {
                     json.mlquerysuggest = true;
-                    json = inspect.checkProperML(model.modelDisplayName, json, json.MLModelsInfo, 'mlquerysuggest')
+                    json = inspect.checkProperML(
+                      name,
+                      json,
+                      json.MLModelsInfo,
+                      "mlquerysuggest"
+                    );
                   }
                 }
               });
@@ -2040,7 +2070,7 @@ tr td.line-ttfb, tr th.line-ttfb {
 
       await page.goto(url, {
         waitUntil: "networkidle0",
-        timeout: 0
+        timeout: 30000
       });
       //Check if no redirect
       const pageurl = this.getHost(page.url());
@@ -2048,7 +2078,9 @@ tr td.line-ttfb, tr th.line-ttfb {
         moveOn = true;
       }
       if (moveOn) {
+       // console.log("HERE1");
         let data = await page.evaluate(() => {
+          //console.log("HERE2");
           let all = {};
           //Calculate score based upon coveo components in the page
           //If it contains facets: highest score
@@ -2060,6 +2092,7 @@ tr td.line-ttfb, tr th.line-ttfb {
           all.facets = document.querySelectorAll(
             ".coveo-facet-selectable"
           ).length;
+          
           let hasSearchAsYoutype = false;
           try {
             var boxes = Coveo.$(".CoveoSearchbox");
@@ -2076,38 +2109,40 @@ tr td.line-ttfb, tr th.line-ttfb {
               counter++;
             });
           } catch (ex2) {
-            if (debug){
-            console.log(ex2.message);
-            }
+            /*if (debug) {
+              console.log(ex2.message);
+            }*/
           }
+          
           all.uiVersion = "";
           try {
             all.uiVersion = Coveo.version.lib;
           } catch (ex) {
-            if (debug){
-            console.log(ex.message);
-            }
+            /*if (debug) {
+              console.log(ex.message);
+            }*/
           }
           all.EndpointVersion = "";
           try {
             all.EndpointVersion = Coveo.SearchEndpoint.endpoints.default.options.version.toUpperCase();
           } catch (ex) {
-            if (debug){
-            console.log(ex.message);
-            }
+            /*if (debug) {
+              console.log(ex.message);
+            }*/
           }
           try {
             all.EndpointVersion = Coveo.Rest.SearchEndpoint.endpoints.default.options.version.toUpperCase();
           } catch (ex) {
-            if (debug){
-            console.log(ex.message);
-            }
+            /*if (debug) {
+              console.log(ex.message);
+            }*/
           }
           all.score = 1;
           all.img = "";
           all.url = "";
           all.hash = 0;
           all.containsSearchAsYouType = hasSearchAsYoutype;
+          
           if (all.facets > 3) {
             all.score = 10;
           } else {
@@ -2121,9 +2156,9 @@ tr td.line-ttfb, tr th.line-ttfb {
           }
           return all;
         });
-if (debug){
-        console.log("Number of Coveo occurences: " + JSON.stringify(data));
-}
+        if (debug) {
+          console.log("Number of Coveo occurences: " + JSON.stringify(data));
+        }
         if (data.score > 0) {
           data.img = file;
           data.url = url;
@@ -2156,7 +2191,7 @@ if (debug){
         return all;
       }
     } catch (e) {
-      //console.log(e);
+      if (debug) console.log(e);
       let all = {};
       all.score = 0;
       return all;
@@ -2187,7 +2222,7 @@ if (debug){
 
       await page.goto(url, {
         waitUntil: "networkidle0",
-        timeout: 0
+        timeout: 30000
       });
       //Check if no redirect
       const pageurl = this.getHost(page.url());
@@ -2223,24 +2258,24 @@ if (debug){
               counter++;
             });
           } catch (ex2) {
-            if (debug) console.log(ex2.message);
+            //if (debug) console.log(ex2.message);
           }
           all.uiVersion = "";
           try {
             all.uiVersion = Coveo.version.lib;
           } catch (ex) {
-            if (debug) console.log(ex.message);
+            //if (debug) console.log(ex.message);
           }
           all.EndpointVersion = "";
           try {
             all.EndpointVersion = Coveo.SearchEndpoint.endpoints.default.options.version.toUpperCase();
           } catch (ex) {
-            if (debug) console.log(ex.message);
+            //if (debug) console.log(ex.message);
           }
           try {
             all.EndpointVersion = Coveo.Rest.SearchEndpoint.endpoints.default.options.version.toUpperCase();
           } catch (ex) {
-            if (debug) console.log(ex.message);
+            //if (debug) console.log(ex.message);
           }
           all.score = 1;
           all.img = "";
@@ -2261,7 +2296,8 @@ if (debug){
           return all;
         });
 
-        if (debug) console.log("Number of Coveo occurences: " + JSON.stringify(data));
+        if (debug)
+          console.log("Number of Coveo occurences: " + JSON.stringify(data));
         if (data.score > 0) {
           data.img = file;
           data.url = url;
@@ -2365,9 +2401,9 @@ if (debug){
           "%<br><br>";
       }
     });
-    report.isLive = false
-    let checkLive = false
-    let isLive = true
+    report.isLive = false;
+    let checkLive = false;
+    let isLive = true;
     let url2ab =
       this.baseUrl +
       "/rest/ua/v15/stats/combinedData?m=PerformSearch&d=week&f=&fm=&p=1&n=40&s=PerformSearch&asc=false&includeMetadata=true&bindOnLastSearch=true&org=" +
@@ -2387,15 +2423,15 @@ if (debug){
       }
       if (data) {
         data["combinations"].map(sourcedet => {
-          checkLive = true
-          if (sourcedet.PerformSearch<1000) {
-            isLive = false
+          checkLive = true;
+          if (sourcedet.PerformSearch < 1000) {
+            isLive = false;
           }
         });
       }
     });
-    if (checkLive){
-       report.isLive = isLive;
+    if (checkLive) {
+      report.isLive = isLive;
     }
     let url2a =
       this.baseUrl +
@@ -2599,7 +2635,7 @@ if (debug){
         (report.ControlFacet / report.ControlSearch) *
         100
       ).toFixed(0);
-      if (report.ControlFacet > 100) {
+      if (Number(report.ControlFacet) > 100) {
         report.ControlFacet = 100;
       }
       report.ControlInterface = (
@@ -2667,6 +2703,143 @@ if (debug){
       // now the session has been expired.
     });
   }
+
+  async deleteAttachment (data) {
+    var cp_id = "";
+    console.log('Start checking delete');
+    try
+    {
+    await SFDCConnection.query(
+      `SELECT ContentDocumentId FROM ContentVersion where Title ='${data.org}'`,
+      function(err, result) {
+        if (err) {
+          console.error(err);
+          cp_id = "";
+        }
+        if (result.records.length >= 1) {
+          //console.log(result);
+          console.log("Attachment exists, id=" + result.records[0]["ContentDocumentId"]);
+          cp_id = result.records[0]["ContentDocumentId"];
+          
+        } else {
+          console.log(
+            "No Attachment yet"
+          );
+          cp_id = "";
+        }
+      }
+    );
+    if (cp_id!=""){
+     
+      await SFDCConnection.sobject('ContentDocument').del([cp_id] ,
+        function(err, rets) {
+          if (err) { return console.error(err); }
+          for (var i=0; i < rets.length; i++) {
+            if (rets[i].success) {
+              console.log("Deleted Successfully : " + rets[i].id);
+            }
+          }
+        });
+       /* await SFDCConnection.sobject('ContentDocumentLink').del([cp_id] ,
+          function(err, rets) {
+            if (err) { return console.error(err); }
+            for (var i=0; i < rets.length; i++) {
+              if (rets[i].success) {
+                console.log("Deleted Successfully : " + rets[i].id);
+              }
+            }
+          });*/
+    }
+  }
+  catch(ex2){
+    if (debug) {
+      console.log(ex2.message);
+    }
+  }
+    console.log('Done checking delete');
+    return cp_id;
+  }
+  
+  async createAttachment(data) {
+    let id='';
+    //Delete previous
+    await inspect.deleteAttachment(data);
+    //Create new content version
+    try
+    {
+    await SFDCConnection.sobject("ContentVersion").create(
+      [
+        {
+          //This is the 
+          FirstPublishLocationId : data.cp_id,
+          Title : data.org,
+          PathOnClient : '/'+data.file,
+          VersionData : inspect.getImage64(data.file)
+        }
+      ],
+      function(err, rets) {
+        if (err) {
+          return console.error(err);
+        }
+        for (var i = 0; i < rets.length; i++) {
+          if (rets[i].success) {
+            console.log(rets[i]);
+            console.log("Created attachment id : " + rets[i].id);
+            id=rets[i].id;
+          }
+        }
+      }
+      );
+      //Get ContentDocumentId of previous created record
+      /*let doc_id = '';
+      await SFDCConnection.query(
+        `SELECT ContentDocumentId FROM ContentVersion where Title ='${data.org}'`,
+        function(err, result) {
+          if (err) {
+            console.error(err);
+            doc_id = "";
+          }
+          if (result.records.length >= 1) {
+            
+            doc_id = result.records[0]["ContentDocumentId"];
+            
+          } else {
+            
+            doc_id = "";
+          }
+        }
+      );
+      console.log("Content Doc: "+data.cp_id+"/"+doc_id);
+      //Add ContentDocumentLink for sharing settings
+      await SFDCConnection.sobject("ContentDocumentLink").create(
+        [
+          {
+            //This is the 
+            ContentDocumentId : doc_id,
+            LinkedEntityId : data.cp_id,
+            ShareType : 'C',
+            Visibility : 'SharedUsers'
+          }
+        ],
+        function(err, rets) {
+          if (err) {
+            return console.error(err);
+          }
+          for (var i = 0; i < rets.length; i++) {
+            if (rets[i].success) {
+              console.log(rets[i]);
+              console.log("Created ContentDocumentLink id : " + rets[i].id);
+              //id=rets[i].id;
+            }
+          }
+        }
+        );*/
+      }
+      catch(ex2){
+        if (debug) console.log(ex2.message);
+      }
+      return id;
+    };
 
   async checkCloudOrg(orgId) {
     var data = {};
@@ -2738,6 +2911,7 @@ if (debug){
 
   async createCustomerProject(data) {
     var date = new Date();
+    let id='';
     const SFDCRecType = "0120d0000001GrS";
     const SitecoreRecType = "0120d0000001GrT";
     const DynamicsRecType = "0120d0000005Ptp";
@@ -2752,12 +2926,14 @@ if (debug){
     if (data.productEdition.includes("DYNAMICS")) {
       recType = DynamicsRecType;
     }
+    try
+    {
     await SFDCConnection.sobject("Project_Non_Billable__c").create(
       [
         {
           Name: data.name,
           //  Coveo_Cloud_Organization_ID__c: 'akqademotaeqdoul',
-          Status__c: data.isLive ? 'Closed' : 'Open',
+          Status__c: data.isLive ? "Closed" : "Opened",
           Coveo_Cloud_Organization__c: data.orgId,
           Parent_Account__c: data.accId,
           Opportunity__c: data.oppId,
@@ -2821,20 +2997,29 @@ if (debug){
         for (var i = 0; i < rets.length; i++) {
           if (rets[i].success) {
             console.log("Created record id : " + rets[i].id);
+            id =  rets[i].id;
+            
           }
         }
         // ...
       }
     );
+    }
+    catch(ex2){
+      if (debug) console.log(ex2.message);
+    }
+    return id;
   }
 
   async updateCustomerProject(data) {
     var date = new Date();
+    try
+    {
     await SFDCConnection.sobject("Project_Non_Billable__c").update(
       [
         {
           Id: data.cp_id,
-          Status__c: data.isLive ? 'Closed' : 'Open',
+          Status__c: data.isLive ? "Closed" : "Opened",
           Intervention_Required__c: !(data.status == "OK"),
           Deployed_Regions__c:
             typeof data.regions === "undefined" ? "" : data.regions.join("\n"),
@@ -2900,7 +3085,18 @@ if (debug){
         // ...
       }
     );
+    }
+    catch(ex2){
+      if (debug) console.log(ex2.message);
+    }
   }
+
+ 
+  sleep(ms){
+     return new Promise(resolve=>{
+         setTimeout(resolve,ms)
+     })
+ }
 
   async inspectOrganization(id) {
     var options = {
@@ -3054,6 +3250,7 @@ if (debug){
           "=============================================================="
         );
       } else {
+        console.log(json.org + " NO SOURCES FOUND ");
         console.log(json.org + "," + json.name + ",,,,,,");
       }
     } else {
@@ -3070,7 +3267,7 @@ if (debug){
         if (!isPush) {
           const data = await inspect.getSourceSchedules(json, source.id);
           if (!data) {
-            sourcenoschedule.push(source.name);
+            sourcenoschedule.push(source.id);
           }
         }
       }
@@ -3082,7 +3279,7 @@ if (debug){
       //Get Security Providers info
       json = await inspect.getSecurityInfo(json);
       json.nrofnoscheduledsecprov = json.noscheduledsecprov.length;
-      
+
       // We do not have access to extensions
       //console.log("getExtensionInfo");
       //Get Extensions Info
@@ -3096,7 +3293,7 @@ if (debug){
       json = await inspect.getLicense(json);
 
       //IF we have the wrong productType, abort
-      if (json.productType != "STANDARD" ) {
+      if (json.productType != "STANDARD") {
         console.log("ABORT ORG IS NO STANDARD PRODUCTTYPE");
         return;
       }
@@ -3169,7 +3366,7 @@ if (debug){
           "," +
           (data.EmptyHubs != 0) +
           "," +
-          (data.SearchAsYouType != 0) 
+          (data.SearchAsYouType != 0)
       );
       let report =
         "<p>   Analytics Tracked: " + data.det_analyticsSent + "<br>";
@@ -3322,14 +3519,16 @@ if (debug){
       };
       //console.log(mydata);
       //let html = `<html><body><h1>${data.org}</h1>${report}${JSON.stringify(mydata)}</body></html>`;
+      data.file = "./results/" + data.org + ".html";
 
       fs.writeFileSync("./results/" + data.org + ".html", html);
-      data.reportLoc = s3Loc + data.org + ".html";
+      
       mydata["SFDCStatus"] = "OK";
       //Copy to s3
       // HTML and Images = screenshots
 
-      const cp_id = await inspect.checkCustomerProject(data.org);
+      let cp_id = await inspect.checkCustomerProject(data.org);
+      data.cp_id = '';
       if (cp_id == "") {
         //We have no Customer Project, check if Cloud Org Exists
         const orgData = await inspect.checkCloudOrg(data.org);
@@ -3344,10 +3543,20 @@ if (debug){
           data.accId = orgData.accId;
           data.oppId = orgData.oppId;
           mydata["SFDCStatus"] = "CREATED CP";
-          await inspect.createCustomerProject(data);
+          cp_id = await inspect.createCustomerProject(data);
+          data.cp_id = cp_id;
+          //Wait for 1 sec
+          await inspect.sleep(500);
+          //We need a Customer Project first before we can create an attachment
+          data.locid = await inspect.createAttachment(data);
+          data.reportLoc = this.settings.SFDC_Download.replace("{ID}",data.locid);
+          await inspect.updateCustomerProject(data);
         }
       } else {
         let ids = cp_id.split(";");
+        data.cp_id = ids[1];
+        data.locid = await inspect.createAttachment(data);
+        data.reportLoc = this.settings.SFDC_Download.replace("{ID}",data.locid);
         for (const id of ids) {
           if (id != "") {
             data.cp_id = id;
@@ -3357,6 +3566,9 @@ if (debug){
             await inspect.updateCustomerProject(data);
           }
         }
+      }
+      if (data.cp_id!=""){
+          
       }
       fs.writeFileSync(
         "./results/" + data.org + ".json",
@@ -3381,7 +3593,7 @@ if (debug){
       };
 
       //Push it to the google Sheet
-      if (addGoogleSheet){
+      if (addGoogleSheet) {
         const response = await callApi(options, dataEncoded);
       }
 
@@ -3394,9 +3606,9 @@ if (debug){
     }
   }
 
-  async loginPlatform() {
-    let browser = await puppeteer.launch();
-    const adminpage = await browser.newPage();
+  async doActualLogin() {
+    let mybrowser = await puppeteer.launch({ headless: false });
+    const adminpage = await mybrowser.newPage();
 
     await adminpage.goto("https://platform.cloud.coveo.com/admin", {
       waitUntil: "networkidle0",
@@ -3412,14 +3624,18 @@ if (debug){
     await adminpage.click(googleLoginButtonSelector);
 
     // wait for the google oauth page to open
-    const googleOAuthTarget = await browser.waitForTarget(target => {
-      // console.log( target.url() ); // debugging
-      return (
-        target
-          .url()
-          .indexOf("https://accounts.google.com/signin/oauth/identifier") !== -1
-      );
-    });
+    const googleOAuthTarget = await mybrowser.waitForTarget(
+      target => {
+        // console.log( target.url() ); // debugging
+        return (
+          target
+            .url()
+            .indexOf("https://accounts.google.com/signin/oauth/identifier") !==
+          -1
+        );
+      },
+      { duration: 3 }
+    );
 
     const googleOAuthPage = await googleOAuthTarget.page();
 
@@ -3448,10 +3664,23 @@ if (debug){
       return window.admin.currentAccessToken;
       //console.log(access);
     });
+    await mybrowser.close();
     //const [ returnedCookie ] = await adminpage.cookies('https://platform.cloud.coveo.com/admin/');
     //console.log("cookies:");
     //console.log(returnedCookie);
     this.apiKey = access;
+  }
+
+  async loginPlatform() {
+    let retry = 0;
+    console.log("Login platform.")
+    while (retry < 3) {
+      try {
+        return inspect.doActualLogin();
+      } catch {
+        retry = retry + 1;
+      }
+    }
   }
 
   async start() {
@@ -3479,7 +3708,7 @@ if (debug){
     }
     //Get first
     let mycounter = 0;
-    let debugCount = 50;
+    let debugCount = 150;
     let pageIndex = 0;
     let orgs = await this.getOrganizations(pageIndex);
 
