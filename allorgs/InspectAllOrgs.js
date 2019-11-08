@@ -2630,6 +2630,9 @@ tr td.line-ttfb, tr th.line-ttfb {
         });
       }
     });
+    if (report.ControlSearch == 0 ){
+      report.ControlSearch = 1;
+    }
     if (report.ControlSearch > 0) {
       report.ControlFacet = (
         (report.ControlFacet / report.ControlSearch) *
@@ -3708,7 +3711,7 @@ tr td.line-ttfb, tr th.line-ttfb {
     }
     //Get first
     let mycounter = 0;
-    let debugCount = 150;
+    let debugCount = 350;
     let pageIndex = 0;
     let orgs = await this.getOrganizations(pageIndex);
 
