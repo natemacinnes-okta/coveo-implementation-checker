@@ -4,4 +4,6 @@ results
 node_modules
 package-lock.json
 coveo_implementation_checker_v*.zip
-output.*
+output.txt
+output.csv
+outputProd.csv
