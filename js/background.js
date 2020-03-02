@@ -11,7 +11,12 @@ const FILTER_OTHERS = { urls: ["*://*/rest/search/alerts*"] };
 
 let getTabId_Then = (callback) => {
   chrome.tabs.query({ active: true, lastFocusedWindow: true}, (tabs) => {
-    callback(tabs[0].id);
+    if (tabs.length>0){
+      callback(tabs[0].id);
+    } else
+    {
+      callback();
+    }
   });
 };
 

@@ -155,6 +155,7 @@ You can load it manually in your browser from the extension page. (chrome://exte
 0.9.6 Added Detailed OriginLevel1/Level2 information
 0.9.7 In stead of 100 days, use 50 days for Analytics
 0.9.8 Fixed DocumentOpen, Recommendation counts, Added EmptyHubs
+0.9.9 Fixed Failing Analytics call, chaning 50 days to 30 days (License restrictions). JS UI Version check only for 2.x
 
 ## Build extension package
 

@@ -381,12 +381,12 @@ function parseScript(name, content, all, external, __report__) {
       matches = content.match(reg);
       report += addMatches(matches);
     }
-    reg = /[^\\]\"CoveoFacet/g;
+    reg = /[^\\]\"(CoveoFacet|CoveoDynamicFacet)/g;
     matches = content.match(reg);
     if (matches) {
       report += '<BR><b>Facets found</b><br><span class="mycode" >';
       __report__.usingFacets = true;
-      reg = /[.\S\s ]{10}[^\\]\"CoveoFacet[.\S\s ]{60}/g;
+      reg = /[.\S\s ]{10}[^\\]\"(CoveoFacet|CoveoDynamicFacet)[.\S\s ]{60}/g;
       matches = content.match(reg);
       report += addMatches(matches);
     }
@@ -657,7 +657,7 @@ function getReport() {
 
   theReport.underscoretemplates = document.querySelectorAll('.result-template[type="text/underscore"]').length + document.querySelectorAll('.result-template[type="text/x-underscore-template"]').length;
 
-  theReport.nroffacets = document.querySelectorAll('.coveo-facet-header').length;
+  theReport.nroffacets = document.querySelectorAll('.coveo-facet-header').length+document.querySelectorAll('.coveo-dynamic-facet-header').length;
   theReport.nrofsorts = document.querySelectorAll('.CoveoSort').length;//document.querySelectorAll('.coveo-sort-icon-descending').length;
 
   // TODO - count FAILURES

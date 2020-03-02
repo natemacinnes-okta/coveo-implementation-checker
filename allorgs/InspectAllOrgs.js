@@ -2765,6 +2765,7 @@ tr td.line-ttfb, tr th.line-ttfb {
   
   async createAttachment(data) {
     let id='';
+    var date = new Date();
     //Delete previous
     await inspect.deleteAttachment(data);
     //Create new content version
@@ -2775,7 +2776,7 @@ tr td.line-ttfb, tr th.line-ttfb {
         {
           //This is the 
           FirstPublishLocationId : data.cp_id,
-          Title : data.org,
+          Title : data.org +' '+date.toISOString().split("T")[0],
           PathOnClient : '/'+data.file,
           VersionData : inspect.getImage64(data.file)
         }
@@ -3022,7 +3023,7 @@ tr td.line-ttfb, tr th.line-ttfb {
       [
         {
           Id: data.cp_id,
-          Status__c: data.isLive ? "Closed" : "Opened",
+          //Status__c: data.isLive ? "Closed" : "Opened",
           Intervention_Required__c: !(data.status == "OK"),
           Deployed_Regions__c:
             typeof data.regions === "undefined" ? "" : data.regions.join("\n"),
@@ -3242,6 +3243,17 @@ tr td.line-ttfb, tr th.line-ttfb {
       thesearchurl: []
     };
     //console.log("GetSourceInfo");
+    //We need to check if it was already done, else skip it
+    var filecheck= "./results/" + json.org + ".html";
+    if (fs.existsSync(filecheck)) {
+      console.log("Org "+json.org+" already done... skipping");
+      return;
+    } else 
+    {
+      //Always write at least a file so we do not parse the org again
+      fs.writeFileSync("./results/" + json.org + ".html", "Empty");
+
+    }
     json = await inspect.getSourceInfo(json);
 
     if (json.nrofsources == 0) {
@@ -3748,11 +3760,20 @@ tr td.line-ttfb, tr th.line-ttfb {
     await inspect.logoutSFDC();
     console.log("Ready");
 
-    console.log("Now execute the UploadToS3.bat file");
+    console.log("Removing output directory");
+    try { var files = fs.readdirSync('results'); }
+      catch(e) { console.log(e); }
+      if (files.length > 0)
+        for (var i = 0; i < files.length; i++) {
+          var filePath = results + '/' + files[i];
+          if (fs.statSync(filePath).isFile())
+            fs.unlinkSync(filePath);
+        }
     process.exit();
   }
 }
 
+console.log("Make sure to clear the results directory with the orgs you DO NOT WANT TO REINDEX!!!!");
 let inspect = new InspectAllOrganizations();
 inspect.initPuppet();
 inspect.start();

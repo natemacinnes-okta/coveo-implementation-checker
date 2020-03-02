@@ -89,3 +89,4 @@ Inside the [secret file](secrets\settings.json) you need to define the following
 
 ## Changes
 1.0 Initial version
+1.1 Jan 2020, removed status update at updateCustomerProject, added date to attachment report in SFDC
