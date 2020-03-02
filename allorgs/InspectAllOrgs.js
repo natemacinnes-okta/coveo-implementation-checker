@@ -468,9 +468,9 @@ tr td.line-ttfb, tr th.line-ttfb {
           {
             key: "uiVersion",
             label: "JS UI version",
-            hint: "Should be 2.5652",
+            hint: "Should be 2.x",
             ref: "https://docs.coveo.com/en/328",
-            expected: /^2\.5652/
+            expected: /^2\./
           },
           {
             key: "EndpointVersion",
