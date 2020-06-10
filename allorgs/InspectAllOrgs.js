@@ -1,18 +1,16 @@
 // npm install puppeteer
 // npm i -S image-hash
-// npm install node-salesforce
 const request = require("request");
 var pHash = require("image-hash");
 const qs = require("querystring");
 const fs = require("fs");
-var sf = require("node-salesforce");
 const nrofdaysAnalytics = 14;
 const debug = false;
 const addGoogleSheet = false;
 const puppeteer = require("puppeteer");
-let browser; //= await puppeteer.launch();
+let browser;
 const s3Loc = "https://s3.amazonaws.com/NOTYET/";
-var SFDCConnection;
+const COVEO_ORG_ID = process.env.COVEO_ORG_ID
 
 class InspectAllOrganizations {
   constructor() {
@@ -39,7 +37,7 @@ class InspectAllOrganizations {
   // function to encode file data to base64 encoded string
   getImage64(file) {
     try {
-    // read binary data
+    // read binary data`
     var bitmap = fs.readFileSync(file);
     // convert binary data to base64 encoded string
     return new Buffer(bitmap).toString("base64");
@@ -1097,6 +1095,7 @@ tr td.line-ttfb, tr th.line-ttfb {
   }
 
   getSourceInfo(report) {
+    console.log(report.org);
     let url = this.baseUrl + "/rest/organizations/" + report.org + "/sources";
     let sources = 0;
     let disabled = 0;
@@ -2092,7 +2091,7 @@ tr td.line-ttfb, tr th.line-ttfb {
           all.facets = document.querySelectorAll(
             ".coveo-facet-selectable"
           ).length;
-          
+
           let hasSearchAsYoutype = false;
           try {
             var boxes = Coveo.$(".CoveoSearchbox");
@@ -2113,7 +2112,7 @@ tr td.line-ttfb, tr th.line-ttfb {
               console.log(ex2.message);
             }*/
           }
-          
+
           all.uiVersion = "";
           try {
             all.uiVersion = Coveo.version.lib;
@@ -2142,7 +2141,7 @@ tr td.line-ttfb, tr th.line-ttfb {
           all.url = "";
           all.hash = 0;
           all.containsSearchAsYouType = hasSearchAsYoutype;
-          
+
           if (all.facets > 3) {
             all.score = 10;
           } else {
@@ -2689,413 +2688,6 @@ tr td.line-ttfb, tr th.line-ttfb {
     });
   }
 
-  loginSFDC(user, pass) {
-    SFDCConnection = new sf.Connection({
-      // you can change loginUrl to connect to sandbox or prerelease env.
-      loginUrl: "https://na61.salesforce.com"
-      //loginUrl: "https://cs18.salesforce.com"
-    });
-    return SFDCConnection.login(user, pass);
-  }
-
-  logoutSFDC() {
-    SFDCConnection.logout(function(err) {
-      if (err) {
-        return console.error(err);
-      }
-      // now the session has been expired.
-    });
-  }
-
-  async deleteAttachment (data) {
-    var cp_id = "";
-    console.log('Start checking delete');
-    try
-    {
-    await SFDCConnection.query(
-      `SELECT ContentDocumentId FROM ContentVersion where Title ='${data.org}'`,
-      function(err, result) {
-        if (err) {
-          console.error(err);
-          cp_id = "";
-        }
-        if (result.records.length >= 1) {
-          //console.log(result);
-          console.log("Attachment exists, id=" + result.records[0]["ContentDocumentId"]);
-          cp_id = result.records[0]["ContentDocumentId"];
-          
-        } else {
-          console.log(
-            "No Attachment yet"
-          );
-          cp_id = "";
-        }
-      }
-    );
-    if (cp_id!=""){
-     
-      await SFDCConnection.sobject('ContentDocument').del([cp_id] ,
-        function(err, rets) {
-          if (err) { return console.error(err); }
-          for (var i=0; i < rets.length; i++) {
-            if (rets[i].success) {
-              console.log("Deleted Successfully : " + rets[i].id);
-            }
-          }
-        });
-       /* await SFDCConnection.sobject('ContentDocumentLink').del([cp_id] ,
-          function(err, rets) {
-            if (err) { return console.error(err); }
-            for (var i=0; i < rets.length; i++) {
-              if (rets[i].success) {
-                console.log("Deleted Successfully : " + rets[i].id);
-              }
-            }
-          });*/
-    }
-  }
-  catch(ex2){
-    if (debug) {
-      console.log(ex2.message);
-    }
-  }
-    console.log('Done checking delete');
-    return cp_id;
-  }
-  
-  async createAttachment(data) {
-    let id='';
-    var date = new Date();
-    //Delete previous
-    await inspect.deleteAttachment(data);
-    //Create new content version
-    try
-    {
-    await SFDCConnection.sobject("ContentVersion").create(
-      [
-        {
-          //This is the 
-          FirstPublishLocationId : data.cp_id,
-          Title : data.org +' '+date.toISOString().split("T")[0],
-          PathOnClient : '/'+data.file,
-          VersionData : inspect.getImage64(data.file)
-        }
-      ],
-      function(err, rets) {
-        if (err) {
-          return console.error(err);
-        }
-        for (var i = 0; i < rets.length; i++) {
-          if (rets[i].success) {
-            console.log(rets[i]);
-            console.log("Created attachment id : " + rets[i].id);
-            id=rets[i].id;
-          }
-        }
-      }
-      );
-      //Get ContentDocumentId of previous created record
-      /*let doc_id = '';
-      await SFDCConnection.query(
-        `SELECT ContentDocumentId FROM ContentVersion where Title ='${data.org}'`,
-        function(err, result) {
-          if (err) {
-            console.error(err);
-            doc_id = "";
-          }
-          if (result.records.length >= 1) {
-            
-            doc_id = result.records[0]["ContentDocumentId"];
-            
-          } else {
-            
-            doc_id = "";
-          }
-        }
-      );
-      console.log("Content Doc: "+data.cp_id+"/"+doc_id);
-      //Add ContentDocumentLink for sharing settings
-      await SFDCConnection.sobject("ContentDocumentLink").create(
-        [
-          {
-            //This is the 
-            ContentDocumentId : doc_id,
-            LinkedEntityId : data.cp_id,
-            ShareType : 'C',
-            Visibility : 'SharedUsers'
-          }
-        ],
-        function(err, rets) {
-          if (err) {
-            return console.error(err);
-          }
-          for (var i = 0; i < rets.length; i++) {
-            if (rets[i].success) {
-              console.log(rets[i]);
-              console.log("Created ContentDocumentLink id : " + rets[i].id);
-              //id=rets[i].id;
-            }
-          }
-        }
-        );*/
-      }
-      catch(ex2){
-        if (debug) console.log(ex2.message);
-      }
-      return id;
-    };
-
-  async checkCloudOrg(orgId) {
-    var data = {};
-    data.orgId = "";
-    data.accId = "";
-    data.oppId = "";
-    //data.prodId = "";
-    console.log("Getting Cloud Org Object");
-    await SFDCConnection.query(
-      `SELECT ID, Cloud_Organization_ID__c, Account__r.Id, Opportunity__r.Id  FROM Coveo_Cloud_License__c where Cloud_Organization_ID__c ='${orgId}'`,
-      function(err, result) {
-        if (err) {
-          console.error(err);
-          data.orgId = "";
-        }
-        if (result.records.length == 1) {
-          //console.log(result);
-          console.log("Cloud Org Record exists, id=" + result.records[0]["Id"]);
-          data.orgId = result.records[0]["Id"];
-          data.accId = "";
-          data.oppId = "";
-          if (result.records[0]["Account__r"] != null) {
-            console.log(
-              "Cloud Org Record exists, accid=" +
-                result.records[0]["Account__r"]["Id"]
-            );
-            data.accId = result.records[0]["Account__r"]["Id"];
-          }
-          if (result.records[0]["Opportunity__r"] != null) {
-            console.log(
-              "Cloud Org Record exists, oppid=" +
-                result.records[0]["Opportunity__r"]["Id"]
-            );
-            data.oppId = result.records[0]["Opportunity__r"]["Id"];
-          }
-        } else {
-          console.log("Cloud Org DOES NOT EXISTS");
-        }
-      }
-    );
-    return data;
-  }
-
-  async checkCustomerProject(orgId) {
-    var cp_id = "";
-    await SFDCConnection.query(
-      `SELECT ID, Coveo_Cloud_Organization_ID__c FROM Project_Non_Billable__c where Coveo_Cloud_Organization_ID__c ='${orgId}'`,
-      function(err, result) {
-        if (err) {
-          console.error(err);
-          cp_id = "";
-        }
-        if (result.records.length >= 1) {
-          console.log(result);
-          result.records.forEach(rec => {
-            console.log("Customer Project exists, id=" + rec["Id"]);
-            cp_id = cp_id + ";" + rec["Id"];
-          });
-        } else {
-          console.log(
-            "Customer project does not exists, looking for Cloud Org object..."
-          );
-          cp_id = "";
-        }
-      }
-    );
-    return cp_id;
-  }
-
-  async createCustomerProject(data) {
-    var date = new Date();
-    let id='';
-    const SFDCRecType = "0120d0000001GrS";
-    const SitecoreRecType = "0120d0000001GrT";
-    const DynamicsRecType = "0120d0000005Ptp";
-    const PlatformRecType = "0120d0000009ghC";
-    var recType = PlatformRecType;
-    if (data.productEdition.includes("SITECORE")) {
-      recType = SitecoreRecType;
-    }
-    if (data.productEdition.includes("SALESFORCE")) {
-      recType = SFDCRecType;
-    }
-    if (data.productEdition.includes("DYNAMICS")) {
-      recType = DynamicsRecType;
-    }
-    try
-    {
-    await SFDCConnection.sobject("Project_Non_Billable__c").create(
-      [
-        {
-          Name: data.name,
-          //  Coveo_Cloud_Organization_ID__c: 'akqademotaeqdoul',
-          Status__c: data.isLive ? "Closed" : "Opened",
-          Coveo_Cloud_Organization__c: data.orgId,
-          Parent_Account__c: data.accId,
-          Opportunity__c: data.oppId,
-          Intervention_Required__c: !(data.status == "OK"),
-          Deployed_Regions__c:
-            typeof data.regions === "undefined" ? "" : data.regions.join("\n"),
-          Org_Checker_Date__c: date.toISOString().split("T")[0],
-          Index_Size__c: data.docsfromsourcesClean,
-          Accessible_Search_URL__c: data.SFDCSearchUrl,
-          Available_Memory__c: data.infra_mem_free,
-          Available_Disk_Space__c: data.infra_disk_free,
-          Bad_Web_Sources__c: data.sourceWebWarning,
-          Total_Number_of_Sources__c: data.nrofsources,
-          Sources_without_Schedules__c: data.nrofnoschedulessources != 0,
-          Used_Connectors__c: data.types.join("\n"),
-          Using_Push_API__c: data.containspush,
-          Using_Crawling_Module__c: data.containsonprem,
-          Security_Providers_Without_Schedules__c:
-            data.noscheduledsecprov.length != 0,
-          Total_Extensions_with_Errors__c: data.nrerrorextensions,
-          Total_Disabled_Extensions__c: data.nrofdisabledextensions,
-          Total_Slow_Extensions__c: data.nrslowextensions,
-          Total_Extensions_that_Timeout__c: data.nrtimeoutextensions,
-          Total_Query_Pipelines__c: data.nrofpipelines,
-          Used_Query_Pipelines__c: data.usedPipelines.join("\n"),
-          ML_Version__c: data.models_platformVersion,
-          ML_QS_Enabled__c: data.mlquerysuggest,
-          ML_ART_Enabled__c: data.mlart,
-          ML_Recommendations_Enabled__c: data.mlrecommendation,
-          ML_DNE_Enabled__c: data.mldne,
-          Number_of_Thesaurus_Entries__c: data.nrofthesaurus,
-          Number_of_Ranking_Expressions__c: data.nrofqre,
-          Number_of_Featured_Results__c: data.nroffeatured,
-          Analytics_Triggered__c: data.det_analyticsSent,
-          Empty_Hubs__c: data.EmptyHubs,
-          Using_Search_as_You_Type__c: data.UsingSearchAsYouType,
-          Average_Response_Time__c: data.AvgResponse,
-          Unique_Visits__c: data.UniqueVisit,
-          Total_Searches__c: data.PerformSearch,
-          Total_Searches_with_Clicks__c: data.SearchWithClick,
-          Click_Through__c: data.ClickThroughRatio,
-          Click_Rank__c: data.AverageClickRank,
-          Percentage_Using_Facets__c: data.ControlFacet,
-          Percentage_Using_Different_Interfaces__c: data.ControlInterface,
-          Percentage_Using_Query_Suggest__c: data.ControlQuerySuggest,
-          Percentage_Using_Field_Query_Suggest__c: data.ControlFieldQS,
-          Percentage_Using_Sorting__c: data.ControlSort,
-          HTML_Report_Location__c: data.reportLoc,
-          Required_Fixes__c: data.statusDetails
-            .replace(/<i>/g, "")
-            .replace(/<\/i>/g, ""),
-          JSUI_Version__c: data.uiVersion,
-          RecordTypeId: recType
-          //https://na61.salesforce.com/setup/ui/recordtypefields.jsp?id=&type=&setupid=CustomObjects&
-        }
-      ],
-      function(err, rets) {
-        if (err) {
-          return console.error(err);
-        }
-        for (var i = 0; i < rets.length; i++) {
-          if (rets[i].success) {
-            console.log("Created record id : " + rets[i].id);
-            id =  rets[i].id;
-            
-          }
-        }
-        // ...
-      }
-    );
-    }
-    catch(ex2){
-      if (debug) console.log(ex2.message);
-    }
-    return id;
-  }
-
-  async updateCustomerProject(data) {
-    var date = new Date();
-    try
-    {
-    await SFDCConnection.sobject("Project_Non_Billable__c").update(
-      [
-        {
-          Id: data.cp_id,
-          //Status__c: data.isLive ? "Closed" : "Opened",
-          Intervention_Required__c: !(data.status == "OK"),
-          Deployed_Regions__c:
-            typeof data.regions === "undefined" ? "" : data.regions.join("\n"),
-          Org_Checker_Date__c: date.toISOString().split("T")[0],
-          Index_Size__c: data.docsfromsourcesClean,
-          Accessible_Search_URL__c: data.SFDCSearchUrl,
-          Available_Memory__c: data.infra_mem_free,
-          Available_Disk_Space__c: data.infra_disk_free,
-          Bad_Web_Sources__c: data.sourceWebWarning,
-          Total_Number_of_Sources__c: data.nrofsources,
-          Sources_without_Schedules__c: data.nrofnoschedulessources != 0,
-          Used_Connectors__c: data.types.join("\n"),
-          Using_Push_API__c: data.containspush,
-          Using_Crawling_Module__c: data.containsonprem,
-          Security_Providers_Without_Schedules__c:
-            data.noscheduledsecprov.length != 0,
-          Total_Extensions_with_Errors__c: data.nrerrorextensions,
-          Total_Disabled_Extensions__c: data.nrofdisabledextensions,
-          Total_Slow_Extensions__c: data.nrslowextensions,
-          Total_Extensions_that_Timeout__c: data.nrtimeoutextensions,
-          Total_Query_Pipelines__c: data.nrofpipelines,
-          Used_Query_Pipelines__c: data.usedPipelines.join("\n"),
-          ML_Version__c: data.models_platformVersion,
-          ML_QS_Enabled__c: data.mlquerysuggest,
-          ML_ART_Enabled__c: data.mlart,
-          ML_Recommendations_Enabled__c: data.mlrecommendation,
-          ML_DNE_Enabled__c: data.mldne,
-          Number_of_Thesaurus_Entries__c: data.nrofthesaurus,
-          Number_of_Ranking_Expressions__c: data.nrofqre,
-          Number_of_Featured_Results__c: data.nroffeatured,
-          Analytics_Triggered__c: data.det_analyticsSent,
-          Empty_Hubs__c: data.EmptyHubs,
-          Using_Search_as_You_Type__c: data.UsingSearchAsYouType,
-          Average_Response_Time__c: data.AvgResponse,
-          Unique_Visits__c: data.UniqueVisit,
-          Total_Searches__c: data.PerformSearch,
-          Total_Searches_with_Clicks__c: data.SearchWithClick,
-          Click_Through__c: data.ClickThroughRatio,
-          Click_Rank__c: data.AverageClickRank,
-          Percentage_Using_Facets__c: data.ControlFacet,
-          Percentage_Using_Different_Interfaces__c: data.ControlInterface,
-          Percentage_Using_Query_Suggest__c: data.ControlQuerySuggest,
-          Percentage_Using_Field_Query_Suggest__c: data.ControlFieldQS,
-          Percentage_Using_Sorting__c: data.ControlSort,
-          HTML_Report_Location__c: data.reportLoc,
-          Required_Fixes__c: data.statusDetails
-            .replace(/<i>/g, "")
-            .replace(/<\/i>/g, ""),
-          JSUI_Version__c: data.uiVersion
-
-          //https://na61.salesforce.com/setup/ui/recordtypefields.jsp?id=&type=&setupid=CustomObjects&
-        }
-      ],
-      function(err, rets) {
-        if (err) {
-          return console.error(err);
-        }
-        for (var i = 0; i < rets.length; i++) {
-          if (rets[i].success) {
-            console.log("Updated record id : " + rets[i].id);
-          }
-        }
-        // ...
-      }
-    );
-    }
-    catch(ex2){
-      if (debug) console.log(ex2.message);
-    }
-  }
-
- 
   sleep(ms){
      return new Promise(resolve=>{
          setTimeout(resolve,ms)
@@ -3113,8 +2705,8 @@ tr td.line-ttfb, tr th.line-ttfb {
     var checkHTML = new RegExp(/<[a-z][\s\S]*>/gi);
     let json = {
       forOrgReport: true,
-      location: id.id,
-      org: id.id,
+      location: id,
+      org: id,
       theDate: today.toLocaleDateString("en-US", options),
       allfields: [],
       querycheck: false,
@@ -3139,7 +2731,7 @@ tr td.line-ttfb, tr th.line-ttfb {
       nrtimeoutextensions: 0,
       sourceids: [],
       badfields_facettolong: [],
-      name: id.displayName,
+      name: id,
       orgtype: "",
       disabledextensions: [],
       errorextensions: [],
@@ -3248,12 +2840,13 @@ tr td.line-ttfb, tr th.line-ttfb {
     if (fs.existsSync(filecheck)) {
       console.log("Org "+json.org+" already done... skipping");
       return;
-    } else 
+    } else
     {
       //Always write at least a file so we do not parse the org again
       fs.writeFileSync("./results/" + json.org + ".html", "Empty");
 
     }
+    console.log(json);
     json = await inspect.getSourceInfo(json);
 
     if (json.nrofsources == 0) {
@@ -3306,12 +2899,6 @@ tr td.line-ttfb, tr th.line-ttfb {
 
       if (debug) console.log("getLicense");
       json = await inspect.getLicense(json);
-
-      //IF we have the wrong productType, abort
-      if (json.productType != "STANDARD") {
-        console.log("ABORT ORG IS NO STANDARD PRODUCTTYPE");
-        return;
-      }
 
       if (debug) console.log("getNodeInfo");
       //Get Node Info
@@ -3401,7 +2988,6 @@ tr td.line-ttfb, tr th.line-ttfb {
 
       let mysearchurls = "";
       data.accessibleUrls = [];
-      data.SFDCSearchUrl = "";
       let newsearchurls = [];
       let screenshots = [];
       var firstHash = 0;
@@ -3450,9 +3036,6 @@ tr td.line-ttfb, tr th.line-ttfb {
               "</a>"
           );
           newsearchurls.push(urls);
-          if (data.SFDCSearchUrl == "") {
-            data.SFDCSearchUrl = urls.searchurl;
-          }
         }
       }
       data.thesearchurl = newsearchurls;
@@ -3518,11 +3101,6 @@ tr td.line-ttfb, tr th.line-ttfb {
         /*'UsingOpen': data.ControlOpening,*/
         productEdition: data.productEdition,
         EndpointVersion: data.EndpointVersion,
-        accountName: data.accountName,
-        accountId:
-          '=HYPERLINK("https://na61.salesforce.com/' +
-          data.accountId +
-          '";"LINK")',
         infra_machine: data.infra_machine,
         regions:
           typeof data.regions === "undefined" ? "" : data.regions.join("\n"),
@@ -3533,91 +3111,16 @@ tr td.line-ttfb, tr th.line-ttfb {
         accessibleSearchUrl: mysearchurls
       };
       //console.log(mydata);
-      //let html = `<html><body><h1>${data.org}</h1>${report}${JSON.stringify(mydata)}</body></html>`;
       data.file = "./results/" + data.org + ".html";
 
       fs.writeFileSync("./results/" + data.org + ".html", html);
-      
-      mydata["SFDCStatus"] = "OK";
       //Copy to s3
-      // HTML and Images = screenshots
 
-      let cp_id = await inspect.checkCustomerProject(data.org);
-      data.cp_id = '';
-      if (cp_id == "") {
-        //We have no Customer Project, check if Cloud Org Exists
-        const orgData = await inspect.checkCloudOrg(data.org);
-        if (orgData.orgId == "") {
-          //We have no cloud org
-          console.log("NO CLOUD ORG, STOP");
-          mydata["SFDCStatus"] = "NO CLOUD ORG";
-        } else {
-          //Continue adding new customer Project
-          console.log("CLOUD ORG, ADD CUSTOMER PROJECT");
-          data.orgId = orgData.orgId;
-          data.accId = orgData.accId;
-          data.oppId = orgData.oppId;
-          mydata["SFDCStatus"] = "CREATED CP";
-          cp_id = await inspect.createCustomerProject(data);
-          data.cp_id = cp_id;
-          //Wait for 1 sec
-          await inspect.sleep(500);
-          //We need a Customer Project first before we can create an attachment
-          data.locid = await inspect.createAttachment(data);
-          data.reportLoc = this.settings.SFDC_Download.replace("{ID}",data.locid);
-          await inspect.updateCustomerProject(data);
-        }
-      } else {
-        let ids = cp_id.split(";");
-        data.cp_id = ids[1];
-        data.locid = await inspect.createAttachment(data);
-        data.reportLoc = this.settings.SFDC_Download.replace("{ID}",data.locid);
-        for (const id of ids) {
-          if (id != "") {
-            data.cp_id = id;
-
-            console.log("UPDATE CUSTOMER PROJECT");
-            mydata["SFDCStatus"] = "UPDATED CP";
-            await inspect.updateCustomerProject(data);
-          }
-        }
-      }
-      if (data.cp_id!=""){
-          
-      }
       fs.writeFileSync(
         "./results/" + data.org + ".json",
         JSON.stringify(mydata)
       );
       let dataEncoded = qs.stringify(mydata);
-      const callApi = require("./callApi");
-      let mdata = [];
-      const options = {
-        url:
-          "https://script.google.com/macros/s/AKfycby6s0EcYjhAfhSCrF4k4ilAi_uUVcGdi32dL_FCX-JlqyXQApTF/exec",
-        method: "post",
-        gzip: true,
-        body: [],
-        //form: mydata,
-
-        followAllRedirects: true,
-        headers: {
-          "Content-Length": Buffer.byteLength(dataEncoded),
-          "Content-Type": "application/x-www-form-urlencoded"
-        }
-      };
-
-      //Push it to the google Sheet
-      if (addGoogleSheet) {
-        const response = await callApi(options, dataEncoded);
-      }
-
-      //Push it to Salesforce
-      //First check if we have a cloud Org
-      // If so, retrieve account id and opp id
-      //Second check if we have a customer implementation object
-      // If so, update it
-      // If not, create it
     }
   }
 
@@ -3655,7 +3158,7 @@ tr td.line-ttfb, tr th.line-ttfb {
     const googleOAuthPage = await googleOAuthTarget.page();
 
     await googleOAuthPage.waitForSelector("#identifierId");
-    await googleOAuthPage.type("#identifierId", this.settings.SFDC_User, {
+    await googleOAuthPage.type("#identifierId", this.settings.OAuth_User, {
       delay: 5
     });
     await googleOAuthPage.click("#identifierNext");
@@ -3665,7 +3168,7 @@ tr td.line-ttfb, tr th.line-ttfb {
     });
     await googleOAuthPage.type(
       'input[type="password"]',
-      this.settings.Normal_Pass
+      this.settings.OAuth_Pass
     );
 
     await googleOAuthPage.waitForSelector("#passwordNext", { visible: true });
@@ -3673,16 +3176,10 @@ tr td.line-ttfb, tr th.line-ttfb {
 
     await navigationPromise;
     await adminpage.waitForSelector(".member");
-    //var access='';
     const access = await adminpage.evaluate(function() {
-      //access = window.admin.currentAccessToken;
       return window.admin.currentAccessToken;
-      //console.log(access);
     });
     await mybrowser.close();
-    //const [ returnedCookie ] = await adminpage.cookies('https://platform.cloud.coveo.com/admin/');
-    //console.log("cookies:");
-    //console.log(returnedCookie);
     this.apiKey = access;
   }
 
@@ -3699,81 +3196,16 @@ tr td.line-ttfb, tr th.line-ttfb {
   }
 
   async start() {
-    await inspect.loginPlatform();
+    if (this.apiKey === "") {
+      await inspect.loginPlatform();
+    }
     console.log("Apikey: " + this.apiKey);
-    await inspect
-      .loginSFDC(this.settings.SFDC_User, this.settings.SFDC_Pass)
-      .then(function(data) {
-        //if (err) { console.log("Error:");console.error(err); return err; }
-        // logged in user property
-        console.log("User ID: " + data.id);
-        console.log("Org ID: " + data.organizationId);
-      });
-    console.log("Return from SFDC:");
-    //console.log(SFDCConnection);
-    console.log(SFDCConnection.accessToken);
-    console.log(SFDCConnection.instanceUrl);
-
-    if (debug) {
-      console.log("Getting organizations...");
-    } else {
-      console.log(
-        "OrgId,OrgName,AnalyticsSent,MissingQS,MissingArt,MissingSearchHub,UsingSearchAsYouType,Report"
-      );
-    }
-    //Get first
-    let mycounter = 0;
-    let debugCount = 350;
-    let pageIndex = 0;
-    let orgs = await this.getOrganizations(pageIndex);
-
-    //orgs.items = orgs.items.filter(org => (/aarp/i).test(org.id));
-    while (pageIndex < orgs.totalPages) {
-      for (let org of orgs.items) {
-        //console.log(org);
-        //if (toprocess.includes(org.id)) {
-        if (!org.readOnly) {
-          console.log(org.id);
-          await this.inspectOrganization(org);
-          //          break;
-          //if (debug) {
-          mycounter = mycounter + 1;
-          //}
-          if (mycounter > debugCount) {
-            await inspect.loginPlatform();
-            mycounter = 0;
-          }
-        }
-        //}
-      }
-      pageIndex++;
-      if (mycounter > debugCount) {
-        await inspect.loginPlatform();
-        mycounter = 0;
-      }
-      if (pageIndex < orgs.totalPages) {
-        orgs = await this.getOrganizations(pageIndex);
-        console.log("Getting next page of orgs");
-      }
-    }
-    browser.close();
-    await inspect.logoutSFDC();
-    console.log("Ready");
-
-    console.log("Removing output directory");
-    try { var files = fs.readdirSync('results'); }
-      catch(e) { console.log(e); }
-      if (files.length > 0)
-        for (var i = 0; i < files.length; i++) {
-          var filePath = results + '/' + files[i];
-          if (fs.statSync(filePath).isFile())
-            fs.unlinkSync(filePath);
-        }
+    console.log(COVEO_ORG_ID);
+    await this.inspectOrganization(COVEO_ORG_ID);
     process.exit();
   }
 }
 
-console.log("Make sure to clear the results directory with the orgs you DO NOT WANT TO REINDEX!!!!");
 let inspect = new InspectAllOrganizations();
-inspect.initPuppet();
+// inspect.initPuppet();
 inspect.start();
